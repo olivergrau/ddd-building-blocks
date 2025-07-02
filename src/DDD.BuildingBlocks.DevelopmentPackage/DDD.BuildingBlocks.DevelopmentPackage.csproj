@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Package with implementations for IEventBus, ICommandDispatcher with in-process implementations. Not to be used in a production environment.</Description>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
+    <ProjectReference Include="..\DDD.BuildingBlocks.Hosting.Background\DDD.BuildingBlocks.Hosting.Background.csproj" />
+  </ItemGroup>
+
+</Project>

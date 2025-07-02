@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+
+    <Copyright>2021</Copyright>
+
+    <Company>SoftwareONE Deutschland GmbH</Company>
+
+    <LangVersion>latestmajor</LangVersion>
+
+    <Product>DDD.BuildingBlocks.DDD.Core.DevelopmentPackage.Tests</Product>
+
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="8.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.DevelopmentPackage\DDD.BuildingBlocks.DevelopmentPackage.csproj" />
+    <ProjectReference Include="..\DDD.BuildingBlocks.Core.Tests.Unit\DDD.BuildingBlocks.Core.Tests.Unit.csproj" />
+    <ProjectReference Include="..\DDD.BuildingBlocks.Tests.Abstracts\DDD.BuildingBlocks.Tests.Abstracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

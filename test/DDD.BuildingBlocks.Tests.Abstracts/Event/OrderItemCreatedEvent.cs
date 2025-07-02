@@ -1,0 +1,29 @@
+﻿using System;
+using DDD.BuildingBlocks.Core.Event;
+
+namespace DDD.BuildingBlocks.Tests.Abstracts.Event
+{
+    using Core.Attribute;
+
+    [DomainEventType]
+	public class OrderItemCreatedEvent(string serializedAggregateId, int version, string name, string description, DateTime registrationDate)
+        : DomainEvent(serializedAggregateId, version, _currentTypeVersion)
+    {
+		private static int _currentTypeVersion = 1;
+
+		public string Name
+		{
+			get;
+		} = name;
+
+        public string Description
+		{
+			get;
+		} = description;
+
+        public DateTime RegistrationDate
+		{
+			get;
+		} = registrationDate;
+    }
+}
