@@ -24,31 +24,34 @@ namespace DDD.BuildingBlocks.Hosting.Background.Worker
 
 		protected abstract object GetLock();
 
-		public virtual Task ProcessAsync(CancellationToken? cancellationToken = null)
-		{
-			lock (GetLock())
-			{
-				if (IsRunning())
-				{
-					_logger.LogDebug("SingletonBackgroundWorker {TypeName} already running", GetType().Name);
-					return Task.CompletedTask;
-				}
-				_logger.LogDebug("SingletonBackgroundWorker {TypeName} set isRunning to true", GetType().Name);
-				SetIsRunning(true);
+                public virtual async Task ProcessAsync(CancellationToken? cancellationToken = null)
+                {
+                        lock (GetLock())
+                        {
+                                if (IsRunning())
+                                {
+                                        _logger.LogDebug("SingletonBackgroundWorker {TypeName} already running", GetType().Name);
+                                        return;
+                                }
 
+                                _logger.LogDebug("SingletonBackgroundWorker {TypeName} set isRunning to true", GetType().Name);
+                                SetIsRunning(true);
+                        }
 
-			    try
-			    {
-				    _logger.LogDebug("SingletonBackgroundWorker {TypeName} is doing some work", GetType().Name);
-				    return WorkAsync(cancellationToken);
-			    }
-			    finally
-			    {
-				    _logger.LogDebug("SingletonBackgroundWorker {TypeName} set free", GetType().Name);
-				    SetIsRunning(false);
-			    }
-            }
-		}
+                        try
+                        {
+                                _logger.LogDebug("SingletonBackgroundWorker {TypeName} is doing some work", GetType().Name);
+                                await WorkAsync(cancellationToken);
+                        }
+                        finally
+                        {
+                                lock (GetLock())
+                                {
+                                        _logger.LogDebug("SingletonBackgroundWorker {TypeName} set free", GetType().Name);
+                                        SetIsRunning(false);
+                                }
+                        }
+                }
 
 		protected abstract Task WorkAsync(CancellationToken? cancellationToken = null);
 	}
