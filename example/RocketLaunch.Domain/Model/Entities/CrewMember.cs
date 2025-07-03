@@ -1,7 +1,7 @@
 // Domain/Entities/CrewMember.cs
 
 using DDD.BuildingBlocks.Core.Domain;
-using RocketLaunch.Domain.Model.Enums;
+using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 
 namespace RocketLaunch.Domain.Model.Entities

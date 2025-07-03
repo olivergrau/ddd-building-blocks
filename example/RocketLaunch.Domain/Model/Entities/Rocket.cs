@@ -2,7 +2,7 @@
 
 using DDD.BuildingBlocks.Core.Domain;
 using JetBrains.Annotations;
-using RocketLaunch.Domain.Model.Enums;
+using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 
 namespace RocketLaunch.Domain.Model.Entities

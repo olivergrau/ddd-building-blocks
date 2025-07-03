@@ -1,5 +1,5 @@
 // Domain/Enums/RocketStatus.cs
-namespace RocketLaunch.Domain.Model.Enums
+namespace RocketLaunch.SharedKernel.Enums
 {
     public enum RocketStatus
     {

@@ -1,5 +1,5 @@
 // Domain/Enums/CrewRole.cs
-namespace RocketLaunch.Domain.Model.Enums
+namespace RocketLaunch.SharedKernel.Enums
 {
     public enum CrewRole
     {

@@ -3,16 +3,19 @@
 using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Domain;
 using DDD.BuildingBlocks.Core.Exception;
+using DDD.BuildingBlocks.Core.Persistence.SnapshotSupport;
 using JetBrains.Annotations;
-using RocketLaunch.Domain.Model.Enums;
+using RocketLaunch.Domain.Service;
+using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.Events;
 using RocketLaunch.SharedKernel.ValueObjects;
 using AggregateException = DDD.BuildingBlocks.Core.Exception.AggregateException;
+// ReSharper disable PossibleMultipleEnumeration
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
 namespace RocketLaunch.Domain.Model
 {
-    public class Mission : AggregateRoot<MissionId>
+    public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
     {
         // Public API
         public Mission(MissionId id,
@@ -45,24 +48,45 @@ namespace RocketLaunch.Domain.Model
         public List<CrewMemberId> Crew            { get; } = new();
 
         // Commands
-        public void AssignRocket(RocketId rocketId)
+        public async Task AssignRocketAsync(
+            RocketId rocketId, 
+            IResourceAvailabilityService validator)
         {
             if (Status != MissionStatus.Planned)
-                throw new AggregateValidationException(Id, nameof(Status), Status,"Can only assign rocket in Planned state");
+                throw new AggregateValidationException(
+                    Id, nameof(Status), Status, "Can only assign rocket in Planned state");
+
+            if (!await validator.IsRocketAvailableAsync(rocketId, Window))
+                throw new RuleValidationException(
+                    Id, "Rocket not available", $"RocketId: {rocketId}");
+
             ApplyEvent(new RocketAssigned(Id, rocketId, CurrentVersion));
         }
 
-        public void AssignLaunchPad(LaunchPadId padId)
+
+        public async Task AssignLaunchPadAsync(LaunchPadId padId, 
+            IResourceAvailabilityService validator)
         {
             if (AssignedRocket is null)
-                throw new AggregateException(Id, "Rocket must be assigned first");
+                throw new AggregateValidationException(Id, nameof(AssignedPad), null, "Rocket must be assigned first");
+            
+            if (!await validator.IsLaunchPadAvailableAsync(padId, Window))
+                throw new RuleValidationException(
+                    Id, "LaunchPad not available", $"LaunchPadId: {padId}");
+            
             ApplyEvent(new LaunchPadAssigned(Id, padId, CurrentVersion));
         }
 
-        public void AssignCrew(IEnumerable<CrewMemberId> crew)
+        public async Task AssignCrewAsync(IEnumerable<CrewMemberId> crew, 
+            IResourceAvailabilityService validator)
         {
             if (AssignedRocket is null || AssignedPad is null)
-                throw new AggregateException(Id, "Rocket & pad must be assigned first");
+                throw new AggregateValidationException(Id, nameof(AssignedRocket), null, "Rocket & pad must be assigned first");
+            
+            if (!await validator.AreCrewMembersAvailableAsync(crew, Window))
+                throw new RuleValidationException(
+                    Id, "Crew not available");
+            
             ApplyEvent(new CrewAssigned(Id, crew, CurrentVersion));
         }
 
@@ -161,7 +185,17 @@ namespace RocketLaunch.Domain.Model
             Status = MissionStatus.Arrived;
             // Integration-event will be published externally
         }
-
+        
         protected override MissionId GetIdFromStringRepresentation(string id) => new(Guid.Parse(id));
+        
+        public Snapshot? TakeSnapshot()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ApplySnapshot(Snapshot snapshot)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
