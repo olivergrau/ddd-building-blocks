@@ -13,7 +13,7 @@ namespace DDD.BuildingBlocks.Core.Event
         /// <summary>
         /// The aggregateID of the aggregate
         /// </summary>
-        string? SerializedAggregateId { get; set; }
+        string SerializedAggregateId { get; set; }
 
         /// <summary>
         /// This is used to timestamp the event when it get's committed

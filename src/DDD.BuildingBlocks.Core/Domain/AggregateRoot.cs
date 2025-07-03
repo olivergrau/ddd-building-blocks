@@ -25,7 +25,7 @@ namespace DDD.BuildingBlocks.Core.Domain
         protected bool Deactivated { get; set; }
 
         private readonly List<IDomainEvent> _uncommittedChanges;
-        private Dictionary<Type, string> _eventHandlerCache = null!;
+        private Dictionary<Type, string> _eventHandlerCache = new();
 
         protected IEnumerable<string> CorrelationIds => _correlationIds.AsReadOnly();
         private readonly List<string> _correlationIds = [];
@@ -149,7 +149,7 @@ namespace DDD.BuildingBlocks.Core.Domain
             if (GetStreamState() == StreamState.NoStream)
             {
                 //This is only needed for the very first event as every other event CAN ONLY apply to a matching ID
-                Id = GetIdFromStringRepresentation(@event.SerializedAggregateId!) as TKey
+                Id = GetIdFromStringRepresentation(@event.SerializedAggregateId) as TKey
                      ?? throw new AggregateCreationException("Cannot determine ID value from string representation. Aggregate could not be created.");
             }
 

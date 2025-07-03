@@ -34,7 +34,7 @@ namespace DDD.BuildingBlocks.Core.Util
         {
             var results = LoadFromJson(file);
 
-            return results?.Select(o => (T)o).ToList();
+            return results?.Select(o => (T)o).ToList() ?? throw new InvalidOperationException();
         }
     }
 }

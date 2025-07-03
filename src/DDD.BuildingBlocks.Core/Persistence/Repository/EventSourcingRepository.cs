@@ -38,9 +38,9 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
     {
         private readonly IEventStorageProvider _eventStorageProvider = eventStorageProvider ?? throw new ArgumentNullException(nameof(eventStorageProvider));
 
-        public virtual async Task<object> GetByIdAsync(string id, Type type, int version = -1)
+        public virtual async Task<object?> GetByIdAsync(string id, Type type, int version = -1)
         {
-            object item = default!;
+            object? item = default;
 
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -102,7 +102,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
         public virtual async Task<T?> GetByIdAsync<T, TKey>(TKey id)
             where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
         {
-            T item = default!;
+            T? item = default;
 
             if (string.IsNullOrWhiteSpace(id.ToString()))
             {
@@ -114,7 +114,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
 
             if (isSnapshotEnabled && snapshotStorageProvider != null)
             {
-                snapshot = await snapshotStorageProvider.GetSnapshotAsync(id.ToString()!);
+                snapshot = await snapshotStorageProvider.GetSnapshotAsync(id.ToString() ?? throw new InvalidOperationException());
             }
 
             if (snapshot != null)
@@ -122,7 +122,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
                 item = ReflectionHelper.CreateInstance<T, TKey>();
                 ((ISnapshotEnabled) item).ApplySnapshot(snapshot);
                 var events =
-                    await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString()!, snapshot.Version + 1, int.MaxValue);
+                    await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString() ?? throw new InvalidOperationException(), snapshot.Version + 1, int.MaxValue);
 
                 if(events != null)
                 {
@@ -131,7 +131,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
             }
             else
             {
-                var eventsList = await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString()!, 0, int.MaxValue);
+                var eventsList = await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString() ?? throw new InvalidOperationException(), 0, int.MaxValue);
 
                 if (eventsList == null)
                 {
@@ -199,7 +199,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
                     )
                    )
                 {
-                    await snapshotStorageProvider.SaveSnapshotAsync(snapshotEnabled.TakeSnapshot());
+                    await snapshotStorageProvider.SaveSnapshotAsync(snapshotEnabled.TakeSnapshot() ?? throw new InvalidOperationException());
                 }
             }
 

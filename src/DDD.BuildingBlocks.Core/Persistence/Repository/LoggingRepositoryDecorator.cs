@@ -34,7 +34,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
             nullLoggerFactory.Dispose();
         }
 
-        public async Task<object> GetByIdAsync(string id, Type type, int version = -1)
+        public async Task<object?> GetByIdAsync(string id, Type type, int version = -1)
         {
             BeforeLoadAggregate(id);
             var result = await _eventSourcingRepository.GetByIdAsync(id, type, version);

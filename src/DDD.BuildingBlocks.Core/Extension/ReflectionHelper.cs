@@ -102,7 +102,7 @@ public static class ReflectionHelper
 
     public static string GetTypeFullName(Type t)
     {
-        return t.AssemblyQualifiedName!;
+        return t.AssemblyQualifiedName ?? throw new InvalidOperationException("Type does not have an assembly qualified name.");
     }
 
     public static MethodInfo[] GetMethods(Type t)
@@ -114,8 +114,22 @@ public static class ReflectionHelper
     {
         try
         {
-            return t.GetMethod(methodName,
-                BindingFlags.NonPublic | BindingFlags.Instance)!;
+            // If you want to allow null or empty paramTypes to fall back to any overload:
+            if (paramTypes.Length == 0)
+            {
+                return t.GetMethod(
+                    methodName,
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+            }
+
+            return t.GetMethod(
+                methodName,
+                BindingFlags.NonPublic | BindingFlags.Instance,
+                binder:     null,
+                types:      paramTypes,
+                modifiers:  null
+            );
         }
         catch
         {
@@ -130,6 +144,7 @@ public static class ReflectionHelper
 
     public static T CreateInstance<T, TKey>() where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
     {
-        return (T)Activator.CreateInstance(typeof(T))!;
+        return (T)Activator.CreateInstance(typeof(T))
+            ?? throw new InvalidOperationException($"Cannot create instance of type {typeof(T).FullName}");
     }
 }
