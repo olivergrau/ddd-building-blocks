@@ -4,7 +4,7 @@ using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Event;
 using LunarOps.SharedKernel.ValueObjects;
 
-namespace LunarOps.SharedKernel.Events
+namespace LunarOps.SharedKernel.Events.LunarMission
 {
     [DomainEventType]
     public sealed class LunarMissionDocked : DomainEvent

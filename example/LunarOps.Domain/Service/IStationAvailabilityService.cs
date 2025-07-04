@@ -8,6 +8,7 @@ namespace LunarOps.Domain.Service
     {
         Task<bool> HasFreePortAsync(StationId stationId);
         Task<bool> HasCrewCapacityAsync(StationId stationId, int crewCount);
-        Task<bool> HasStorageCapacityAsync(StationId stationId, IEnumerable<PayloadId> payloads);
+        Task<bool> HasStorageCapacityAsync(StationId stationId, double payloadMass);
+        Task<bool> HasSupportedVehicleTypeAsync(StationId stationId, VehicleType vehicleType);
     }
 }

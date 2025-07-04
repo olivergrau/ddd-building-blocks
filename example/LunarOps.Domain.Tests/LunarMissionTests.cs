@@ -1,12 +1,10 @@
-﻿// LunarOps.Domain.Tests/LunarMissionTests.cs
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using DDD.BuildingBlocks.Core;
+// Tests/Domain/Model/LunarMissionTests.cs
+
+using System.Reflection;
 using DDD.BuildingBlocks.Core.Exception;
 using LunarOps.Domain.Model;
+using LunarOps.Domain.Service;
 using LunarOps.SharedKernel.Enums;
-using LunarOps.SharedKernel.Events;
 using LunarOps.SharedKernel.ValueObjects;
 using Xunit;
 
@@ -14,219 +12,301 @@ namespace LunarOps.Domain.Tests
 {
     public class LunarMissionTests
     {
-        private static LunarMission NewRegisteredMission(
-            out ExternalMissionId missionId,
-            out DateTime arrival,
-            out VehicleType vehicle,
-            out List<(string Name,string Role)> crewManifest,
-            out List<(string Item,double Mass)> payloadManifest)
+        // Dummy IStationAvailabilityService for testing
+        private class TestStationAvailabilityService : IStationAvailabilityService
         {
-            missionId = new ExternalMissionId(Guid.NewGuid().ToString());
-            arrival = DateTime.UtcNow;
-            vehicle = new VehicleType("LunarLander");
-            crewManifest = new List<(string,string)> { ("Alice","Commander") };
-            payloadManifest = new List<(string,double)> { ("Rover", 1500.0) };
+            private readonly bool _crewOk;
+            private readonly bool _storageOk;
+            private readonly bool _supportOk;
 
+            public TestStationAvailabilityService(bool crewOk = true, bool storageOk = true, bool supportOk = true)
+            {
+                _crewOk = crewOk;
+                _storageOk = storageOk;
+                _supportOk = supportOk;
+            }
+
+            public Task<bool> HasCrewCapacityAsync(StationId stationId, int crewCount)
+                => Task.FromResult(_crewOk);
+
+            public Task<bool> HasStorageCapacityAsync(StationId stationId, double payloadMass)
+                => Task.FromResult(_storageOk);
+
+            public Task<bool> HasSupportedVehicleTypeAsync(StationId stationId, VehicleType vehicleType)
+                => Task.FromResult(_supportOk);
+
+            public Task<bool> HasFreePortAsync(StationId stationId)
+                => Task.FromResult(true);
+        }
+
+        private readonly ExternalMissionId _missionId = new(Guid.NewGuid().ToString());
+        private readonly StationId _stationId = new(Guid.NewGuid());
+        private readonly DateTime _arrivalTime = DateTime.UtcNow;
+        private readonly VehicleType _vehicleType = new("Starship");
+        private readonly List<(string Name, string Role)> _crewManifest =
+            [("Alice", "Commander"), ("Bob", "Scientist")];
+        private readonly List<(string Item, double Mass)> _payloadManifest =
+            [("Rover", 10.0), ("Supplies", 20.0)];
+
+        [Fact]
+        public void Constructor_WithValidParams_SetsRegisteredAndRelation()
+        {
+            var validator = new TestStationAvailabilityService();
             var mission = new LunarMission(
-                missionId,
-                arrival,
-                vehicle,
-                crewManifest,
-                payloadManifest
-            );
-            // commit the registration event so tests start from Registered state
-            mission.MarkChangesAsCommitted();
-            return mission;
-        }
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
-        [Fact]
-        public void Register_LunarMission_Should_Raise_LunarMissionRegistered_And_Be_Registered()
-        {
-            // arrange
-            ExternalMissionId id = new ExternalMissionId("M-001");
-            var arrival = new DateTime(2025, 7, 10, 12, 0, 0, DateTimeKind.Utc);
-            var vehicle = new VehicleType("Orion");
-            var crew = new List<(string,string)> { ("Bob","Pilot") };
-            var payload = new List<(string,double)> { ("Probe", 100.0) };
-
-            // act
-            var mission = new LunarMission(id, arrival, vehicle, crew, payload);
-            var events  = mission.GetUncommittedChanges().ToList();
-
-            // assert
-            Assert.Single(events);
-            var e = Assert.IsType<LunarMissionRegistered>(events[0]);
-            Assert.Equal(id, e.MissionId);
-            Assert.Equal(arrival, e.ArrivalTime);
-            Assert.Equal(vehicle, e.VehicleType);
-            Assert.Equal(crew, e.CrewManifest);
-            Assert.Equal(payload, e.PayloadManifest);
+            Assert.Equal(_arrivalTime, mission.ArrivalTime);
+            Assert.Equal(_vehicleType, mission.VehicleType);
+            Assert.Equal(_crewManifest, mission.CrewManifest);
+            Assert.Equal(_payloadManifest, mission.PayloadManifest);
             Assert.Equal(LunarMissionStatus.Registered, mission.Status);
+            Assert.Equal(_stationId.Value.ToString(), mission.StationRelation.AggregateId);
         }
 
         [Fact]
-        public void ScheduleDocking_When_Registered_Should_Raise_DockingPortAssigned()
+        public void Constructor_InsufficientCrewCapacity_ThrowsRuleValidationException()
         {
-            var mission = NewRegisteredMission(
-                out var id, out _, out _, out _, out _);
+            var validator = new TestStationAvailabilityService(crewOk: false);
+            Assert.Throws<RuleValidationException>(() =>
+                new LunarMission(
+                    _missionId,
+                    _arrivalTime,
+                    _vehicleType,
+                    _crewManifest,
+                    _payloadManifest,
+                    _stationId,
+                    validator));
+        }
 
-            var stationId = new StationId(Guid.NewGuid());
-            var portId    = new DockingPortId(Guid.NewGuid());
+        [Fact]
+        public void Constructor_InsufficientStorageCapacity_ThrowsRuleValidationException()
+        {
+            var validator = new TestStationAvailabilityService(storageOk: false);
+            Assert.Throws<RuleValidationException>(() =>
+                new LunarMission(
+                    _missionId,
+                    _arrivalTime,
+                    _vehicleType,
+                    _crewManifest,
+                    _payloadManifest,
+                    _stationId,
+                    validator));
+        }
 
-            mission.ScheduleDocking(stationId, portId);
-            var events = mission.GetUncommittedChanges().ToList();
+        [Fact]
+        public void Constructor_UnsupportedVehicleType_ThrowsRuleValidationException()
+        {
+            var validator = new TestStationAvailabilityService(supportOk: false);
+            Assert.Throws<RuleValidationException>(() =>
+                new LunarMission(
+                    _missionId,
+                    _arrivalTime,
+                    _vehicleType,
+                    _crewManifest,
+                    _payloadManifest,
+                    _stationId,
+                    validator));
+        }
 
-            Assert.Single(events);
-            var e = Assert.IsType<DockingPortAssigned>(events[0]);
-            Assert.Equal(id, e.MissionId);
-            Assert.Equal(stationId, e.StationId);
-            Assert.Equal(portId, e.PortId);
+        [Fact]
+        public void AssignDockingPort_Valid_TransitionsToDockingScheduled()
+        {
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
+
+            var somePortId = new DockingPortId(Guid.NewGuid());
+            mission.AssignDockingPort(somePortId);
+
             Assert.Equal(LunarMissionStatus.DockingScheduled, mission.Status);
+            Assert.Equal(somePortId, mission.AssignedPort);
+        }
+
+        [Theory]
+        [InlineData(LunarMissionStatus.DockingScheduled)]
+        [InlineData(LunarMissionStatus.Docked)]
+        [InlineData(LunarMissionStatus.InService)]
+        public void AssignDockingPort_InvalidState_Throws(LunarMissionStatus status)
+        {
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
+
+            // Find the public property (even though its setter is private):
+            var statusProp = typeof(LunarMission)
+                .GetProperty(
+                    "Status",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                );
+
+            if (statusProp == null)
+                throw new InvalidOperationException("Could not find 'Status' property via reflection.");
+
+            // Now set the private setter:
+            statusProp.SetValue(mission, status);
+
+            Assert.Throws<AggregateValidationException>(
+                () => mission.AssignDockingPort(new DockingPortId(Guid.NewGuid()))
+            );
         }
 
         [Fact]
-        public void CompleteDocking_Without_Scheduling_Should_Throw()
+        public void CompleteDocking_Valid_TransitionsToDocked()
         {
-            var mission = NewRegisteredMission(
-                out _, out _, out _, out _, out _);
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
+
+            var portId = new DockingPortId(Guid.NewGuid());
+            mission.AssignDockingPort(portId);
+            mission.CompleteDocking();
+
+            Assert.Equal(LunarMissionStatus.Docked, mission.Status);
+        }
+
+        [Fact]
+        public void CompleteDocking_InvalidState_Throws()
+        {
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
             Assert.Throws<AggregateValidationException>(() => mission.CompleteDocking());
         }
 
         [Fact]
-        public void CompleteDocking_When_Scheduled_Should_Raise_LunarMissionDocked()
+        public void UnloadPayload_ValidAfterDocked_TransitionsToPayloadUnloaded()
         {
-            var mission = NewRegisteredMission(
-                out var id, out _, out _, out _, out _);
-            mission.ScheduleDocking(new StationId(Guid.NewGuid()), new DockingPortId(Guid.NewGuid()));
-            mission.MarkChangesAsCommitted();
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
+            mission.AssignDockingPort(new DockingPortId(Guid.NewGuid()));
             mission.CompleteDocking();
-            var events = mission.GetUncommittedChanges().ToList();
+            mission.UnloadPayload();
 
-            Assert.Single(events);
-            var e = Assert.IsType<LunarMissionDocked>(events[0]);
-            Assert.Equal(id, e.MissionId);
-            Assert.Equal(LunarMissionStatus.Docked, mission.Status);
+            Assert.Equal(LunarMissionStatus.PayloadUnloaded, mission.Status);
         }
 
         [Fact]
-        public void TransferCrew_Without_Docking_Should_Throw()
+        public void UnloadPayload_InvalidState_Throws()
         {
-            var mission = NewRegisteredMission(
-                out _, out _, out _, out _, out _);
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
-            var crewIds = new[] { new LunarCrewMemberId(Guid.NewGuid()) };
-            Assert.Throws<AggregateValidationException>(() => mission.TransferCrew(crewIds));
+            Assert.Throws<AggregateValidationException>(() => mission.UnloadPayload());
         }
 
         [Fact]
-        public void TransferCrew_When_Docked_Should_Raise_CrewTransferred()
+        public void TransferCrew_ValidAfterDocked_TransitionsToCrewTransferred()
         {
-            var mission = NewRegisteredMission(
-                out var id, out _, out _, out _, out _);
-            mission.ScheduleDocking(new StationId(Guid.NewGuid()), new DockingPortId(Guid.NewGuid()));
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
+
+            mission.AssignDockingPort(new DockingPortId(Guid.NewGuid()));
             mission.CompleteDocking();
-            mission.MarkChangesAsCommitted();
-
-            var crewIds = new[] { new LunarCrewMemberId(Guid.NewGuid()), new LunarCrewMemberId(Guid.NewGuid()) };
-            mission.TransferCrew(crewIds);
-            var events = mission.GetUncommittedChanges().ToList();
-
-            Assert.Single(events);
-            var e = Assert.IsType<CrewTransferred>(events[0]);
-            Assert.Equal(id.Value, e.MissionId);
-            Assert.Equal(crewIds.Length, e.Crew.Count);
-            Assert.Equal(crewIds, e.Crew);
-            Assert.Equal(LunarMissionStatus.Unloaded, mission.Status);
+            mission.TransferCrew(_crewManifest.Select((c, _) => new LunarCrewMemberId(Guid.NewGuid())));
+            
+            Assert.Equal(LunarMissionStatus.CrewTransferred, mission.Status);
         }
 
         [Fact]
-        public void UnloadPayload_Without_Docking_Should_Throw()
+        public void TransferCrew_InvalidState_Throws()
         {
-            var mission = NewRegisteredMission(
-                out _, out _, out _, out _, out _);
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
-            var payloadIds = new[] { new PayloadId(Guid.NewGuid()) };
-            Assert.Throws<AggregateValidationException>(() => mission.UnloadPayload(payloadIds));
+            Assert.Throws<AggregateValidationException>(() =>
+                mission.TransferCrew(_crewManifest.Select((c, _) => new LunarCrewMemberId(Guid.NewGuid()))));
         }
 
         [Fact]
-        public void UnloadPayload_When_Docked_Should_Raise_PayloadUnloaded()
+        public void MarkInService_InvalidState_Throws()
         {
-            var mission = NewRegisteredMission(
-                out var id, out _, out _, out _, out _);
-            mission.ScheduleDocking(new StationId(Guid.NewGuid()), new DockingPortId(Guid.NewGuid()));
-            mission.CompleteDocking();
-            mission.MarkChangesAsCommitted();
-
-            var payloadIds = new[] { new PayloadId(Guid.NewGuid()), new PayloadId(Guid.NewGuid()) };
-            mission.UnloadPayload(payloadIds);
-            var events = mission.GetUncommittedChanges().ToList();
-
-            Assert.Single(events);
-            var e = Assert.IsType<PayloadUnloaded>(events[0]);
-            Assert.Equal(id.Value, e.MissionId);
-            Assert.Equal(payloadIds.Length, e.PayloadItems.Count);
-            Assert.Equal(payloadIds, e.PayloadItems);
-            Assert.Equal(LunarMissionStatus.Unloaded, mission.Status);
-        }
-
-        [Fact]
-        public void MarkInService_Without_Unloaded_Should_Throw()
-        {
-            var mission = NewRegisteredMission(
-                out _, out _, out _, out _, out _);
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
             Assert.Throws<AggregateValidationException>(() => mission.MarkInService());
         }
 
         [Fact]
-        public void MarkInService_When_Unloaded_Should_Raise_LunarMissionInService()
+        public void Depart_InvalidState_Throws()
         {
-            var mission = NewRegisteredMission(
-                out var id, out _, out _, out _, out _);
-            mission.ScheduleDocking(new StationId(Guid.NewGuid()), new DockingPortId(Guid.NewGuid()));
-            mission.CompleteDocking();
-            mission.TransferCrew(new[] { new LunarCrewMemberId(Guid.NewGuid()) });
-            mission.MarkChangesAsCommitted();
-
-            mission.MarkInService();
-            var events = mission.GetUncommittedChanges().ToList();
-
-            Assert.Single(events);
-            var e = Assert.IsType<LunarMissionInService>(events[0]);
-            Assert.Equal(id, e.MissionId);
-            Assert.Equal(LunarMissionStatus.InService, mission.Status);
-        }
-
-        [Fact]
-        public void Depart_Without_InService_Should_Throw()
-        {
-            var mission = NewRegisteredMission(
-                out _, out _, out _, out _, out _);
+            var validator = new TestStationAvailabilityService();
+            var mission = new LunarMission(
+                _missionId,
+                _arrivalTime,
+                _vehicleType,
+                _crewManifest,
+                _payloadManifest,
+                _stationId,
+                validator);
 
             Assert.Throws<AggregateValidationException>(() => mission.Depart());
-        }
-
-        [Fact]
-        public void Depart_When_InService_Should_Raise_LunarMissionDeparted()
-        {
-            var mission = NewRegisteredMission(
-                out var id, out _, out _, out _, out _);
-            mission.ScheduleDocking(new StationId(Guid.NewGuid()), new DockingPortId(Guid.NewGuid()));
-            mission.CompleteDocking();
-            mission.TransferCrew(new[] { new LunarCrewMemberId(Guid.NewGuid()) });
-            mission.MarkInService();
-            mission.MarkChangesAsCommitted();
-
-            mission.Depart();
-            var events = mission.GetUncommittedChanges().ToList();
-
-            Assert.Single(events);
-            var e = Assert.IsType<LunarMissionDeparted>(events[0]);
-            Assert.Equal(id, e.MissionId);
-            Assert.Equal(LunarMissionStatus.Departed, mission.Status);
         }
     }
 }

@@ -6,7 +6,9 @@ namespace LunarOps.SharedKernel.Enums
         Registered,
         DockingScheduled,
         Docked,
-        Unloaded,
+        CrewTransferred,
+        PayloadUnloaded,
+        ReadyForService,
         InService,
         Departed
     }
