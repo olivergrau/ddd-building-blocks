@@ -10,7 +10,7 @@ namespace LunarOps.Domain.Model.Entities
     public class DockingPort : Entity<DockingPortId>
     {
         public DockingPortStatus Status          { get; private set; }
-        public string?           AssignedVehicle { get; private set; }
+        public VehicleType?           AssignedVehicle { get; private set; }
 
         public DockingPort(DockingPortId id) : base(id)
         {
@@ -19,7 +19,7 @@ namespace LunarOps.Domain.Model.Entities
 
         private DockingPort() : base(default!) { }
 
-        public void Occupy(string vehicle)
+        public void Occupy(VehicleType vehicle)
         {
             if (Status != DockingPortStatus.Available)
                 throw new EntityValidationException(Id, nameof(Status), Status, "Port not available");

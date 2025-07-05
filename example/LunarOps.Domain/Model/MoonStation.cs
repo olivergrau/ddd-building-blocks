@@ -20,8 +20,8 @@ namespace LunarOps.Domain.Model
         public StationStatus OperationalStatus { get; private set; }
 
         // Supported Config
-        private readonly HashSet<string> _supportedVehicleTypes;
-        public IReadOnlyCollection<string> SupportedVehicleTypes => _supportedVehicleTypes;
+        private readonly HashSet<VehicleType> _supportedVehicleTypes;
+        public IReadOnlyCollection<VehicleType> SupportedVehicleTypes => _supportedVehicleTypes;
 
         // Capacity
         public int MaxCrewCapacity { get; private set; }
@@ -43,7 +43,7 @@ namespace LunarOps.Domain.Model
             string name,
             string location,
             StationStatus status,
-            IEnumerable<string> supportedVehicleTypes,
+            IEnumerable<VehicleType> supportedVehicleTypes,
             int maxCrewCapacity,
             double maxPayloadCapacity,
             IEnumerable<DockingPort> dockingPorts
@@ -52,7 +52,7 @@ namespace LunarOps.Domain.Model
             Name = name;
             Location = location;
             OperationalStatus = status;
-            _supportedVehicleTypes = new HashSet<string>(supportedVehicleTypes);
+            _supportedVehicleTypes = new HashSet<VehicleType>(supportedVehicleTypes);
             MaxCrewCapacity = maxCrewCapacity;
             MaxPayloadCapacity = maxPayloadCapacity;
             _dockingPorts = new List<DockingPort>(dockingPorts);
@@ -63,7 +63,7 @@ namespace LunarOps.Domain.Model
 
         // Business Methods
 
-        public DockingPortId ReserveDockingPort(ExternalMissionId missionId, string vehicleType)
+        public DockingPortId ReserveDockingPort(ExternalMissionId missionId, VehicleType vehicleType)
         {
             if (!_supportedVehicleTypes.Contains(vehicleType))
                 throw new AggregateValidationException(Id, nameof(SupportedVehicleTypes), vehicleType, "Vehicle type not supported by this station.");

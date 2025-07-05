@@ -8,7 +8,7 @@ using LunarOps.SharedKernel.Enums;
 using LunarOps.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace LunarOps.Domain.Tests
+namespace LunarOps.Domain.Tests.Aggregate
 {
     public class LunarMissionTests
     {

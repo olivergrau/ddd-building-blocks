@@ -35,7 +35,7 @@ namespace LunarOps.Domain.Service
                 throw new RuleValidationException(mission.Id, "Station has no remaining payload capacity");
 
             // Mutate both aggregates (within coordination boundary)
-            var reservedPort = station.ReserveDockingPort(mission.Id, mission.VehicleType.ToString() ?? throw new InvalidOperationException());
+            var reservedPort = station.ReserveDockingPort(mission.Id, mission.VehicleType ?? throw new InvalidOperationException());
             mission.AssignDockingPort(reservedPort);
         }
     }

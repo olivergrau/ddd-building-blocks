@@ -12,13 +12,13 @@ namespace LunarOps.SharedKernel.Events.MoonStation
         public StationId StationId       { get; }
         public DockingPortId PortId          { get; }
         public ExternalMissionId MissionId       { get; }
-        public string VehicleType     { get; }
+        public VehicleType VehicleType     { get; }
 
         public DockingPortReserved(
             StationId stationId,
             DockingPortId portId,
             ExternalMissionId missionId,
-            string vehicleType,
+            VehicleType vehicleType,
             int targetVersion = -1
         ) : base(stationId.Value.ToString(), targetVersion, CurrentClassVersion)
         {

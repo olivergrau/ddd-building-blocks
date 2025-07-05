@@ -9,7 +9,6 @@ public class StubStationAvailabilityService : IStationAvailabilityService
     public bool HasFreePort      { get; set; } = true;
     public bool HasCrewCapacity  { get; set; } = true;
     public bool HasStorage       { get; set; } = true;
-    
     public bool HasSupportedVehicleType { get; set; } = true;
 
     public Task<bool> HasFreePortAsync(StationId stationId)

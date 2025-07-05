@@ -7,14 +7,14 @@ using LunarOps.SharedKernel.Enums;
 using LunarOps.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace LunarOps.Domain.Tests
+namespace LunarOps.Domain.Tests.Aggregate
 {
     public class MoonStationTests
     {
-        private readonly StationId _stationId = new StationId(Guid.NewGuid());
-        private readonly ExternalMissionId _missionId = new ExternalMissionId(Guid.NewGuid().ToString());
-        private const string SupportedVehicle = "Starship";
-        private const string UnsupportedVehicle = "Capsule";
+        private readonly StationId _stationId = new(Guid.NewGuid());
+        private readonly ExternalMissionId _missionId = new(Guid.NewGuid().ToString());
+        private readonly VehicleType _supportedVehicle = new("Starship");
+        private readonly VehicleType _unsupportedVehicle = new("Capsule");
 
         private MoonStation CreateStation(
             int portCount = 2,
@@ -31,7 +31,7 @@ namespace LunarOps.Domain.Tests
                 name: "Alpha",
                 location: "SouthPole",
                 status: StationStatus.Active,
-                supportedVehicleTypes: new[] { SupportedVehicle },
+                supportedVehicleTypes: [_supportedVehicle],
                 maxCrewCapacity: maxCrew,
                 maxPayloadCapacity: maxPayload,
                 dockingPorts: ports
@@ -43,12 +43,12 @@ namespace LunarOps.Domain.Tests
         {
             var station = CreateStation(portCount: 1);
             // Act
-            station.ReserveDockingPort(_missionId, SupportedVehicle);
+            station.ReserveDockingPort(_missionId, _supportedVehicle);
 
             // Assert: single port is now occupied
             var port = station.DockingPorts.Single();
             Assert.Equal(DockingPortStatus.Occupied, port.Status);
-            Assert.Equal(SupportedVehicle, port.AssignedVehicle);
+            Assert.Equal(_supportedVehicle, port.AssignedVehicle);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace LunarOps.Domain.Tests
         {
             var station = CreateStation();
             var ex = Assert.Throws<AggregateValidationException>(
-                () => station.ReserveDockingPort(_missionId, UnsupportedVehicle)
+                () => station.ReserveDockingPort(_missionId, _unsupportedVehicle)
             );
             Assert.Contains("Vehicle type not supported", ex.Message);
         }
@@ -66,10 +66,10 @@ namespace LunarOps.Domain.Tests
         {
             // Make a station with one port and already occupy it
             var station = CreateStation(portCount: 1);
-            station.ReserveDockingPort(_missionId, SupportedVehicle);
+            station.ReserveDockingPort(_missionId, _supportedVehicle);
 
             var ex = Assert.Throws<AggregateValidationException>(
-                () => station.ReserveDockingPort(_missionId, SupportedVehicle)
+                () => station.ReserveDockingPort(_missionId, _supportedVehicle)
             );
             Assert.Contains("No available docking ports", ex.Message);
         }
@@ -78,7 +78,7 @@ namespace LunarOps.Domain.Tests
         public void ReleaseDockingPort_SucceedsAndFreesPort()
         {
             var station = CreateStation(portCount: 1);
-            station.ReserveDockingPort(_missionId, SupportedVehicle);
+            station.ReserveDockingPort(_missionId, _supportedVehicle);
 
             var portId = station.DockingPorts.Single().Id;
             station.ReleaseDockingPort(portId);

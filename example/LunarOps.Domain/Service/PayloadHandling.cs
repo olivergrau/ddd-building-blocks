@@ -7,7 +7,7 @@ namespace LunarOps.Domain.Service
 {
     public sealed class PayloadHandling
     {
-        public async Task Unload(LunarMission mission, MoonStation station, IStationAvailabilityService stationAvailabilityService)
+        public async Task UnloadAsync(LunarMission mission, MoonStation station, IStationAvailabilityService stationAvailabilityService)
         {
             ArgumentNullException.ThrowIfNull(mission);
             ArgumentNullException.ThrowIfNull(station);

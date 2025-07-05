@@ -87,7 +87,7 @@ namespace LunarOps.Domain.Model
             if (Status == LunarMissionStatus.Departed)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Mission has already departed and cannot assign a docking port.");
 
-            if (Status != LunarMissionStatus.Docked)
+            if (Status != LunarMissionStatus.Docked && Status != LunarMissionStatus.CrewTransferred)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Mission must be docked before unloading payload.");
 
             var payloads = PayloadManifest.Select(p => new LunarPayload(p.Item, p.Mass, "Unknown")).ToList(); // fix if DestinationArea exists
@@ -158,8 +158,11 @@ namespace LunarOps.Domain.Model
         private void On(PayloadUnloaded e)
         {
             if (Status == LunarMissionStatus.CrewTransferred)
+            {
                 Status = LunarMissionStatus.ReadyForService;
-            
+                return;
+            }
+
             Status = LunarMissionStatus.PayloadUnloaded;
         }
         
@@ -168,8 +171,11 @@ namespace LunarOps.Domain.Model
         private void On(CrewTransferred e)
         {
             if (Status == LunarMissionStatus.PayloadUnloaded)
+            {
                 Status = LunarMissionStatus.ReadyForService;
-            
+                return;
+            }
+
             Status = LunarMissionStatus.CrewTransferred;
         }
         
