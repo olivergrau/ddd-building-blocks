@@ -13,7 +13,7 @@ namespace RocketLaunch.Application.Command
     /// Side Effects:
     /// - Emits MissionCreated domain event.
     /// </summary>
-    public class CreateMissionCommand : DDD.BuildingBlocks.Core.Commanding.Command
+    public class RegisterMissionCommand : DDD.BuildingBlocks.Core.Commanding.Command
     {
         public Guid MissionId { get; }
         public string MissionName { get; }
@@ -21,7 +21,7 @@ namespace RocketLaunch.Application.Command
         public string PayloadDescription { get; }
         public LaunchWindowDto LaunchWindow { get; }
 
-        public CreateMissionCommand(
+        public RegisterMissionCommand(
             Guid missionId,
             string missionName,
             string targetOrbit,

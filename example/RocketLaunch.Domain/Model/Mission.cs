@@ -36,7 +36,7 @@ namespace RocketLaunch.Domain.Model
         }
 
         // For rehydration
-        private Mission() : base(default!) { }
+        public Mission() : base(default!) { }
 
         public MissionName        Name            { get; private set; }
         public TargetOrbit        TargetOrbit     { get; private set; }
@@ -74,7 +74,7 @@ namespace RocketLaunch.Domain.Model
                 throw new RuleValidationException(
                     Id, "LaunchPad not available", $"LaunchPadId: {padId}");
             
-            ApplyEvent(new LaunchPadAssigned(Id, padId, CurrentVersion));
+            ApplyEvent(new LaunchPadAssigned(Id, padId, Window, CurrentVersion));
         }
 
         public async Task AssignCrewAsync(IEnumerable<CrewMemberId> crew, 
