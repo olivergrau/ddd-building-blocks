@@ -18,7 +18,7 @@ namespace LunarOps.SharedKernel.Events.LunarMission
             ExternalMissionId missionId,
             DockingPortId portId,
             int targetVersion = -1
-        ) : base(missionId.Value, targetVersion, CurrentClassVersion)
+        ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;
             PortId    = portId;

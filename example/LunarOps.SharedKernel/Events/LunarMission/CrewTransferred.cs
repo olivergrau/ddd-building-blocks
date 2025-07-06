@@ -11,16 +11,16 @@ namespace LunarOps.SharedKernel.Events.LunarMission
     {
         private const int CurrentClassVersion = 1;
 
-        public string                            MissionId { get; }
+        public ExternalMissionId MissionId { get; }
         public IReadOnlyCollection<LunarCrewMemberId> Crew      { get; }
 
         public CrewTransferred(
             ExternalMissionId missionId,
             IEnumerable<LunarCrewMemberId> crew,
             int targetVersion = -1
-        ) : base(missionId.Value, targetVersion, CurrentClassVersion)
+        ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
-            MissionId = missionId.Value;
+            MissionId = missionId;
             Crew      = new List<LunarCrewMemberId>(crew).AsReadOnly();
         }
     }

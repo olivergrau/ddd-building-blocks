@@ -8,7 +8,7 @@ namespace RocketLaunch.SharedKernel.ValueObjects
     {
         public string Value { get; }
 
-        public TargetOrbit(string value)
+        public TargetOrbit(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new Exception("Target orbit cannot be empty");

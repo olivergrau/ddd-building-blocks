@@ -7,7 +7,7 @@ namespace LunarOps.SharedKernel.ValueObjects
     public class DockingPortId : EntityId<DockingPortId>
     {
         public Guid Value { get; }
-
+        
         public DockingPortId(Guid value)
         {
             if (value == Guid.Empty)

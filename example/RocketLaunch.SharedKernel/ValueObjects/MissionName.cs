@@ -8,7 +8,7 @@ namespace RocketLaunch.SharedKernel.ValueObjects
     {
         public string Value { get; }
 
-        public MissionName(string value)
+        public MissionName(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new Exception("Mission name cannot be empty");

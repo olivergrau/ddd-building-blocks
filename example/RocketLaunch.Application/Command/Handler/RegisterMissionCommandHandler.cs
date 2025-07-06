@@ -19,7 +19,8 @@ public class RegisterMissionCommandHandler(IEventSourcingRepository repository)
             mission =
                 await AggregateSourcing.Source<Mission, MissionId>(
                     command, 
-                    new MissionId(command.MissionId), 
+                    new MissionId(command.MissionId),
+                    new MissionName(command.MissionName),
                     new TargetOrbit(command.TargetOrbit), 
                     new PayloadDescription(command.PayloadDescription),
                     new LaunchWindow(

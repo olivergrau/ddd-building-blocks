@@ -26,7 +26,7 @@ namespace LunarOps.SharedKernel.Events.LunarMission
             IEnumerable<(string Item,double Mass)> payloadManifest,
             StationId assignedStationId,
             int targetVersion = -1
-        ) : base(missionId.Value, targetVersion, CurrentClassVersion)
+        ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId       = missionId;
             ArrivalTime     = arrivalTime;

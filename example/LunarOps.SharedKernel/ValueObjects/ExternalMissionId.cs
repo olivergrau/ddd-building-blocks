@@ -7,7 +7,7 @@ namespace LunarOps.SharedKernel.ValueObjects
     public class ExternalMissionId : EntityId<ExternalMissionId>
     {
         public string Value { get; }
-
+        
         public ExternalMissionId(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

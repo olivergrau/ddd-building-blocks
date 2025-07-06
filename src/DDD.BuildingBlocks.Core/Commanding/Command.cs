@@ -7,11 +7,11 @@ namespace DDD.BuildingBlocks.Core.Commanding
         public AggregateSourcingMode Mode { get; set; }
 
         public string? CorrelationId { get; }
-        public string? SerializedAggregateId { get; }
+        public string SerializedAggregateId { get; }
 
         public int TargetVersion { get; }
 
-        protected Command(string? serializedAggregateId, int targetVersion)
+        protected Command(string serializedAggregateId, int targetVersion)
         {
             if (string.IsNullOrWhiteSpace(serializedAggregateId))
             {

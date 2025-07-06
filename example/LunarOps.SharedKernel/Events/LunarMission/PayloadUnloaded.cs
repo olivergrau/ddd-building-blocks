@@ -9,16 +9,16 @@ public sealed class PayloadUnloaded : DomainEvent
 {
     private const int CurrentClassVersion = 1;
 
-    public string                            MissionId { get; }
+    public ExternalMissionId                            MissionId { get; }
     public IReadOnlyCollection<LunarPayload> Payload      { get; }
 
     public PayloadUnloaded(
         ExternalMissionId missionId,
         IEnumerable<LunarPayload> payload,
         int targetVersion = -1
-    ) : base(missionId.Value, targetVersion, CurrentClassVersion)
+    ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
     {
-        MissionId = missionId.Value;
+        MissionId = missionId;
         Payload      = new List<LunarPayload>(payload).AsReadOnly();
     }
 }

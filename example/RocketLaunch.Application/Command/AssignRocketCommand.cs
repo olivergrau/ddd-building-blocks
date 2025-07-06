@@ -1,3 +1,5 @@
+using DDD.BuildingBlocks.Core.Commanding;
+
 namespace RocketLaunch.Application.Command;
 
 /// <summary>
@@ -19,5 +21,7 @@ public class AssignRocketCommand : DDD.BuildingBlocks.Core.Commanding.Command
     {
         MissionId = missionId;
         RocketId  = rocketId;
+
+        Mode = AggregateSourcingMode.Update;
     }
 }

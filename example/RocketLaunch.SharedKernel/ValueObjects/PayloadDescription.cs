@@ -8,7 +8,7 @@ namespace RocketLaunch.SharedKernel.ValueObjects
     {
         public string Value { get; }
 
-        public PayloadDescription(string value)
+        public PayloadDescription(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new Exception("Payload description cannot be empty");

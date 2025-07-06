@@ -2,17 +2,20 @@ using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
+using RocketLaunch.Domain.Service;
 
 namespace RocketLaunch.Application
 {
     public class DomainEntry : IDomainEntry
     {
         private readonly ICommandProcessor _commandProcessor;
+        private readonly IResourceAvailabilityService _validator;
 
         public DomainEntry(
-            ICommandProcessor commandProcessor, IEventSourcingRepository repository)
+            ICommandProcessor commandProcessor, IEventSourcingRepository repository, IResourceAvailabilityService validator)
         {
             _commandProcessor = commandProcessor;
+            _validator = validator;
 
             RegisterCommandsForManagementDomain(repository);
 
@@ -30,6 +33,7 @@ namespace RocketLaunch.Application
         private void RegisterCommandsForManagementDomain(IEventSourcingRepository repository)
         {
             _commandProcessor.RegisterHandlerFactory(() => new RegisterMissionCommandHandler(repository));
+            _commandProcessor.RegisterHandlerFactory(() => new AssignRocketCommandHandler(repository, _validator));
         }
 
         public async Task<ICommandExecutionResult> ExecuteAsync<TCommand>(TCommand command)
