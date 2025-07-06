@@ -56,7 +56,7 @@ public class AssignCrewCommandTests
         Assert.Equal(crewIds.Length, mission!.Crew.Count);
         foreach (var id in crewIds)
         {
-            Assert.Contains(mission.Crew, m => m.Value == id);
+            Assert.Contains(mission.Crew, m => Guid.Parse(m.AggregateId) == id);
         }
         Assert.Equal(3, mission.CurrentVersion);
     }
