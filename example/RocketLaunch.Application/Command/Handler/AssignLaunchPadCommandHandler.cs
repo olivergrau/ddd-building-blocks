@@ -16,7 +16,7 @@ public class AssignLaunchPadCommandHandler(IEventSourcingRepository repository, 
         Mission mission;
 
         try
-        {
+        {            
             mission = await AggregateSourcing.Source<Mission, MissionId>(command);
         }
         catch (Exception e)
