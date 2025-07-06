@@ -46,7 +46,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
     public MissionStatus      Status          { get; private set; }
     public RocketId?          AssignedRocket  { get; private set; }
     public LaunchPadId?       AssignedPad     { get; private set; }
-    public List<CrewMemberId> Crew            { get; } = new();
+    public List<DomainRelation> Crew { get; } = new();
 
     // Commands
     public async Task AssignRocketAsync(
@@ -155,7 +155,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
     [InternalEventHandler]
     private void On(CrewAssigned e)
     {
-        Crew.AddRange(e.Crew);
+        Crew.AddRange(e.Crew.Select(id => new DomainRelation(id.Value.ToString())));
     }
         
     [UsedImplicitly]
@@ -208,7 +208,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
             AssignedRocketId = AssignedRocket?.Value,
             AssignedPadId = AssignedPad?.Value,
 
-            CrewMemberIds = Crew.Select(c => c.Value).ToList()
+            CrewMemberIds = Crew.Select(c => Guid.Parse(c.AggregateId)).ToList()
         };
     }
 
@@ -234,6 +234,6 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
         AssignedPad = s.AssignedPadId != null ? new LaunchPadId(s.AssignedPadId.Value) : null;
 
         Crew.Clear();
-        Crew.AddRange(s.CrewMemberIds.Select(id => new CrewMemberId(id)));
+        Crew.AddRange(s.CrewMemberIds.Select(id => new DomainRelation(id.ToString())));
     }
 }

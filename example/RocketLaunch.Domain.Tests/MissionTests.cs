@@ -150,6 +150,7 @@ namespace RocketLaunch.Domain.Tests
             Assert.Equal(id, evt.MissionId);
             Assert.Equal(2, evt.Crew.Count);
             Assert.Equal(evt.Crew, crew);
+            Assert.Equal(crew.Select(c => c.Value.ToString()), mission.Crew.Select(r => r.AggregateId));
         }
 
         [Fact]
@@ -344,6 +345,7 @@ namespace RocketLaunch.Domain.Tests
 
             Assert.Contains("Crew not available", ex.Message);
             Assert.Empty(mission.GetUncommittedChanges());
+            Assert.Empty(mission.Crew);
         }
     }
 }
