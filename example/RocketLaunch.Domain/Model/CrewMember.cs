@@ -1,7 +1,10 @@
 // Domain/Aggregates/CrewMember.cs
 
+using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Domain;
+using JetBrains.Annotations;
 using RocketLaunch.SharedKernel.Enums;
+using RocketLaunch.SharedKernel.Events.CrewMember;
 using RocketLaunch.SharedKernel.ValueObjects;
 
 namespace RocketLaunch.Domain.Model;
@@ -29,22 +32,55 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     {
         if (Status != CrewMemberStatus.Available)
             throw new Exception("Crew member is not available");
-        Status = CrewMemberStatus.Assigned;
+
+        ApplyEvent(new AssignCrewMember(Id, CurrentVersion));
     }
 
     public void Release()
     {
-        Status = CrewMemberStatus.Available;
+        ApplyEvent(new ReleaseCrewMember(Id, CurrentVersion));
     }
 
     public void SetCertifications(IEnumerable<string> certifications)
     {
-        Certifications = new List<string>(certifications ?? throw new ArgumentNullException(nameof(certifications)));
+        ApplyEvent(new SetCertificationForCrewMember(Id,
+            certifications ?? throw new ArgumentNullException(nameof(certifications)),
+            CurrentVersion));
     }
 
     public void SetStatus(CrewMemberStatus status)
     {
-        Status = status;
+        ApplyEvent(new SetStatusForCrewMember(Id, status, CurrentVersion));
+    }
+
+    // Event handlers
+
+    [UsedImplicitly]
+    [InternalEventHandler]
+    private void On(AssignCrewMember e)
+    {
+        Status = CrewMemberStatus.Assigned;
+    }
+
+    [UsedImplicitly]
+    [InternalEventHandler]
+    private void On(ReleaseCrewMember e)
+    {
+        Status = CrewMemberStatus.Available;
+    }
+
+    [UsedImplicitly]
+    [InternalEventHandler]
+    private void On(SetCertificationForCrewMember e)
+    {
+        Certifications = new List<string>(e.Certifications);
+    }
+
+    [UsedImplicitly]
+    [InternalEventHandler]
+    private void On(SetStatusForCrewMember e)
+    {
+        Status = e.Status;
     }
 
     protected override CrewMemberId GetIdFromStringRepresentation(string value)

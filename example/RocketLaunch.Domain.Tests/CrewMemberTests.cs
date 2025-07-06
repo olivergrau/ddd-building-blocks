@@ -2,8 +2,10 @@
 
 using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.Enums;
+using RocketLaunch.SharedKernel.Events.CrewMember;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
+using System.Linq;
 
 namespace RocketLaunch.Domain.Tests;
 
@@ -26,7 +28,12 @@ public class CrewMemberTests
     public void Assign_WhenAvailable_SetsAssigned()
     {
         var member = new CrewMember(new CrewMemberId(Guid.NewGuid()), "Bob", CrewRole.Pilot, Array.Empty<string>());
+
         member.Assign();
+
+        var events = member.GetUncommittedChanges().ToList();
+        Assert.Single(events);
+        Assert.IsType<AssignCrewMember>(events[0]);
         Assert.Equal(CrewMemberStatus.Assigned, member.Status);
     }
 
@@ -42,7 +49,13 @@ public class CrewMemberTests
     public void SetCertifications_ReplacesList()
     {
         var member = new CrewMember(new CrewMemberId(Guid.NewGuid()), "Bob", CrewRole.Pilot, new[] { "A" });
+
         member.SetCertifications(new[] { "B", "C" });
+
+        var events = member.GetUncommittedChanges().ToList();
+        Assert.Single(events);
+        var evt = Assert.IsType<SetCertificationForCrewMember>(events[0]);
+        Assert.Equal(new[] { "B", "C" }, evt.Certifications);
         Assert.Equal(new[] { "B", "C" }, member.Certifications);
     }
 }
