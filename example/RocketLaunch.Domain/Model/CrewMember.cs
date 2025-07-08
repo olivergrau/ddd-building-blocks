@@ -21,7 +21,7 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     }
 
     // For rehydration
-    private CrewMember() : base(default!) { }
+    public CrewMember() : base(default!) { }
 
     public string Name { get; private set; } = null!;
     public CrewRole Role { get; private set; }
