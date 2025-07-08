@@ -71,8 +71,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
         private EventPublishingTable _eventPublishingTable = new ();
 
-        private InMemoryDomainEventBackgroundWorker _eventWorker1;
-        private InMemoryDomainEventBackgroundWorker _eventWorker2;
+        private DomainEventProjectionDispatcher _eventWorker1;
+        private DomainEventProjectionDispatcher _eventWorker2;
 
 		public EventSourcingRepositoryWithEventPublishingTableShould()
         {
@@ -110,10 +110,10 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
             var domainEventNotifier = new DomainEventNotifier("DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration");
 
-            _eventWorker1 = new InMemoryDomainEventBackgroundWorker(
+            _eventWorker1 = new DomainEventProjectionDispatcher(
                 new InProcessDomainEventHandler(domainEventNotifier), _eventPublishingTable, "worker1");
 
-            _eventWorker2 = new InMemoryDomainEventBackgroundWorker(
+            _eventWorker2 = new DomainEventProjectionDispatcher(
                 new InProcessDomainEventHandler(domainEventNotifier), _eventPublishingTable, "worker2");
 
             _eventPublishingTable.RegisterWorkerId("worker1");

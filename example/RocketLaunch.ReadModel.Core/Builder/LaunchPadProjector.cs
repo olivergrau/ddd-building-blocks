@@ -3,16 +3,17 @@ using Microsoft.Extensions.Logging;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events;
+using RocketLaunch.SharedKernel.Events.Mission;
 
 namespace RocketLaunch.ReadModel.Core.Builder
 {
-    public class LaunchPadBuilder(ILaunchPadService padService, ILogger<LaunchPadBuilder> logger)
+    public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadProjector> logger)
         :
             ISubscribe<LaunchPadAssigned>,
             ISubscribe<MissionAborted>
     {
         private readonly ILaunchPadService _padService = padService ?? throw new ArgumentNullException(nameof(padService));
-        private readonly ILogger<LaunchPadBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ILogger<LaunchPadProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task WhenAsync(LaunchPadAssigned @event)
         {

@@ -10,7 +10,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.BackgroundService
     using System;
     using EventPublishing;
 
-    public class InMemoryDomainEventBackgroundWorker : SingletonBackgroundServiceWorker
+    public class DomainEventProjectionDispatcher : SingletonBackgroundServiceWorker
     {
         private static readonly object Lock = new();
         private static bool _isRunning;
@@ -21,7 +21,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.BackgroundService
 
         private readonly ILogger _log;
 
-        public InMemoryDomainEventBackgroundWorker(
+        public DomainEventProjectionDispatcher(
             IDomainEventHandler eventHandler, EventPublishingTable eventPublishingTable, string boundToWorkerId, ILoggerFactory? loggerFactory = null) : base(loggerFactory)
         {
             if (string.IsNullOrWhiteSpace(boundToWorkerId))
@@ -35,8 +35,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.BackgroundService
 
             var nullLoggerFactory = new NullLoggerFactory();
 
-            _log = loggerFactory != null ? loggerFactory.CreateLogger(nameof(InMemoryDomainEventBackgroundWorker))
-                : nullLoggerFactory.CreateLogger(nameof(InMemoryDomainEventBackgroundWorker));
+            _log = loggerFactory != null ? loggerFactory.CreateLogger(nameof(DomainEventProjectionDispatcher))
+                : nullLoggerFactory.CreateLogger(nameof(DomainEventProjectionDispatcher));
 
             nullLoggerFactory.Dispose();
         }

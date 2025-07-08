@@ -2,17 +2,17 @@ using DDD.BuildingBlocks.Core.Event;
 using Microsoft.Extensions.Logging;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
-using RocketLaunch.SharedKernel.Events;
+using RocketLaunch.SharedKernel.Events.Mission;
 
 namespace RocketLaunch.ReadModel.Core.Builder;
 
-public class RocketBuilder(IRocketService rocketService, ILogger<RocketBuilder> logger)
+public class RocketProjector(IRocketService rocketService, ILogger<RocketProjector> logger)
     :
         ISubscribe<RocketAssigned>,
         ISubscribe<MissionAborted>
 {
     private readonly IRocketService _rocketService = rocketService ?? throw new ArgumentNullException(nameof(rocketService));
-    private readonly ILogger<RocketBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<RocketProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task WhenAsync(RocketAssigned @event)
     {

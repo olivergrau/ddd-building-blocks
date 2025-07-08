@@ -4,7 +4,7 @@ using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Event;
 using RocketLaunch.SharedKernel.ValueObjects;
 
-namespace RocketLaunch.SharedKernel.Events
+namespace RocketLaunch.SharedKernel.Events.Mission
 {
     [DomainEventType]
     public sealed class MissionCreated : DomainEvent

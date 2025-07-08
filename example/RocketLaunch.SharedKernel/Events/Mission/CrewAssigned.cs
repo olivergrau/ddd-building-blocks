@@ -1,27 +1,27 @@
-// Domain/Events/RocketAssigned.cs
+// Domain/Events/CrewAssigned.cs
 
 using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Event;
 using RocketLaunch.SharedKernel.ValueObjects;
 
-namespace RocketLaunch.SharedKernel.Events
+namespace RocketLaunch.SharedKernel.Events.Mission
 {
     [DomainEventType]
-    public sealed class RocketAssigned : DomainEvent
+    public sealed class CrewAssigned : DomainEvent
     {
         private const int CurrentClassVersion = 1;
 
-        public MissionId MissionId { get; }
-        public RocketId  RocketId  { get; }
+        public MissionId                   MissionId { get; }
+        public IReadOnlyCollection<CrewMemberId> Crew      { get; }
 
-        public RocketAssigned(
+        public CrewAssigned(
             MissionId missionId,
-            RocketId rocketId,
+            IEnumerable<CrewMemberId> crew,
             int targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;
-            RocketId  = rocketId;
+            Crew      = new List<CrewMemberId>(crew).AsReadOnly();
         }
     }
 }

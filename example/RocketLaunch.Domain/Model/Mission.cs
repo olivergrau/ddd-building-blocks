@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.Events;
+using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.Snapshots;
 using RocketLaunch.SharedKernel.ValueObjects;
 using AggregateException = DDD.BuildingBlocks.Core.Exception.AggregateException;

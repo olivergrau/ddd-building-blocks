@@ -33,52 +33,52 @@ public class CrewMember : AggregateRoot<CrewMemberId>
         if (Status != CrewMemberStatus.Available)
             throw new Exception("Crew member is not available");
 
-        ApplyEvent(new AssignCrewMember(Id, CurrentVersion));
+        ApplyEvent(new CrewMemberAssigned(Id, CurrentVersion));
     }
 
     public void Release()
     {
-        ApplyEvent(new ReleaseCrewMember(Id, CurrentVersion));
+        ApplyEvent(new CrewMemberReleased(Id, CurrentVersion));
     }
 
     public void SetCertifications(IEnumerable<string> certifications)
     {
-        ApplyEvent(new SetCertificationForCrewMember(Id,
+        ApplyEvent(new CrewMemberCertificationSet(Id,
             certifications ?? throw new ArgumentNullException(nameof(certifications)),
             CurrentVersion));
     }
 
     public void SetStatus(CrewMemberStatus status)
     {
-        ApplyEvent(new SetStatusForCrewMember(Id, status, CurrentVersion));
+        ApplyEvent(new CrewMemberStatusSet(Id, status, CurrentVersion));
     }
 
     // Event handlers
 
     [UsedImplicitly]
     [InternalEventHandler]
-    private void On(AssignCrewMember e)
+    private void On(CrewMemberAssigned e)
     {
         Status = CrewMemberStatus.Assigned;
     }
 
     [UsedImplicitly]
     [InternalEventHandler]
-    private void On(ReleaseCrewMember e)
+    private void On(CrewMemberReleased e)
     {
         Status = CrewMemberStatus.Available;
     }
 
     [UsedImplicitly]
     [InternalEventHandler]
-    private void On(SetCertificationForCrewMember e)
+    private void On(CrewMemberCertificationSet e)
     {
         Certifications = new List<string>(e.Certifications);
     }
 
     [UsedImplicitly]
     [InternalEventHandler]
-    private void On(SetStatusForCrewMember e)
+    private void On(CrewMemberStatusSet e)
     {
         Status = e.Status;
     }

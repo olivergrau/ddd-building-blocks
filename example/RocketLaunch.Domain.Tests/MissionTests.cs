@@ -5,6 +5,7 @@ using RocketLaunch.Domain.Model;
 using RocketLaunch.Domain.Tests.Mocks;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.Events;
+using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
 

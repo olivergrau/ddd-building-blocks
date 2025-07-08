@@ -53,7 +53,7 @@ public class AssignCrewCommandTests
         var mission = await repository.GetByIdAsync<Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
 
         Debug.Assert(mission != null, nameof(mission) + " != null");
-        Assert.Equal(crewIds.Length, mission!.Crew.Count);
+        Assert.Equal(crewIds.Length, mission.Crew.Count);
         foreach (var id in crewIds)
         {
             Assert.Contains(mission.Crew, m => Guid.Parse(m.AggregateId) == id);

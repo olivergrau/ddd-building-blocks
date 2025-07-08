@@ -3,17 +3,18 @@ using Microsoft.Extensions.Logging;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events;
+using RocketLaunch.SharedKernel.Events.Mission;
 
 namespace RocketLaunch.ReadModel.Core.Builder
 {
-    public class CrewMemberBuilder(ICrewMemberService crewService, ILogger<CrewMemberBuilder> logger)
+    public class CrewMemberProjector(ICrewMemberService crewService, ILogger<CrewMemberProjector> logger)
         :
             ISubscribe<CrewAssigned>,
             ISubscribe<MissionAborted>,
             ISubscribe<MissionLaunched>
     {
         private readonly ICrewMemberService _crewService = crewService ?? throw new ArgumentNullException(nameof(crewService));
-        private readonly ILogger<CrewMemberBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ILogger<CrewMemberProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task WhenAsync(CrewAssigned @event)
         {
@@ -23,7 +24,7 @@ namespace RocketLaunch.ReadModel.Core.Builder
                 {
                     CrewMemberId = crewId.Value,
                     Status = CrewMemberStatus.Unknown,
-                    CertificationLevels = new List<string>()
+                    CertificationLevels = []
                 };
 
                 member.Status = CrewMemberStatus.Assigned;

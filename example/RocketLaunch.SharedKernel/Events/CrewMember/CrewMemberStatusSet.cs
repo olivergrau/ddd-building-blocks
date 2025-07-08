@@ -1,26 +1,24 @@
-// Domain/Events/CrewMember/SetCertificationForCrewMember.cs
+// Domain/Events/CrewMember/SetStatusForCrewMember.cs
 
 using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Event;
+using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 
 namespace RocketLaunch.SharedKernel.Events.CrewMember;
 
 [DomainEventType]
-public sealed class SetCertificationForCrewMember : DomainEvent
+public sealed class CrewMemberStatusSet : DomainEvent
 {
     private const int CurrentClassVersion = 1;
 
     public CrewMemberId CrewMemberId { get; }
-    public IReadOnlyCollection<string> Certifications { get; }
+    public CrewMemberStatus Status { get; }
 
-    public SetCertificationForCrewMember(
-        CrewMemberId crewMemberId,
-        IEnumerable<string> certifications,
-        int targetVersion = -1)
+    public CrewMemberStatusSet(CrewMemberId crewMemberId, CrewMemberStatus status, int targetVersion = -1)
         : base(crewMemberId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         CrewMemberId = crewMemberId;
-        Certifications = new List<string>(certifications).AsReadOnly();
+        Status = status;
     }
 }
