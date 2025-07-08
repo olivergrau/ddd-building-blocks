@@ -38,6 +38,10 @@ namespace RocketLaunch.Application
                 () => new AssignLaunchPadCommandHandler(repository, _validator));
             _commandProcessor.RegisterHandlerFactory(
                 () => new AssignCrewCommandHandler(repository, _validator));
+            _commandProcessor.RegisterHandlerFactory(() => new ScheduleMissionCommandHandler(repository));
+            _commandProcessor.RegisterHandlerFactory(() => new LaunchMissionCommandHandler(repository));
+            _commandProcessor.RegisterHandlerFactory(() => new AbortMissionCommandHandler(repository));
+            _commandProcessor.RegisterHandlerFactory(() => new MarkMissionArrivedCommandHandler(repository));
         }
 
         public async Task<ICommandExecutionResult> ExecuteAsync<TCommand>(TCommand command)
