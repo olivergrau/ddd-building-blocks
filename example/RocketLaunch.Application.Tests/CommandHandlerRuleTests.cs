@@ -73,7 +73,7 @@ public class CommandHandlerRuleTests
     {
         var (missionId, repo, validator) = await SetupMissionAsync();
         var handler = new AssignCrewCommandHandler(repo, validator);
-        var command = new AssignCrewCommand(missionId, new[] { Guid.NewGuid() });
+        var command = new AssignCrewCommand(missionId, [Guid.NewGuid()]);
 
         await Assert.ThrowsAsync<AggregateValidationException>(() => handler.HandleCommandAsync(command));
     }
@@ -89,7 +89,7 @@ public class CommandHandlerRuleTests
 
         validator.CrewIsAvailable = false;
         var handler = new AssignCrewCommandHandler(repo, validator);
-        var command = new AssignCrewCommand(missionId, new[] { Guid.NewGuid() });
+        var command = new AssignCrewCommand(missionId, [Guid.NewGuid()]);
 
         await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleCommandAsync(command));
     }

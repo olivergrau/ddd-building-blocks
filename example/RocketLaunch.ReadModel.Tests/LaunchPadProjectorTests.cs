@@ -69,4 +69,37 @@ public class LaunchPadProjectorTests
         Assert.Equal(LaunchPadStatus.Available, pad.Status);
         Assert.Empty(pad.OccupiedWindows);
     }
+    
+    [Fact]
+    public async Task MissionAborted_releases_launch_pad_after_rocket_launch()
+    {
+        var service = new InMemoryLaunchPadService();
+        var projector = new LaunchPadProjector(service, NullLogger<LaunchPadProjector>.Instance);
+
+        var padId = Guid.NewGuid();
+        var missionId = Guid.NewGuid();
+        var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
+        await service.CreateOrUpdateAsync(new LaunchPad
+        {
+            LaunchPadId = padId,
+            PadName = "Pad B",
+            Status = LaunchPadStatus.Occupied,
+            OccupiedWindows =
+            [
+                new ScheduledLaunchWindow
+                {
+                    MissionId = missionId,
+                    Start = window.Start,
+                    End = window.End
+                }
+            ]
+        });
+
+        await projector.WhenAsync(new MissionLaunched(new MissionId(missionId)));
+
+        var pad = service.GetById(padId)
+            ?? throw new InvalidOperationException("Launch pad not found");
+        Assert.Equal(LaunchPadStatus.Available, pad.Status);
+        Assert.Empty(pad.OccupiedWindows);
+    }
 }

@@ -2,7 +2,6 @@ using DDD.BuildingBlocks.Core.Event;
 using Microsoft.Extensions.Logging;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
-using RocketLaunch.SharedKernel.Events;
 using RocketLaunch.SharedKernel.Events.Mission;
 
 namespace RocketLaunch.ReadModel.Core.Builder

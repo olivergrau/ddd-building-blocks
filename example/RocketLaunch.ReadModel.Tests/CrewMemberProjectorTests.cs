@@ -26,9 +26,11 @@ public class CrewMemberProjectorTests
         });
 
         var missionId = Guid.NewGuid();
-        await projector.WhenAsync(new CrewAssigned(new MissionId(missionId), new[] { new CrewMemberId(memberId) }));
+        await projector.WhenAsync(new CrewAssigned(new MissionId(missionId), [new CrewMemberId(memberId)]));
 
-        var member = service.GetById(memberId)!;
+        var member = service.GetById(memberId)
+            ?? throw new InvalidOperationException("Crew member not found after assignment");
+        
         Assert.Equal(CrewMemberStatus.Assigned, member.Status);
         Assert.Equal(missionId, member.AssignedMissionId);
     }
