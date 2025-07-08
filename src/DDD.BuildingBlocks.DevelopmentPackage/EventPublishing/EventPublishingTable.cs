@@ -8,7 +8,7 @@ using Core.Event;
 
 public class EventPublishingTable
 {
-    private List<string> _alreadyPublished = [];
+    private readonly List<string> _alreadyPublished = [];
     public ConcurrentDictionary<string, ConcurrentQueue<IDomainEvent>> WorkerQueues { get; } = new();
 
     public void RegisterWorkerId(string workerId)

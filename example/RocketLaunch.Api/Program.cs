@@ -1,18 +1,12 @@
-using System.Text.Json.Serialization;
 using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Event;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.Core.Persistence.Storage;
-using DDD.BuildingBlocks.Core.Persistence.SnapshotSupport;
 using DDD.BuildingBlocks.DevelopmentPackage.BackgroundService;
 using DDD.BuildingBlocks.DevelopmentPackage.EventPublishing;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using DDD.BuildingBlocks.DI.Extensions;
 using DDD.BuildingBlocks.Hosting.Background;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RocketLaunch.Application;
 using RocketLaunch.Api.Handler;
@@ -21,6 +15,7 @@ using RocketLaunch.ReadModel.Core.Builder;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.ReadModel.InMemory.Service;
 
+var workerId = "rocket-launch-worker";
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddConsole();
@@ -28,11 +23,17 @@ builder.Logging.AddConsole();
 var services = builder.Services;
 
 // Event publishing infrastructure
-services.AddSingleton<EventPublishingTable>();
+services.AddSingleton<EventPublishingTable>(x =>
+{
+    var wt = new EventPublishingTable();
+    wt.RegisterWorkerId(workerId);
+    
+    return wt;
+});
 
 services.AddSingleton<DomainEventNotifier>(sp =>
 {
-    var notifier = new DomainEventNotifier("RocketLaunch");
+    var notifier = new DomainEventNotifier("RocketLaunch.ReadModel.Core");
     notifier.SetDependencyResolver(new ServiceLocator(sp));
     return notifier;
 });
@@ -44,10 +45,10 @@ services.AddSingleton<DomainEventProjectionDispatcher>(sp =>
     new DomainEventProjectionDispatcher(
         sp.GetRequiredService<IDomainEventHandler>(),
         sp.GetRequiredService<EventPublishingTable>(),
-        "projection-worker",
+        workerId,
         sp.GetService<ILoggerFactory>()));
 
-services.Configure<TimedHostedServiceOptions>(o => o.GlobalTriggerTimeoutInMilliseconds = 100);
+services.Configure<TimedHostedServiceOptions>(o => o.GlobalTriggerTimeoutInMilliseconds = 1000);
 
 services.AddHostedService(sp =>
     new TimedHostedService<DomainEventProjectionDispatcher>(
