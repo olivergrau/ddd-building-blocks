@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RocketLaunch.Application\RocketLaunch.Application.csproj" />
+    <ProjectReference Include="..\RocketLaunch.ReadModel.InMemory\RocketLaunch.ReadModel.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.DevelopmentPackage\DDD.BuildingBlocks.DevelopmentPackage.csproj" />
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.DI.Extensions\DDD.BuildingBlocks.DI.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.Hosting.Background\DDD.BuildingBlocks.Hosting.Background.csproj" />
+  </ItemGroup>
+</Project>
