@@ -11,4 +11,8 @@
       <ProjectReference Include="..\RocketLaunch.Domain\RocketLaunch.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Command\CrewMember\" />
+    </ItemGroup>
+
 </Project>
