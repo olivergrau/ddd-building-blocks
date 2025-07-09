@@ -5,11 +5,10 @@ using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.Application.Tests.Mocks;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace RocketLaunch.Application.Tests;
+namespace RocketLaunch.Application.Tests.Mission;
 
 public class AssignCrewCommandTests
 {
@@ -50,7 +49,7 @@ public class AssignCrewCommandTests
             crewMemberIds: crewIds
         ));
 
-        var mission = await repository.GetByIdAsync<Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
 
         Debug.Assert(mission != null, nameof(mission) + " != null");
         Assert.Equal(crewIds.Length, mission.Crew.Count);

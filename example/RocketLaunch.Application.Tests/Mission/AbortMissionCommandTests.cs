@@ -5,12 +5,11 @@ using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.Application.Tests.Mocks;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace RocketLaunch.Application.Tests;
+namespace RocketLaunch.Application.Tests.Mission;
 
 public class AbortMissionCommandTests
 {
@@ -43,7 +42,7 @@ public class AbortMissionCommandTests
         var handler = new AbortMissionCommandHandler(repository);
         await handler.HandleCommandAsync(new AbortMissionCommand(registerCommand.MissionId));
 
-        var mission = await repository.GetByIdAsync<Mission, MissionId>(new MissionId(registerCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId));
         Debug.Assert(mission != null);
         Assert.Equal(MissionStatus.Aborted, mission.Status);
         Assert.Equal(4, mission.CurrentVersion);

@@ -5,12 +5,11 @@ using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.Application.Tests.Mocks;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace RocketLaunch.Application.Tests;
+namespace RocketLaunch.Application.Tests.Mission;
 
 public class LaunchMissionCommandTests
 {
@@ -43,7 +42,7 @@ public class LaunchMissionCommandTests
         var handler = new LaunchMissionCommandHandler(repository);
         await handler.HandleCommandAsync(new LaunchMissionCommand(registerCommand.MissionId));
 
-        var mission = await repository.GetByIdAsync<Mission, MissionId>(new MissionId(registerCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId));
         Debug.Assert(mission != null);
         Assert.Equal(MissionStatus.Launched, mission.Status);
         Assert.Equal(4, mission.CurrentVersion);

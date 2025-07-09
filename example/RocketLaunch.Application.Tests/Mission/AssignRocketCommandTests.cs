@@ -5,13 +5,13 @@ using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.Application.Tests.Mocks;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
+
 // your command types / handlers
 // your domain-event types
 
-namespace RocketLaunch.Application.Tests;
+namespace RocketLaunch.Application.Tests.Mission;
 
 public class AssignRocketCommandTests
 {
@@ -40,7 +40,7 @@ public class AssignRocketCommandTests
 
         // 4. assert: check that exactly one MissionRegisteredEvent was stored
         var mission = await repository
-            .GetByIdAsync<Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
             
         Assert.NotNull(mission);
         
@@ -53,7 +53,7 @@ public class AssignRocketCommandTests
         await assignRocketCommandHandler.HandleCommandAsync(assignRocketCommend);
         
         mission = await repository
-            .GetByIdAsync<Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
         
         // 5. assert: check that the rocket was assigned
         Debug.Assert(mission != null, nameof(mission) + " != null");

@@ -3,13 +3,13 @@ using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Dto;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
+
 // your command types / handlers
 // your domain-event types
 
-namespace RocketLaunch.Application.Tests;
+namespace RocketLaunch.Application.Tests.Mission;
 
 public class RegisterMissionCommandTests
 {
@@ -36,7 +36,7 @@ public class RegisterMissionCommandTests
 
         // 4. assert: check that exactly one MissionRegisteredEvent was stored
         var mission = await repository
-            .GetByIdAsync<Mission, MissionId>(new MissionId(command.MissionId));
+            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(command.MissionId));
             
         Assert.NotNull(mission);
         

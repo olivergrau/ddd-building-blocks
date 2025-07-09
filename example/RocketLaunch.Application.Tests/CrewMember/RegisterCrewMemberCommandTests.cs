@@ -2,12 +2,11 @@ using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace RocketLaunch.Application.Tests;
+namespace RocketLaunch.Application.Tests.CrewMember;
 
 public class RegisterCrewMemberCommandTests
 {
@@ -27,7 +26,7 @@ public class RegisterCrewMemberCommandTests
 
         await handler.HandleCommandAsync(command);
 
-        var crewMember = await repository.GetByIdAsync<CrewMember, CrewMemberId>(new CrewMemberId(command.CrewMemberId));
+        var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(command.CrewMemberId));
 
         Assert.NotNull(crewMember);
         Assert.Equal(0, crewMember.CurrentVersion);
