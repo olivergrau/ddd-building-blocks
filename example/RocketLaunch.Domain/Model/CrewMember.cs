@@ -14,10 +14,7 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     public CrewMember(CrewMemberId id, string name, CrewRole role, IEnumerable<string> certifications)
         : base(id)
     {
-        Name = name;
-        Role = role;
-        Certifications = new List<string>(certifications);
-        Status = CrewMemberStatus.Available;
+        ApplyEvent(new CrewMemberRegistered(id, name, role, certifications));
     }
 
     // For rehydration
@@ -54,6 +51,16 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     }
 
     // Event handlers
+
+    [UsedImplicitly]
+    [InternalEventHandler]
+    private void On(CrewMemberRegistered e)
+    {
+        Name = e.Name;
+        Role = e.Role;
+        Certifications = new List<string>(e.Certifications);
+        Status = CrewMemberStatus.Available;
+    }
 
     [UsedImplicitly]
     [InternalEventHandler]
