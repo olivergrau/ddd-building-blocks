@@ -111,6 +111,7 @@ app.UseSwaggerUI();
 
 // Minimal API endpoints
 app.MapMissionRoutes();
+app.MapCrewMemberRoutes();
 
 app.Run();
 
