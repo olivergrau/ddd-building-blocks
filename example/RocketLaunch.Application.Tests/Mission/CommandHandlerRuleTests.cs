@@ -5,6 +5,8 @@ using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Command.Mission.Handler;
 using RocketLaunch.Application.Dto;
+using RocketLaunch.Domain.Service;
+using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.Application.Tests.Mocks;
 using Xunit;
 
@@ -71,8 +73,16 @@ public class CommandHandlerRuleTests
     public async Task AssignCrew_WithoutRocketOrPad_Throws()
     {
         var (missionId, repo, validator) = await SetupMissionAsync();
-        var handler = new AssignCrewCommandHandler(repo, validator);
-        var command = new AssignCrewCommand(missionId, [Guid.NewGuid()]);
+        var crewAssignment = new CrewAssignment(validator);
+        var handler = new AssignCrewCommandHandler(repo, crewAssignment);
+        var crewId = Guid.NewGuid();
+        var register = new RegisterCrewMemberCommandHandler(repo);
+        await register.HandleCommandAsync(new RegisterCrewMemberCommand(
+            crewId,
+            "Alice",
+            CrewRole.Commander,
+            []));
+        var command = new AssignCrewCommand(missionId, [crewId]);
 
         await Assert.ThrowsAsync<AggregateValidationException>(() => handler.HandleCommandAsync(command));
     }
@@ -87,8 +97,16 @@ public class CommandHandlerRuleTests
         await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(missionId, Guid.NewGuid()));
 
         validator.CrewIsAvailable = false;
-        var handler = new AssignCrewCommandHandler(repo, validator);
-        var command = new AssignCrewCommand(missionId, [Guid.NewGuid()]);
+        var crewAssignment = new CrewAssignment(validator);
+        var handler = new AssignCrewCommandHandler(repo, crewAssignment);
+        var crewId = Guid.NewGuid();
+        var register = new RegisterCrewMemberCommandHandler(repo);
+        await register.HandleCommandAsync(new RegisterCrewMemberCommand(
+            crewId,
+            "Bob",
+            CrewRole.FlightEngineer,
+            []));
+        var command = new AssignCrewCommand(missionId, [crewId]);
 
         await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleCommandAsync(command));
     }

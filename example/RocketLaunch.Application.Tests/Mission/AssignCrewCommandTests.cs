@@ -4,8 +4,10 @@ using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
 using RocketLaunch.Application.Command.Mission.Handler;
+using RocketLaunch.Domain.Service;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.Application.Tests.Mocks;
+using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
 
@@ -43,8 +45,19 @@ public class AssignCrewCommandTests
             launchPadId: Guid.NewGuid()
         ));
 
-        var assignCrewHandler = new AssignCrewCommandHandler(repository, validator);
+        var crewAssignment = new CrewAssignment(validator);
+        var assignCrewHandler = new AssignCrewCommandHandler(repository, crewAssignment);
         var crewIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+
+        var registerCrewHandler = new RegisterCrewMemberCommandHandler(repository);
+        foreach (var id in crewIds)
+        {
+            await registerCrewHandler.HandleCommandAsync(new RegisterCrewMemberCommand(
+                crewMemberId: id,
+                name: $"Member-{id}",
+                role: RocketLaunch.SharedKernel.Enums.CrewRole.Commander,
+                certifications: []));
+        }
         await assignCrewHandler.HandleCommandAsync(new AssignCrewCommand(
             missionId: registerMissionCommand.MissionId,
             crewMemberIds: crewIds
@@ -59,5 +72,12 @@ public class AssignCrewCommandTests
             Assert.Contains(mission.Crew, m => Guid.Parse(m.AggregateId) == id);
         }
         Assert.Equal(3, mission.CurrentVersion);
+
+        foreach (var id in crewIds)
+        {
+            var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(id));
+            Debug.Assert(crew != null);
+            Assert.Equal(RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Assigned, crew.Status);
+        }
     }
 }

@@ -2,14 +2,16 @@ using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Exception.Constants;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
+using RocketLaunch.Domain.Model;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.SharedKernel.ValueObjects;
 
 namespace RocketLaunch.Application.Command.Mission.Handler;
 
-public class AssignCrewCommandHandler(IEventSourcingRepository repository, IResourceAvailabilityService validator)
+public class AssignCrewCommandHandler(IEventSourcingRepository repository, CrewAssignment crewAssignment)
     : CommandHandler<AssignCrewCommand>(repository)
 {
+    private readonly CrewAssignment _crewAssignment = crewAssignment;
     public override async Task HandleCommandAsync(AssignCrewCommand command)
     {
         Domain.Model.Mission mission;
@@ -22,9 +24,20 @@ public class AssignCrewCommandHandler(IEventSourcingRepository repository, IReso
             throw new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, e);
         }
 
-        var crew = command.CrewMemberIds.Select(id => new CrewMemberId(id));
-        await mission.AssignCrewAsync(crew, validator);
+        var crewMemberAggregates = new List<CrewMember>();
+        foreach (var id in command.CrewMemberIds)
+        {
+            var crewCmd = new AssignCrewMemberCommand(id);
+            var member = await AggregateSourcing.Source<CrewMember, CrewMemberId>(crewCmd);
+            crewMemberAggregates.Add(member);
+        }
+
+        await _crewAssignment.AssignAsync(mission, crewMemberAggregates);
 
         await AggregateRepository.SaveAsync(mission);
+        foreach (var crewMember in crewMemberAggregates)
+        {
+            await AggregateRepository.SaveAsync(crewMember);
+        }
     }
 }
