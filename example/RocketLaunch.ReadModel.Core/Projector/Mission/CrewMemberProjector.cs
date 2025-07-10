@@ -4,7 +4,7 @@ using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
 
-namespace RocketLaunch.ReadModel.Core.Builder
+namespace RocketLaunch.ReadModel.Core.Projector.Mission
 {
     public class CrewMemberProjector(ICrewMemberService crewService, ILogger<CrewMemberProjector> logger)
         :
@@ -19,7 +19,7 @@ namespace RocketLaunch.ReadModel.Core.Builder
         {
             foreach (var crewId in @event.Crew)
             {
-                var member = _crewService.GetById(crewId.Value) ?? new CrewMember
+                var member = _crewService.GetById(crewId.Value) ?? new Model.CrewMember
                 {
                     CrewMemberId = crewId.Value,
                     Status = CrewMemberStatus.Unknown,

@@ -2,6 +2,7 @@
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.Handler;
+using RocketLaunch.Application.Command.Mission.Handler;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;

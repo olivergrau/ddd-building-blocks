@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +15,37 @@ internal static class CrewMemberRequestHandler
 {
     internal static void MapCrewMemberRoutes(this WebApplication app)
     {
+        // app.MapPost("/crew-members", async (HttpRequest request, ILogger<Program> logger) =>
+        // {
+        //     request.EnableBuffering();
+        //
+        //     var body = await new StreamReader(request.Body).ReadToEndAsync();
+        //     request.Body.Position = 0;
+        //
+        //     logger.LogInformation("RAW BODY: {Body}", body);
+        //
+        //     try
+        //     {
+        //         var obj = JsonSerializer.Deserialize<RegisterCrewMemberRequest>(body, new JsonSerializerOptions
+        //         {
+        //             PropertyNameCaseInsensitive = true
+        //         });
+        //
+        //         if (obj == null)
+        //         {
+        //             logger.LogError("Deserialization failed: object is null.");
+        //             return Results.BadRequest("Invalid input.");
+        //         }
+        //
+        //         return Results.Ok(obj);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         logger.LogError(ex, "JSON deserialization error.");
+        //         return Results.BadRequest("Deserialization exception: " + ex.Message);
+        //     }
+        // });
+
         app.MapPost("/crew-members", async ([FromServices] IDomainEntry entry, [FromBody] RegisterCrewMemberRequest request) =>
         {
             var cmd = new RegisterCrewMemberCommand(request.CrewMemberId, request.Name, request.Role, request.Certifications);
@@ -48,14 +81,19 @@ internal static class CrewMemberRequestHandler
             return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
         });
 
-        app.MapGet("/crew-members/{id:guid}", ([FromServices] ICrewMemberService service, [FromRoute] Guid id) =>
+        app.MapGet("/crew-members/{crewMemberId:guid}", ([FromServices] ICrewMemberService service, [FromRoute] Guid crewMemberId) =>
         {
-            var crew = service.GetById(id);
+            var crew = service.GetById(crewMemberId);
             return crew is null ? Results.NotFound() : Results.Ok(crew);
         });
     }
 }
 
-internal record RegisterCrewMemberRequest(Guid CrewMemberId, string Name, CrewRole Role, [property: Required] IReadOnlyCollection<string> Certifications);
+internal record RegisterCrewMemberRequest(
+    Guid CrewMemberId,
+    string Name,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))] CrewRole Role,
+    [property: Required] IReadOnlyCollection<string> Certifications);
+
 internal record SetCrewMemberCertificationsRequest([property: Required] IReadOnlyCollection<string> Certifications);
-internal record SetCrewMemberStatusRequest(CrewMemberStatus Status);
+internal record SetCrewMemberStatusRequest([property: JsonConverter(typeof(JsonStringEnumConverter))] CrewMemberStatus Status);

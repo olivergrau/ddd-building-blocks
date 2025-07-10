@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Event;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
@@ -7,13 +8,15 @@ using DDD.BuildingBlocks.DevelopmentPackage.EventPublishing;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using DDD.BuildingBlocks.DI.Extensions;
 using DDD.BuildingBlocks.Hosting.Background;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using RocketLaunch.Api;
 using RocketLaunch.Application;
 using RocketLaunch.Api.Handler;
 using RocketLaunch.Domain.Service;
-using RocketLaunch.ReadModel.Core.Builder;
+using RocketLaunch.ReadModel.Core.Projector;
+using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.ReadModel.InMemory.Service;
 
@@ -24,6 +27,10 @@ var rocketOptions = builder.Configuration.GetSection("RocketLaunch").Get<RocketL
 var workerId = rocketOptions.WorkerId;
 
 builder.Logging.AddConsole();
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 var services = builder.Services;
 services.AddEndpointsApiExplorer();
@@ -105,6 +112,35 @@ services.AddSingleton<IDomainEntry>(sp => new DomainEntry(
     sp.GetRequiredService<IResourceAvailabilityService>()));
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+        
+        // Log non-successful responses (e.g., 400, 404, etc.)
+        if (context.Response.StatusCode >= 400)
+        {
+            var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("GlobalLogger");
+            logger.LogWarning("Request returned status code {StatusCode} for path {Path}", 
+                context.Response.StatusCode, context.Request.Path);
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("GlobalException");
+        logger.LogError(ex, "Unhandled exception occurred for path {Path}", context.Request.Path);
+        throw;
+    }
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();

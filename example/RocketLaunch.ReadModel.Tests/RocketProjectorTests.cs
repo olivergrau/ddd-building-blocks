@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
-using RocketLaunch.ReadModel.Core.Builder;
 using RocketLaunch.ReadModel.Core.Model;
+using RocketLaunch.ReadModel.Core.Projector;
+using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.InMemory.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.ValueObjects;

@@ -2,22 +2,21 @@ using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Exception.Constants;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
-using RocketLaunch.Domain.Model;
 using RocketLaunch.SharedKernel.ValueObjects;
 
-namespace RocketLaunch.Application.Command.Handler;
+namespace RocketLaunch.Application.Command.Mission.Handler;
 
 public class RegisterMissionCommandHandler(IEventSourcingRepository repository) 
     : CommandHandler<RegisterMissionCommand>(repository)
 {
     public override async Task HandleCommandAsync(RegisterMissionCommand command)
     {
-        Mission mission;
+        Domain.Model.Mission mission;
 
         try
         {
             mission =
-                await AggregateSourcing.Source<Mission, MissionId>(
+                await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(
                     command, 
                     new MissionId(command.MissionId),
                     new MissionName(command.MissionName),

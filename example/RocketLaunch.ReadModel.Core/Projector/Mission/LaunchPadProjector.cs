@@ -4,7 +4,7 @@ using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
 
-namespace RocketLaunch.ReadModel.Core.Builder
+namespace RocketLaunch.ReadModel.Core.Projector.Mission
 {
     public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadProjector> logger)
         :
