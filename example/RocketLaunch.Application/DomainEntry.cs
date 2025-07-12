@@ -12,6 +12,7 @@ namespace RocketLaunch.Application
         private readonly ICommandProcessor _commandProcessor;
         private readonly IResourceAvailabilityService _validator;
         private readonly CrewAssignment _crewAssignment;
+        private readonly CrewUnassignment _crewUnassignment;
 
         public DomainEntry(
             ICommandProcessor commandProcessor, IEventSourcingRepository repository, IResourceAvailabilityService validator)
@@ -19,6 +20,7 @@ namespace RocketLaunch.Application
             _commandProcessor = commandProcessor;
             _validator = validator;
             _crewAssignment = new CrewAssignment(validator);
+            _crewUnassignment = new CrewUnassignment();
 
             RegisterCommandsForManagementDomain(repository);
 
@@ -43,7 +45,7 @@ namespace RocketLaunch.Application
                 () => new AssignCrewCommandHandler(repository, _crewAssignment));
             _commandProcessor.RegisterHandlerFactory(() => new ScheduleMissionCommandHandler(repository));
             _commandProcessor.RegisterHandlerFactory(() => new LaunchMissionCommandHandler(repository));
-            _commandProcessor.RegisterHandlerFactory(() => new AbortMissionCommandHandler(repository));
+            _commandProcessor.RegisterHandlerFactory(() => new AbortMissionCommandHandler(repository, _crewUnassignment));
             _commandProcessor.RegisterHandlerFactory(() => new MarkMissionArrivedCommandHandler(repository));
 
             _commandProcessor.RegisterHandlerFactory(() => new RegisterCrewMemberCommandHandler(repository));
