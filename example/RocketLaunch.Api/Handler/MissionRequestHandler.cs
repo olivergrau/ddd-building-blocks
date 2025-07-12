@@ -67,6 +67,14 @@ internal static class MissionRequestHandler
             return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
         });
 
+        app.MapGet("/missions/{missionId:guid}", ([FromServices] IMissionService service, [FromRoute] Guid missionId) =>
+        {
+            var mission = service.GetById(missionId);
+            return mission is null ? Results.NotFound() : Results.Ok(mission);
+        });
+
+        app.MapGet("/missions", ([FromServices] IMissionService service) => Results.Ok(service.GetAll()));
+
         app.MapGet("/rockets/{id:guid}", ([FromServices] IRocketService service, [FromRoute] Guid id) =>
         {
             var rocket = service.GetById(id);

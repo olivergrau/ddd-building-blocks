@@ -15,6 +15,11 @@ namespace RocketLaunch.ReadModel.InMemory.Service
             return member;
         }
 
+        public IEnumerable<CrewMember> GetAll()
+        {
+            return _crew.Values;
+        }
+
         public bool IsAvailable(Guid crewMemberId, string requiredRole)
         {
             if (!_crew.TryGetValue(crewMemberId, out var member))

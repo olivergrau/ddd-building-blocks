@@ -14,6 +14,11 @@ public class InMemoryMissionService : IMissionService
         return mission;
     }
 
+    public IEnumerable<Mission> GetAll()
+    {
+        return _missions.Values;
+    }
+
     public Task CreateOrUpdateAsync(Mission mission)
     {
         _missions[mission.MissionId] = mission;

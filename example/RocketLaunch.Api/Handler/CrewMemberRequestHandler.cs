@@ -83,6 +83,8 @@ internal static class CrewMemberRequestHandler
             var crew = service.GetById(crewMemberId);
             return crew is null ? Results.NotFound() : Results.Ok(crew);
         });
+
+        app.MapGet("/crew-members", ([FromServices] ICrewMemberService service) => Results.Ok(service.GetAll()));
     }
 }
 
