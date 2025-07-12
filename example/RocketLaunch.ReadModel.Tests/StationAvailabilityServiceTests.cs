@@ -12,7 +12,8 @@ public class StationAvailabilityServiceTests
     {
         var rocketService = new InMemoryRocketService();
         var padService = new InMemoryLaunchPadService();
-        var crewService = new InMemoryCrewService();
+        var missionService = new InMemoryMissionService();
+        var crewService = new InMemoryCrewService(missionService);
         var sut = new InMemoryStationAvailabilityService(rocketService, padService, crewService);
 
         var rocketId = Guid.NewGuid();
@@ -33,7 +34,8 @@ public class StationAvailabilityServiceTests
     public async Task IsRocketAvailable_returns_false_when_not_available()
     {
         var rocketService = new InMemoryRocketService();
-        var sut = new InMemoryStationAvailabilityService(rocketService, new InMemoryLaunchPadService(), new InMemoryCrewService());
+        var missionService = new InMemoryMissionService();
+        var sut = new InMemoryStationAvailabilityService(rocketService, new InMemoryLaunchPadService(), new InMemoryCrewService(missionService));
 
         var rocketId = Guid.NewGuid();
         await rocketService.CreateOrUpdateAsync(new Rocket
@@ -55,7 +57,8 @@ public class StationAvailabilityServiceTests
     {
         var rocketService = new InMemoryRocketService();
         var padService = new InMemoryLaunchPadService();
-        var crewService = new InMemoryCrewService();
+        var missionService = new InMemoryMissionService();
+        var crewService = new InMemoryCrewService(missionService);
         var sut = new InMemoryStationAvailabilityService(rocketService, padService, crewService);
 
         var padId = Guid.NewGuid();
@@ -77,7 +80,8 @@ public class StationAvailabilityServiceTests
     public async Task IsLaunchPadAvailable_returns_false_when_overlap()
     {
         var padService = new InMemoryLaunchPadService();
-        var sut = new InMemoryStationAvailabilityService(new InMemoryRocketService(), padService, new InMemoryCrewService());
+        var missionService = new InMemoryMissionService();
+        var sut = new InMemoryStationAvailabilityService(new InMemoryRocketService(), padService, new InMemoryCrewService(missionService));
 
         var padId = Guid.NewGuid();
         var window1 = new LaunchWindow(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2));
@@ -105,7 +109,8 @@ public class StationAvailabilityServiceTests
     [Fact]
     public async Task AreCrewMembersAvailable_returns_true_when_all_available()
     {
-        var crewService = new InMemoryCrewService();
+        var missionService = new InMemoryMissionService();
+        var crewService = new InMemoryCrewService(missionService);
         var sut = new InMemoryStationAvailabilityService(new InMemoryRocketService(), new InMemoryLaunchPadService(), crewService);
 
         var id1 = Guid.NewGuid();
@@ -122,7 +127,8 @@ public class StationAvailabilityServiceTests
     [Fact]
     public async Task AreCrewMembersAvailable_returns_false_when_any_unavailable()
     {
-        var crewService = new InMemoryCrewService();
+        var missionService = new InMemoryMissionService();
+        var crewService = new InMemoryCrewService(missionService);
         var sut = new InMemoryStationAvailabilityService(new InMemoryRocketService(), new InMemoryLaunchPadService(), crewService);
 
         var id1 = Guid.NewGuid();
