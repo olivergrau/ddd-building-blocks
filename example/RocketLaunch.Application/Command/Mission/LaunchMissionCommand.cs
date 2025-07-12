@@ -1,4 +1,4 @@
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.Mission;
 
 /// <summary>
 /// Command to mark a mission as successfully launched.
@@ -9,13 +9,7 @@ namespace RocketLaunch.Application.Command;
 /// Side Effects:
 /// - Emits MissionLaunched domain event.
 /// </summary>
-public class LaunchMissionCommand : DDD.BuildingBlocks.Core.Commanding.Command
+public class LaunchMissionCommand(Guid missionId) : DDD.BuildingBlocks.Core.Commanding.Command(missionId.ToString(), -1)
 {
-    public Guid MissionId { get; }
-
-    public LaunchMissionCommand(Guid missionId)
-        : base(missionId.ToString(), -1)
-    {
-        MissionId = missionId;
-    }
+    public Guid MissionId { get; } = missionId;
 }

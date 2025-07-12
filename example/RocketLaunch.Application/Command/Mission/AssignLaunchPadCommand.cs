@@ -1,4 +1,4 @@
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.Mission;
 
 /// <summary>
 /// Command to assign a launch pad to a mission.
@@ -10,15 +10,9 @@ namespace RocketLaunch.Application.Command;
 /// Side Effects:
 /// - Emits LaunchPadAssigned domain event.
 /// </summary>
-public class AssignLaunchPadCommand : DDD.BuildingBlocks.Core.Commanding.Command
+public class AssignLaunchPadCommand(Guid missionId, Guid launchPadId)
+    : DDD.BuildingBlocks.Core.Commanding.Command(missionId.ToString(), -1)
 {
-    public Guid MissionId   { get; }
-    public Guid LaunchPadId { get; }
-
-    public AssignLaunchPadCommand(Guid missionId, Guid launchPadId)
-        : base(missionId.ToString(), -1)
-    {
-        MissionId   = missionId;
-        LaunchPadId = launchPadId;
-    }
+    public Guid MissionId   { get; } = missionId;
+    public Guid LaunchPadId { get; } = launchPadId;
 }

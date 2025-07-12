@@ -1,4 +1,4 @@
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.Mission;
 
 /// <summary>
 /// Command to abort a mission before launch.
@@ -9,13 +9,7 @@ namespace RocketLaunch.Application.Command;
 /// Side Effects:
 /// - Emits MissionAborted domain event.
 /// </summary>
-public class AbortMissionCommand : DDD.BuildingBlocks.Core.Commanding.Command
+public class AbortMissionCommand(Guid missionId) : DDD.BuildingBlocks.Core.Commanding.Command(missionId.ToString(), -1)
 {
-    public Guid MissionId { get; }
-
-    public AbortMissionCommand(Guid missionId)
-        : base(missionId.ToString(), -1)
-    {
-        MissionId = missionId;
-    }
+    public Guid MissionId { get; } = missionId;
 }

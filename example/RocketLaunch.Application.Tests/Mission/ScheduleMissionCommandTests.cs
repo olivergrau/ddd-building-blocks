@@ -2,7 +2,7 @@ using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command;
-using RocketLaunch.Application.Command.Handler;
+using RocketLaunch.Application.Command.Mission;
 using RocketLaunch.Application.Command.Mission.Handler;
 using RocketLaunch.Application.Dto;
 using RocketLaunch.Application.Tests.Mocks;

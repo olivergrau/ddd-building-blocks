@@ -1,12 +1,11 @@
-namespace RocketLaunch.Application.Command;
-
-using DDD.BuildingBlocks.Core.Commanding;
 using RocketLaunch.SharedKernel.Enums;
+
+namespace RocketLaunch.Application.Command.CrewMember;
 
 /// <summary>
 /// Command to set the status of a crew member.
 /// </summary>
-public class SetCrewMemberStatusCommand : Command
+public class SetCrewMemberStatusCommand : DDD.BuildingBlocks.Core.Commanding.Command
 {
     public Guid CrewMemberId { get; }
     public CrewMemberStatus Status { get; }

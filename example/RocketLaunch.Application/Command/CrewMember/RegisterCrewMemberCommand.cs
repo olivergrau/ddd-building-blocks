@@ -1,7 +1,7 @@
-namespace RocketLaunch.Application.Command;
-
 using DDD.BuildingBlocks.Core.Commanding;
 using RocketLaunch.SharedKernel.Enums;
+
+namespace RocketLaunch.Application.Command.CrewMember;
 
 /// <summary>
 /// Command to register a new crew member.
@@ -12,7 +12,7 @@ using RocketLaunch.SharedKernel.Enums;
 /// Side Effects:
 /// - Emits CrewMemberAssigned event with Available status (implicit from creation).
 /// </summary>
-public class RegisterCrewMemberCommand : Command
+public class RegisterCrewMemberCommand : DDD.BuildingBlocks.Core.Commanding.Command
 {
     public Guid CrewMemberId { get; }
     public string Name { get; }

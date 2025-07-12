@@ -1,6 +1,6 @@
 using RocketLaunch.Application.Dto;
 
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.Mission;
 
 /// <summary>
 /// Command to mark a mission as "Arrived" at lunar orbit.
@@ -12,26 +12,17 @@ namespace RocketLaunch.Application.Command;
 /// - Emits MissionArrivedAtLunarOrbit integration event.
 /// - Finalizes mission state.
 /// </summary>
-public class MarkMissionArrivedCommand : DDD.BuildingBlocks.Core.Commanding.Command
+public class MarkMissionArrivedCommand(
+    Guid missionId,
+    DateTime arrivalTime,
+    string vehicleType,
+    IEnumerable<CrewManifestItemDto> crewManifest,
+    IEnumerable<PayloadManifestItemDto> payloadManifest)
+    : DDD.BuildingBlocks.Core.Commanding.Command(missionId.ToString(), -1)
 {
-    public Guid MissionId { get; }
-    public DateTime ArrivalTime { get; }
-    public string VehicleType { get; }
-    public IReadOnlyCollection<CrewManifestItemDto> CrewManifest { get; }
-    public IReadOnlyCollection<PayloadManifestItemDto> PayloadManifest { get; }
-
-    public MarkMissionArrivedCommand(
-        Guid missionId,
-        DateTime arrivalTime,
-        string vehicleType,
-        IEnumerable<CrewManifestItemDto> crewManifest,
-        IEnumerable<PayloadManifestItemDto> payloadManifest
-    ) : base(missionId.ToString(), -1)
-    {
-        MissionId       = missionId;
-        ArrivalTime     = arrivalTime;
-        VehicleType     = vehicleType ?? throw new ArgumentNullException(nameof(vehicleType));
-        CrewManifest    = new List<CrewManifestItemDto>(crewManifest ?? throw new ArgumentNullException(nameof(crewManifest))).AsReadOnly();
-        PayloadManifest = new List<PayloadManifestItemDto>(payloadManifest ?? throw new ArgumentNullException(nameof(payloadManifest))).AsReadOnly();
-    }
+    public Guid MissionId { get; } = missionId;
+    public DateTime ArrivalTime { get; } = arrivalTime;
+    public string VehicleType { get; } = vehicleType ?? throw new ArgumentNullException(nameof(vehicleType));
+    public IReadOnlyCollection<CrewManifestItemDto> CrewManifest { get; } = new List<CrewManifestItemDto>(crewManifest ?? throw new ArgumentNullException(nameof(crewManifest))).AsReadOnly();
+    public IReadOnlyCollection<PayloadManifestItemDto> PayloadManifest { get; } = new List<PayloadManifestItemDto>(payloadManifest ?? throw new ArgumentNullException(nameof(payloadManifest))).AsReadOnly();
 }

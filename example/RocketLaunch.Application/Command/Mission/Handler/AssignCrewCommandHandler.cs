@@ -2,7 +2,7 @@ using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Exception.Constants;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
-using RocketLaunch.Domain.Model;
+using RocketLaunch.Application.Command.CrewMember;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.SharedKernel.ValueObjects;
 
@@ -24,11 +24,11 @@ public class AssignCrewCommandHandler(IEventSourcingRepository repository, CrewA
             throw new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, e);
         }
 
-        var crewMemberAggregates = new List<CrewMember>();
+        var crewMemberAggregates = new List<Domain.Model.CrewMember>();
         foreach (var id in command.CrewMemberIds)
         {
             var crewCmd = new AssignCrewMemberCommand(id);
-            var member = await AggregateSourcing.Source<CrewMember, CrewMemberId>(crewCmd);
+            var member = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(crewCmd);
             crewMemberAggregates.Add(member);
         }
 

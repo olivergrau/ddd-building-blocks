@@ -17,20 +17,20 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
 
         public async Task WhenAsync(CrewAssigned @event)
         {
-            foreach (var crewId in @event.Crew)
-            {
-                var member = _crewService.GetById(crewId.Value) ?? new CrewMember
-                {
-                    CrewMemberId = crewId.Value,
-                    Status = CrewMemberStatus.Unknown,
-                    CertificationLevels = []
-                };
-
-                member.Status = CrewMemberStatus.Assigned;
-                member.AssignedMissionId = @event.MissionId.Value;
-
-                await _crewService.CreateOrUpdateAsync(member);
-            }
+            // foreach (var crewId in @event.Crew)
+            // {
+            //     var member = _crewService.GetById(crewId.Value) ?? new CrewMember
+            //     {
+            //         CrewMemberId = crewId.Value,
+            //         Status = CrewMemberStatus.Unknown,
+            //         CertificationLevels = []
+            //     };
+            //
+            //     member.Status = CrewMemberStatus.Assigned;
+            //     member.AssignedMissionId = @event.MissionId.Value;
+            //
+            //     await _crewService.CreateOrUpdateAsync(member);
+            // }
         }
 
         public async Task WhenAsync(MissionAborted @event)

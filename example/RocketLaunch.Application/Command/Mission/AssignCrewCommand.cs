@@ -1,4 +1,4 @@
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.Mission;
 
 /// <summary>
 /// Command to assign crew members to a mission.
@@ -11,15 +11,9 @@ namespace RocketLaunch.Application.Command;
 /// Side Effects:
 /// - Emits CrewAssigned domain event.
 /// </summary>
-public class AssignCrewCommand : DDD.BuildingBlocks.Core.Commanding.Command
+public class AssignCrewCommand(Guid missionId, IEnumerable<Guid> crewMemberIds)
+    : DDD.BuildingBlocks.Core.Commanding.Command(missionId.ToString(), -1)
 {
-    public Guid MissionId { get; }
-    public IReadOnlyCollection<Guid> CrewMemberIds { get; }
-
-    public AssignCrewCommand(Guid missionId, IEnumerable<Guid> crewMemberIds)
-        : base(missionId.ToString(), -1)
-    {
-        MissionId     = missionId;
-        CrewMemberIds = new List<Guid>(crewMemberIds ?? throw new ArgumentNullException(nameof(crewMemberIds))).AsReadOnly();
-    }
+    public Guid MissionId { get; } = missionId;
+    public IReadOnlyCollection<Guid> CrewMemberIds { get; } = new List<Guid>(crewMemberIds ?? throw new ArgumentNullException(nameof(crewMemberIds))).AsReadOnly();
 }

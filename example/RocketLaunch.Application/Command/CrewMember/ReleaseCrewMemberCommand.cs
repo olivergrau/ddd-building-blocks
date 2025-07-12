@@ -1,4 +1,4 @@
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.CrewMember;
 
 /// <summary>
 /// Command to release a crew member from assignment.

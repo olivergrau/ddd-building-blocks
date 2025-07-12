@@ -2,7 +2,9 @@ using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command;
-using RocketLaunch.Application.Command.Handler;
+using RocketLaunch.Application.Command.CrewMember;
+using RocketLaunch.Application.Command.CrewMember.Handler;
+using RocketLaunch.Application.Command.Mission;
 using RocketLaunch.Application.Command.Mission.Handler;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.Application.Dto;
@@ -55,7 +57,7 @@ public class AssignCrewCommandTests
             await registerCrewHandler.HandleCommandAsync(new RegisterCrewMemberCommand(
                 crewMemberId: id,
                 name: $"Member-{id}",
-                role: RocketLaunch.SharedKernel.Enums.CrewRole.Commander,
+                role: CrewRole.Commander,
                 certifications: []));
         }
         await assignCrewHandler.HandleCommandAsync(new AssignCrewCommand(
@@ -77,7 +79,7 @@ public class AssignCrewCommandTests
         {
             var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(id));
             Debug.Assert(crew != null);
-            Assert.Equal(RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Assigned, crew.Status);
+            Assert.Equal(CrewMemberStatus.Assigned, crew.Status);
         }
     }
 }

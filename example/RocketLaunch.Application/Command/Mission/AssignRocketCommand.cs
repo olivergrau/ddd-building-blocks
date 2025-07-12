@@ -1,6 +1,6 @@
 using DDD.BuildingBlocks.Core.Commanding;
 
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.Mission;
 
 /// <summary>
 /// Command to assign a rocket to a planned mission.

@@ -1,11 +1,9 @@
-namespace RocketLaunch.Application.Command;
-
-using DDD.BuildingBlocks.Core.Commanding;
+namespace RocketLaunch.Application.Command.CrewMember;
 
 /// <summary>
 /// Command to update the certifications of a crew member.
 /// </summary>
-public class SetCrewMemberCertificationsCommand : Command
+public class SetCrewMemberCertificationsCommand : DDD.BuildingBlocks.Core.Commanding.Command
 {
     public Guid CrewMemberId { get; }
     public IReadOnlyCollection<string> Certifications { get; }

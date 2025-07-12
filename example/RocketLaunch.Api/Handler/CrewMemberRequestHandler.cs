@@ -1,11 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RocketLaunch.Application;
-using RocketLaunch.Application.Command;
+using RocketLaunch.Application.Command.CrewMember;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Enums;
 

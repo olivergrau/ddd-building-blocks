@@ -15,7 +15,6 @@ using RocketLaunch.Api;
 using RocketLaunch.Application;
 using RocketLaunch.Api.Handler;
 using RocketLaunch.Domain.Service;
-using RocketLaunch.ReadModel.Core.Projector;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.ReadModel.InMemory.Service;

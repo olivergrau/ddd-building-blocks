@@ -3,7 +3,7 @@
 using DDD.BuildingBlocks.Core.Commanding;
 using RocketLaunch.Application.Dto;
 
-namespace RocketLaunch.Application.Command
+namespace RocketLaunch.Application.Command.Mission
 {
     /// <summary>
     /// Command to create a new mission in the "Planned" state.

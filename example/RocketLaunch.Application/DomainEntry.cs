@@ -1,7 +1,7 @@
 using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using RocketLaunch.Application.Command;
-using RocketLaunch.Application.Command.Handler;
+using RocketLaunch.Application.Command.CrewMember.Handler;
 using RocketLaunch.Application.Command.Mission.Handler;
 using RocketLaunch.Domain.Service;
 

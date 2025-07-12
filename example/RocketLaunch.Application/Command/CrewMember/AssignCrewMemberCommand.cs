@@ -1,4 +1,4 @@
-namespace RocketLaunch.Application.Command;
+namespace RocketLaunch.Application.Command.CrewMember;
 
 /// <summary>
 /// Command to mark a crew member as assigned.
