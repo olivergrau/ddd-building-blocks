@@ -15,5 +15,5 @@ public class Mission
 
     public Guid? AssignedRocketId { get; set; }
     public Guid? AssignedPadId { get; set; }
-    public List<Guid> CrewMemberIds { get; set; } = new();
+    public List<Guid> CrewMemberIds { get; set; } = [];
 }

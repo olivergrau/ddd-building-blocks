@@ -52,7 +52,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
                 CrewMemberId = @event.CrewMemberId.Value,
                 Name = @event.Name,
                 Role = @event.Role.ToString(),
-                CertificationLevels = new List<string>(@event.Certifications),
+                CertificationLevels = [..@event.Certifications],
                 Status = CrewMemberStatus.Available
             };
 

@@ -5,11 +5,11 @@ public class LaunchPad
     public Guid LaunchPadId { get; set; }
     public string PadName { get; set; } = default!;
     public string Location { get; set; } = default!;
-    public List<string> SupportedRocketTypes { get; set; } = new();
+    public List<string> SupportedRocketTypes { get; set; } = [];
 
     public LaunchPadStatus Status { get; set; } = LaunchPadStatus.Unknown;
 
-    public List<ScheduledLaunchWindow> OccupiedWindows { get; set; } = new();
+    public List<ScheduledLaunchWindow> OccupiedWindows { get; set; } = [];
 }
 
 public enum LaunchPadStatus

@@ -15,6 +15,7 @@ using RocketLaunch.Api;
 using RocketLaunch.Application;
 using RocketLaunch.Api.Handler;
 using RocketLaunch.Domain.Service;
+using RocketLaunch.ReadModel.Core.Projector.CrewMember;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.ReadModel.InMemory.Service;
@@ -103,8 +104,8 @@ services.AddSingleton<IResourceAvailabilityService, InMemoryStationAvailabilityS
 // Projectors so they can be resolved by the notifier
 services.AddTransient<RocketProjector>();
 services.AddTransient<LaunchPadProjector>();
-services.AddTransient<CrewMemberProjector>();
 services.AddTransient<MissionProjector>();
+services.AddTransient<CrewMemberProjector>();
 
 // Domain entry
 services.AddSingleton<IDomainEntry>(sp => new DomainEntry(

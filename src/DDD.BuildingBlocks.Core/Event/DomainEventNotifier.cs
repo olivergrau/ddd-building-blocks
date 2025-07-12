@@ -103,10 +103,20 @@ namespace DDD.BuildingBlocks.Core.Event
             {
                 _log.LogInformation($"Trying to instantiate event subscriber for: {@event.GetType().Name}");
 
-                var instance = GetInstance(subscriber);
+                object? instance;
+                try
+                {
+                    instance = GetInstance(subscriber);
+                }
+                catch (System.Exception ex)
+                {
+                    _log.LogError(ex, "Could not instantiate subscriber for event {EventType}: {ExceptionMessage}",
+                        @event.GetType().AssemblyQualifiedName, ex.Message);
+                    continue;
+                }
 
                 _log.LogInformation(
-                    $"Executing event subscriber: {subscriber.DeclaringType} / {subscriber.Name}");
+                    $"Try to execute event subscriber: {subscriber.DeclaringType} / {subscriber.Name}");
 
                 if (instance == null)
                 {
@@ -125,6 +135,9 @@ namespace DDD.BuildingBlocks.Core.Event
                         _log.LogError(e, "Subscriber threw an exception: {@Exception}", e);
                         OnSubscriberException?.Invoke(this, new DomainEventNotifierSubscriberExceptionEventArgs(e));
                     }
+                    
+                    _log.LogInformation(
+                        $"Executed event subscriber: {subscriber.DeclaringType} / {subscriber.Name}");
                 }
             }
         }

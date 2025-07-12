@@ -5,7 +5,7 @@ public class CrewMember
     public Guid CrewMemberId { get; set; }
     public string Name { get; set; } = default!;
     public string Role { get; set; } = default!; // Commander, Pilot, etc.
-    public List<string> CertificationLevels { get; set; } = new();
+    public List<string> CertificationLevels { get; set; } = [];
 
     public CrewMemberStatus Status { get; set; } = CrewMemberStatus.Unknown;
 
