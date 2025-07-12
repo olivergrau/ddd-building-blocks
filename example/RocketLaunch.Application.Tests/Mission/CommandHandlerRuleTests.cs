@@ -1,7 +1,6 @@
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
-using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.CrewMember;
 using RocketLaunch.Application.Command.CrewMember.Handler;
 using RocketLaunch.Application.Command.Mission;

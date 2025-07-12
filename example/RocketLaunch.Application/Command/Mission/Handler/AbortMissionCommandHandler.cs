@@ -12,7 +12,6 @@ namespace RocketLaunch.Application.Command.Mission.Handler;
 public class AbortMissionCommandHandler(IEventSourcingRepository repository, CrewUnassignment crewUnassignment)
     : CommandHandler<AbortMissionCommand>(repository)
 {
-    private readonly CrewUnassignment _crewUnassignment = crewUnassignment;
     public override async Task HandleCommandAsync(AbortMissionCommand command)
     {
         Domain.Model.Mission mission;
@@ -34,7 +33,7 @@ public class AbortMissionCommandHandler(IEventSourcingRepository repository, Cre
             crewMemberAggregates.Add(member);
         }
 
-        _crewUnassignment.Unassign(mission, crewMemberAggregates);
+        crewUnassignment.Unassign(mission, crewMemberAggregates);
 
         await AggregateRepository.SaveAsync(mission);
         foreach (var crewMember in crewMemberAggregates)
