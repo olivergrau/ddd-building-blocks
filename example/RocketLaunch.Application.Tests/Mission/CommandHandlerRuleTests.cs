@@ -151,7 +151,8 @@ public class CommandHandlerRuleTests
         var launchHandler = new LaunchMissionCommandHandler(repo);
         await launchHandler.HandleCommandAsync(new LaunchMissionCommand(missionId));
 
-        var handler = new AbortMissionCommandHandler(repo);
+        var unassignment = new CrewUnassignment();
+        var handler = new AbortMissionCommandHandler(repo, unassignment);
         var command = new AbortMissionCommand(missionId);
 
         await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleCommandAsync(command));
