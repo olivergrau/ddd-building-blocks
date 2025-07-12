@@ -94,6 +94,7 @@ services.AddSingleton<IEventSourcingRepository>(sp =>
 services.AddSingleton<ICommandProcessor, DefaultCommandProcessor>();
 
 // Read model services and validators
+services.AddSingleton<IMissionService, InMemoryMissionService>();
 services.AddSingleton<IRocketService, InMemoryRocketService>();
 services.AddSingleton<ILaunchPadService, InMemoryLaunchPadService>();
 services.AddSingleton<ICrewMemberService, InMemoryCrewService>();
@@ -103,6 +104,7 @@ services.AddSingleton<IResourceAvailabilityService, InMemoryStationAvailabilityS
 services.AddTransient<RocketProjector>();
 services.AddTransient<LaunchPadProjector>();
 services.AddTransient<CrewMemberProjector>();
+services.AddTransient<MissionProjector>();
 
 // Domain entry
 services.AddSingleton<IDomainEntry>(sp => new DomainEntry(

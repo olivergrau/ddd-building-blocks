@@ -4,9 +4,10 @@ using RocketLaunch.ReadModel.Core.Service;
 
 namespace RocketLaunch.ReadModel.InMemory.Service
 {
-    public class InMemoryCrewService : ICrewMemberService
+    public class InMemoryCrewService(IMissionService missionService) : ICrewMemberService
     {
         private readonly ConcurrentDictionary<Guid, CrewMember> _crew = new();
+        private readonly IMissionService _missionService = missionService;
 
         public CrewMember? GetById(Guid id)
         {
@@ -24,7 +25,14 @@ namespace RocketLaunch.ReadModel.InMemory.Service
 
         public IEnumerable<CrewMember> FindByAssignedMission(Guid missionId)
         {
-            return _crew.Values.Where(c => c.AssignedMissionId == missionId);
+            var mission = _missionService.GetById(missionId);
+            if (mission == null)
+                return Enumerable.Empty<CrewMember>();
+
+            return mission.CrewMemberIds
+                .Select(id => GetById(id))
+                .Where(m => m != null)
+                .Select(m => m!);
         }
 
         public IEnumerable<CrewMember> FindAvailable(string role, string? certification = null)

@@ -19,29 +19,76 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
         private readonly ILogger<CrewMemberProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 
-        public Task WhenAsync(CrewMemberAssigned @event)
+        public async Task WhenAsync(CrewMemberAssigned @event)
         {
-            throw new NotImplementedException();
+            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            if (member == null)
+            {
+                _logger.LogWarning("Crew member {CrewMemberId} not found for assignment", @event.CrewMemberId);
+                return;
+            }
+
+            member.Status = CrewMemberStatus.Assigned;
+            await _crewService.CreateOrUpdateAsync(member);
         }
 
-        public Task WhenAsync(CrewMemberCertificationSet @event)
+        public async Task WhenAsync(CrewMemberCertificationSet @event)
         {
-            throw new NotImplementedException();
+            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            if (member == null)
+            {
+                _logger.LogWarning("Crew member {CrewMemberId} not found for certification update", @event.CrewMemberId);
+                return;
+            }
+
+            member.CertificationLevels = new List<string>(@event.Certifications);
+            await _crewService.CreateOrUpdateAsync(member);
         }
 
-        public Task WhenAsync(CrewMemberRegistered @event)
+        public async Task WhenAsync(CrewMemberRegistered @event)
         {
-            throw new NotImplementedException();
+            var member = new Model.CrewMember
+            {
+                CrewMemberId = @event.CrewMemberId.Value,
+                Name = @event.Name,
+                Role = @event.Role.ToString(),
+                CertificationLevels = new List<string>(@event.Certifications),
+                Status = CrewMemberStatus.Available
+            };
+
+            await _crewService.CreateOrUpdateAsync(member);
         }
 
-        public Task WhenAsync(CrewMemberReleased @event)
+        public async Task WhenAsync(CrewMemberReleased @event)
         {
-            throw new NotImplementedException();
+            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            if (member == null)
+            {
+                _logger.LogWarning("Crew member {CrewMemberId} not found for release", @event.CrewMemberId);
+                return;
+            }
+
+            member.Status = CrewMemberStatus.Available;
+            await _crewService.CreateOrUpdateAsync(member);
         }
 
-        public Task WhenAsync(CrewMemberStatusSet @event)
+        public async Task WhenAsync(CrewMemberStatusSet @event)
         {
-            throw new NotImplementedException();
+            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            if (member == null)
+            {
+                _logger.LogWarning("Crew member {CrewMemberId} not found for status change", @event.CrewMemberId);
+                return;
+            }
+
+            member.Status = @event.Status switch
+            {
+                RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Available => CrewMemberStatus.Available,
+                RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Assigned => CrewMemberStatus.Assigned,
+                RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Unavailable => CrewMemberStatus.Unavailable,
+                _ => CrewMemberStatus.Unknown
+            };
+            await _crewService.CreateOrUpdateAsync(member);
         }
     }
 }
