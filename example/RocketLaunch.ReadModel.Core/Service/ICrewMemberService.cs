@@ -5,6 +5,7 @@ namespace RocketLaunch.ReadModel.Core.Service;
 public interface ICrewMemberService
 {
     CrewMember? GetById(Guid crewMemberId);
+    IEnumerable<CrewMember> GetAll();
 
     /// <summary>
     /// Returns true if the crew member is available and certified for a given role
