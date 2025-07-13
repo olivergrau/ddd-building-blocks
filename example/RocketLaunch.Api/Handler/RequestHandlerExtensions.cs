@@ -19,8 +19,8 @@ internal static class RequestHandlerExtensions
                 ErrorClassification.NotFound => Results.NotFound(payload),
                 ErrorClassification.InputDataError => Results.BadRequest(payload),
                 ErrorClassification.ProcessingError => Results.UnprocessableEntity(payload),
-                ErrorClassification.Infrastructure => Results.StatusCode(StatusCodes.Status503ServiceUnavailable, payload),
-                ErrorClassification.ProgrammingError => Results.StatusCode(StatusCodes.Status500InternalServerError, payload),
+                ErrorClassification.Infrastructure => Results.StatusCode(StatusCodes.Status503ServiceUnavailable),
+                ErrorClassification.ProgrammingError => Results.StatusCode(StatusCodes.Status500InternalServerError),
                 _ => Results.BadRequest(payload)
             };
         }

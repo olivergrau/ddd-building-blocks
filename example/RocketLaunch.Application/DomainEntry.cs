@@ -68,13 +68,12 @@ namespace RocketLaunch.Application
                 return result;
             }
 
-            if (result.ResultException is ClassifiedErrorException)
+            if (result.ResultException is ClassifiedErrorException ce)
             {
-                var ce = (ClassifiedErrorException)result.ResultException;
                 return new CommandExecutionResult(false, ce.ErrorInfo.Message, ce);
             }
 
-            ClassifiedErrorException wrapped = result.ResultException switch
+            var wrapped = result.ResultException switch
             {
                 NotFoundException nf => new ClassifiedErrorException(
                     new ClassificationInfo(nf.Message, ErrorOrigin.ApplicationLevel, ErrorClassification.NotFound), nf),
