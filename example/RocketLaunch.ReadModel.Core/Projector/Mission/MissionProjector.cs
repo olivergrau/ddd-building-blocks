@@ -1,5 +1,7 @@
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using DDD.BuildingBlocks.Core.Event;
 using Microsoft.Extensions.Logging;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
@@ -43,7 +45,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for RocketAssigned", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for rocket assignment",
+                ErrorClassification.NotFound);
         }
 
         mission.AssignedRocketId = @event.RocketId.Value;
@@ -56,7 +60,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for LaunchPadAssigned", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for launch pad assignment",
+                ErrorClassification.NotFound);
         }
 
         mission.AssignedPadId = @event.PadId.Value;
@@ -72,7 +78,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for CrewAssigned", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for crew assignment",
+                ErrorClassification.NotFound);
         }
         
         foreach (var crew in @event.Crew)
@@ -86,7 +94,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
             if (member == null)
             {
                 _logger.LogError("Crew member {CrewMemberId} not found for assignment", crew.Value);
-                return;
+                throw new ReadModelException(
+                    $"Crew member with ID {crew.Value} not found for assignment",
+                    ErrorClassification.NotFound);
             }
             
             member.Status = CrewMemberStatus.Assigned;
@@ -102,7 +112,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionScheduled", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for scheduling",
+                ErrorClassification.NotFound);
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Scheduled;
@@ -115,7 +127,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionAborted", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for abort",
+                ErrorClassification.NotFound);
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Aborted;
@@ -128,7 +142,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionLaunched", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for launch",
+                ErrorClassification.NotFound);
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Launched;
@@ -141,7 +157,9 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionArrivedAtLunarOrbit", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"Mission with ID {@event.MissionId} not found for arrival",
+                ErrorClassification.NotFound);
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Arrived;
