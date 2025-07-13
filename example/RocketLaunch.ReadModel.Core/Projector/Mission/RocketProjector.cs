@@ -16,13 +16,15 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
 
     public async Task WhenAsync(RocketAssigned @event)
     {
-        var rocket = _rocketService.GetById(@event.RocketId.Value);
-
-        if (rocket == null)
+        var rocket = _rocketService.GetById(@event.RocketId.Value) ?? new Rocket
         {
-            _logger.LogWarning("Rocket {RocketId} not found when handling RocketAssigned", @event.RocketId);
-            return;
-        }
+            RocketId = @event.RocketId.Value,
+            Name = @event.Name,
+            ThrustCapacity = @event.ThrustCapacity,
+            PayloadCapacityKg = @event.PayloadCapacityKg,
+            AssignedMissionId = @event.MissionId.Value,
+            Status = RocketStatus.Assigned
+        };
 
         rocket.Status = RocketStatus.Assigned;
         rocket.AssignedMissionId = @event.MissionId.Value;

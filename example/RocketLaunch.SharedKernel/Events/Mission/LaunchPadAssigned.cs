@@ -13,12 +13,18 @@ namespace RocketLaunch.SharedKernel.Events.Mission
 
         public MissionId   MissionId { get; }
         public LaunchPadId PadId     { get; }
+        public string      Name            { get; }
+        public string      Location        { get; }
+        public string[]    SupportedRockets { get; }
         
         public LaunchWindow LaunchWindow { get; }
         
         public LaunchPadAssigned(
             MissionId missionId,
             LaunchPadId padId,
+            string name,
+            string location,
+            string[] supportedRockets,
             LaunchWindow launchWindow,
             int targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
@@ -26,6 +32,9 @@ namespace RocketLaunch.SharedKernel.Events.Mission
             MissionId = missionId;
             PadId     = padId;
             LaunchWindow = launchWindow;
+            Name = name;
+            Location = location;
+            SupportedRockets = supportedRockets ?? throw new ArgumentNullException(nameof(supportedRockets));
         }
     }
 }

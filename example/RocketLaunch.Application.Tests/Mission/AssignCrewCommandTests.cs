@@ -35,16 +35,13 @@ public class AssignCrewCommandTests
         await registerMissionHandler.HandleCommandAsync(registerMissionCommand);
 
         var assignRocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await assignRocketHandler.HandleCommandAsync(new AssignRocketCommand(
-            missionId: registerMissionCommand.MissionId,
-            rocketId: Guid.NewGuid()
-        ));
+        await assignRocketHandler.HandleCommandAsync(
+            new AssignRocketCommand(registerMissionCommand.MissionId, Guid.NewGuid(),
+                "Saturn V", 34.5, 140000, 3));
 
         var assignPadHandler = new AssignLaunchPadCommandHandler(repository, validator);
         await assignPadHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            missionId: registerMissionCommand.MissionId,
-            launchPadId: Guid.NewGuid()
-        ));
+            registerMissionCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
 
         var crewAssignment = new CrewAssignment(validator);
         var assignCrewHandler = new AssignCrewCommandHandler(repository, crewAssignment);

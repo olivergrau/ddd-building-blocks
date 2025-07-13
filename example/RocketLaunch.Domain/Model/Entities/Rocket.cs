@@ -9,12 +9,12 @@ namespace RocketLaunch.Domain.Model.Entities
 {
     public class Rocket : Entity<RocketId>
     {
-        public Rocket(RocketId id, string name, double thrust, double payloadCapacity, int crewCapacity)
+        public Rocket(RocketId id, string name, double thrust, int payloadCapacityKg, int crewCapacity)
             : base(id)
         {
             Name = name;
             ThrustCapacity = thrust;
-            PayloadCapacity = payloadCapacity;
+            PayloadCapacityKg = payloadCapacityKg;
             CrewCapacity = crewCapacity;
             Status = RocketStatus.Available;
         }
@@ -25,20 +25,8 @@ namespace RocketLaunch.Domain.Model.Entities
 
         public string      Name            { get; private set; } = null!;
         public double      ThrustCapacity  { get; private set; }
-        public double      PayloadCapacity { get; private set; }
+        public int      PayloadCapacityKg { get; private set; }
         public int         CrewCapacity    { get; private set; }
         public RocketStatus Status         { get; private set; }
-
-        public void MarkAssigned()
-        {
-            if (Status != RocketStatus.Available)
-                throw new Exception("Rocket is not available for assignment");
-            Status = RocketStatus.Assigned;
-        }
-
-        public void MarkAvailable()
-        {
-            Status = RocketStatus.Available;
-        }
     }
 }

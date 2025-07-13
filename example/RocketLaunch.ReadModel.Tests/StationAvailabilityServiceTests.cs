@@ -20,7 +20,7 @@ public class StationAvailabilityServiceTests
         await rocketService.CreateOrUpdateAsync(new Rocket
         {
             RocketId = rocketId,
-            RocketName = "Falcon",
+            Name = "Falcon",
             Status = RocketStatus.Available
         });
 
@@ -41,7 +41,7 @@ public class StationAvailabilityServiceTests
         await rocketService.CreateOrUpdateAsync(new Rocket
         {
             RocketId = rocketId,
-            RocketName = "Falcon",
+            Name = "Falcon",
             Status = RocketStatus.Assigned,
             AssignedMissionId = Guid.NewGuid()
         });

@@ -45,10 +45,8 @@ public class AssignRocketCommandTests
         Assert.NotNull(mission);
         
         var assignRocketCommandHandler = new AssignRocketCommandHandler(repository, validator);
-        var assignRocketCommend = new AssignRocketCommand(
-            missionId: mission.Id.Value,
-            rocketId: Guid.NewGuid()
-        );
+        var assignRocketCommend = new AssignRocketCommand(registerMissionCommand.MissionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3);
             
         await assignRocketCommandHandler.HandleCommandAsync(assignRocketCommend);
         

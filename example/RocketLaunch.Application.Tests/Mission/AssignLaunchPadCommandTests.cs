@@ -32,18 +32,14 @@ public class AssignLaunchPadCommandTests
         await registerMissionHandler.HandleCommandAsync(registerMissionCommand);
 
         var assignRocketHandler = new AssignRocketCommandHandler(repository, validator);
-        var assignRocketCommand = new AssignRocketCommand(
-            missionId: registerMissionCommand.MissionId,
-            rocketId: Guid.NewGuid()
-        );
-        await assignRocketHandler.HandleCommandAsync(assignRocketCommand);
-
+        await assignRocketHandler.HandleCommandAsync(
+            new AssignRocketCommand(registerMissionCommand.MissionId, Guid.NewGuid(),
+                "Saturn V", 34.5, 140000, 3));
+        
         var assignPadHandler = new AssignLaunchPadCommandHandler(repository, validator);
         var padId = Guid.NewGuid();
         var assignPadCommand = new AssignLaunchPadCommand(
-            missionId: registerMissionCommand.MissionId,
-            launchPadId: padId
-        );
+            registerMissionCommand.MissionId, padId, "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]);
         await assignPadHandler.HandleCommandAsync(assignPadCommand);
 
         var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));

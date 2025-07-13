@@ -5,6 +5,7 @@ using DDD.BuildingBlocks.Core.Domain;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Persistence.SnapshotSupport;
 using JetBrains.Annotations;
+using RocketLaunch.Domain.Model.Entities;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.Events;
@@ -51,32 +52,40 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
 
     // Commands
     public async Task AssignRocketAsync(
-        RocketId rocketId, 
+        Rocket rocket, 
         IResourceAvailabilityService validator)
     {
         if (Status != MissionStatus.Planned)
             throw new AggregateValidationException(
                 Id, nameof(Status), Status, "Can only assign rocket in Planned state");
 
-        if (!await validator.IsRocketAvailableAsync(rocketId, Window))
+        if (!await validator.IsRocketAvailableAsync(rocket.Id, Window))
             throw new RuleValidationException(
-                Id, "Rocket not available", $"RocketId: {rocketId}");
+                Id, "Rocket not available", $"RocketId: {rocket.Id}");
 
-        ApplyEvent(new RocketAssigned(Id, rocketId, CurrentVersion));
+        ApplyEvent(new RocketAssigned(
+            Id, rocket.Id, 
+            rocket.Name,
+            rocket.ThrustCapacity,
+            rocket.PayloadCapacityKg,
+            rocket.CrewCapacity,
+            CurrentVersion));
     }
 
 
-    public async Task AssignLaunchPadAsync(LaunchPadId padId, 
+    public async Task AssignLaunchPadAsync(LaunchPad pad, 
         IResourceAvailabilityService validator)
     {
         if (AssignedRocket is null)
             throw new AggregateValidationException(Id, nameof(AssignedPad), null, "Rocket must be assigned first");
             
-        if (!await validator.IsLaunchPadAvailableAsync(padId, Window))
+        if (!await validator.IsLaunchPadAvailableAsync(pad.Id, Window))
             throw new RuleValidationException(
-                Id, "LaunchPad not available", $"LaunchPadId: {padId}");
+                Id, "LaunchPad not available", $"LaunchPadId: {pad.Id}");
             
-        ApplyEvent(new LaunchPadAssigned(Id, padId, Window, CurrentVersion));
+        ApplyEvent(new LaunchPadAssigned(Id, pad.Id, 
+            pad.Name, pad.Location, pad.SupportedRocketTypes.ToArray(),
+            Window, CurrentVersion));
     }
 
     public async Task AssignCrewAsync(IEnumerable<CrewMemberId> crew, 

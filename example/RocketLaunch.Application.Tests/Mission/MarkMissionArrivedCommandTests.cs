@@ -31,10 +31,12 @@ public class MarkMissionArrivedCommandTests
         await registerHandler.HandleCommandAsync(registerCommand);
 
         var rocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid()));
+        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3));
 
         var padHandler = new AssignLaunchPadCommandHandler(repository, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(registerCommand.MissionId, Guid.NewGuid()));
+        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
+            registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
 
         var scheduleHandler = new ScheduleMissionCommandHandler(repository);
         await scheduleHandler.HandleCommandAsync(new ScheduleMissionCommand(registerCommand.MissionId));

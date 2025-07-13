@@ -2,6 +2,7 @@ using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Exception.Constants;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
+using RocketLaunch.Domain.Model.Entities;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.SharedKernel.ValueObjects;
 
@@ -23,7 +24,9 @@ public class AssignLaunchPadCommandHandler(IEventSourcingRepository repository, 
             throw new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, e);
         }
 
-        await mission.AssignLaunchPadAsync(new LaunchPadId(command.LaunchPadId), validator);
+        await mission.AssignLaunchPadAsync(
+            new LaunchPad(
+                new LaunchPadId(command.LaunchPadId), command.Name, command.Location, command.SupportedRockets), validator);
 
         await AggregateRepository.SaveAsync(mission);
     }

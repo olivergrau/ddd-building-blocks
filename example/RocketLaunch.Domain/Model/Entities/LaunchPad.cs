@@ -23,18 +23,5 @@ namespace RocketLaunch.Domain.Model.Entities
         public string           Location             { get; private set; } = null!;
         public IReadOnlyList<string> SupportedRocketTypes { get; private set; } = null!;
         public LaunchPadStatus  Status               { get; private set; }
-
-        public void MarkOccupied(LaunchWindow window)
-        {
-            if (Status != LaunchPadStatus.Available)
-                throw new Exception("Launch pad is not available");
-            // you might record the window for later checks...
-            Status = LaunchPadStatus.Occupied;
-        }
-
-        public void MarkAvailable()
-        {
-            Status = LaunchPadStatus.Available;
-        }
     }
 }

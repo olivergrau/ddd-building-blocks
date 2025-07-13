@@ -2,6 +2,7 @@ using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Exception.Constants;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
+using RocketLaunch.Domain.Model.Entities;
 using RocketLaunch.Domain.Service;
 using RocketLaunch.SharedKernel.ValueObjects;
 
@@ -24,7 +25,10 @@ public class AssignRocketCommandHandler(IEventSourcingRepository repository, IRe
             throw new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, e);
         }
         
-        await mission.AssignRocketAsync(new RocketId(command.RocketId), validator);
+        var rocket = new Rocket(new RocketId(command.RocketId), command.Name, command.ThrustCapacity, 
+            command.PayloadCapacityKg, command.CrewCapacity);
+        
+        await mission.AssignRocketAsync(rocket, validator);
         
         await AggregateRepository.SaveAsync(mission);
     }

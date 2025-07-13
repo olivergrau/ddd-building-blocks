@@ -28,7 +28,9 @@ public class LaunchPadProjectorTests
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
 
-        await projector.WhenAsync(new LaunchPadAssigned(new MissionId(missionId), new LaunchPadId(padId), window));
+        await projector.WhenAsync(
+            new LaunchPadAssigned(
+                new MissionId(missionId), new LaunchPadId(padId), "Launch Pad M-1", "Cape Carnival", ["Falcon 9"], window));
 
         var pad = service.GetById(padId)!;
         Assert.Equal(LaunchPadStatus.Occupied, pad.Status);

@@ -21,12 +21,14 @@ public class RocketProjectorTests
         await service.CreateOrUpdateAsync(new Rocket
         {
             RocketId = rocketId,
-            RocketName = "Saturn",
+            Name = "Saturn",
             Status = RocketStatus.Available
         });
 
         var missionId = Guid.NewGuid();
-        await projector.WhenAsync(new RocketAssigned(new MissionId(missionId), new RocketId(rocketId)));
+        await projector.WhenAsync(
+            new RocketAssigned(
+                new MissionId(missionId), new RocketId(rocketId), "Falcon 9", 34.5, 140000, 3));
 
         var rocket = service.GetById(rocketId)!;
         Assert.Equal(RocketStatus.Assigned, rocket.Status);
@@ -44,7 +46,7 @@ public class RocketProjectorTests
         await service.CreateOrUpdateAsync(new Rocket
         {
             RocketId = rocketId,
-            RocketName = "Saturn",
+            Name = "Saturn",
             Status = RocketStatus.Assigned,
             AssignedMissionId = missionId
         });

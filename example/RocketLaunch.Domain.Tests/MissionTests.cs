@@ -2,6 +2,7 @@
 
 using DDD.BuildingBlocks.Core.Exception;
 using RocketLaunch.Domain.Model;
+using RocketLaunch.Domain.Model.Entities;
 using RocketLaunch.Domain.Tests.Mocks;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.Events;
@@ -13,6 +14,18 @@ namespace RocketLaunch.Domain.Tests
 {
     public class MissionTests
     {
+        private static Rocket NewRocket(out RocketId rocketId)
+        {
+            rocketId = new RocketId(Guid.NewGuid());
+            return new Rocket(rocketId, "Falcon 9", 7600, 22800, 7);
+        }
+        
+        private static LaunchPad NewLaunchPad(out LaunchPadId launchPadId)
+        {
+            launchPadId = new LaunchPadId(Guid.NewGuid());
+            return new LaunchPad(launchPadId, "Pad 39A", "Cape Canaveral", ["Falcon 9", "Starship"]);
+        }
+        
         private static Mission NewPlannedMission(out MissionId missionId)
         {
             missionId = new MissionId(Guid.NewGuid());
@@ -53,11 +66,11 @@ namespace RocketLaunch.Domain.Tests
         public async Task AssignRocket_When_Planned_Should_Raise_RocketAssigned()
         {
             var mission = NewPlannedMission(out var id);
-            var rocketId = new RocketId(Guid.NewGuid());
-
             var stub = new StubResourceAvailabilityService { RocketIsAvailable = true };
-
-            await mission.AssignRocketAsync(rocketId, stub);
+            
+            var rocket = NewRocket(out var rocketId);
+            
+            await mission.AssignRocketAsync(rocket, stub);
             var events = mission.GetUncommittedChanges().ToList();
 
             Assert.Single(events);
@@ -77,27 +90,30 @@ namespace RocketLaunch.Domain.Tests
                 RocketIsAvailable = true,
                 LaunchPadIsAvailable = true
             };
-
+            
+            var launchPad = NewLaunchPad(out _);
+            
             await Assert.ThrowsAsync<AggregateValidationException>(() =>
-                mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub));
+                mission.AssignLaunchPadAsync(launchPad, stub));
         }
 
         [Fact]
         public async Task AssignLaunchPad_With_Rocket_Should_Raise_LaunchPadAssigned()
         {
             var mission = NewPlannedMission(out var id);
-            var rocketId = new RocketId(Guid.NewGuid());
+            var rocket = NewRocket(out var rocketId);
+            
             var stub = new StubResourceAvailabilityService
             {
                 RocketIsAvailable = true,
                 LaunchPadIsAvailable = true
             };
 
-            await mission.AssignRocketAsync(rocketId, stub);
+            await mission.AssignRocketAsync(rocket, stub);
             mission.MarkChangesAsCommitted();
-
-            var padId = new LaunchPadId(Guid.NewGuid());
-            await mission.AssignLaunchPadAsync(padId, stub);
+            
+            var launchPad = NewLaunchPad(out var padId);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
             var events = mission.GetUncommittedChanges().ToList();
 
             Assert.Single(events);
@@ -134,8 +150,12 @@ namespace RocketLaunch.Domain.Tests
                 LaunchPadIsAvailable = true,
                 CrewIsAvailable = true
             };
-            await mission.AssignRocketAsync(new RocketId(Guid.NewGuid()), stub);
-            await mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub);
+            
+            var rocket = NewRocket(out _);
+   
+            await mission.AssignRocketAsync(rocket, stub);
+            var launchPad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
             mission.MarkChangesAsCommitted();
 
             var crew = new[]
@@ -170,10 +190,13 @@ namespace RocketLaunch.Domain.Tests
                 RocketIsAvailable = true,
                 LaunchPadIsAvailable = true
             };
-
+            
             var mission = NewPlannedMission(out var id);
-            await mission.AssignRocketAsync(new RocketId(Guid.NewGuid()), stub);
-            await mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub);
+            var rocket = NewRocket(out _);
+            
+            await mission.AssignRocketAsync(rocket, stub);
+            var launchPad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
 
             mission.MarkChangesAsCommitted();
 
@@ -210,8 +233,11 @@ namespace RocketLaunch.Domain.Tests
             };
 
             var mission = NewPlannedMission(out _);
-            await mission.AssignRocketAsync(new RocketId(Guid.NewGuid()), stub);
-            await mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub);
+            var rocket = NewRocket(out _);
+            
+            await mission.AssignRocketAsync(rocket, stub);
+            var launchPad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
             mission.Schedule();
             mission.MarkChangesAsCommitted();
             mission.MarkLaunched();
@@ -231,8 +257,11 @@ namespace RocketLaunch.Domain.Tests
             var mission = NewPlannedMission(out _);
             Assert.Throws<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => mission.MarkLaunched());
 
-            await mission.AssignRocketAsync(new RocketId(Guid.NewGuid()), stub);
-            await mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub);
+            var rocket = NewRocket(out _);
+            
+            await mission.AssignRocketAsync(rocket, stub);
+            var launchPad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
             mission.Schedule();
             mission.MarkChangesAsCommitted();
 
@@ -257,8 +286,11 @@ namespace RocketLaunch.Domain.Tests
                 mission.MarkArrived(DateTime.UtcNow, "TestVehicle",
                     new List<(string, string)>(), new List<(string, double)>()));
 
-            await mission.AssignRocketAsync(new RocketId(Guid.NewGuid()), stub);
-            await mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub);
+            var rocket = NewRocket(out _);
+            
+            await mission.AssignRocketAsync(rocket, stub);
+            var launchPad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
             mission.Schedule();
             mission.MarkLaunched();
             mission.MarkChangesAsCommitted();
@@ -290,8 +322,10 @@ namespace RocketLaunch.Domain.Tests
             {
                 RocketIsAvailable = false // simulate unavailability
             };
-
-            var ex = await Assert.ThrowsAsync<RuleValidationException>(() => mission.AssignRocketAsync(rocketId, stub));
+            
+            var rocket = NewRocket(out _);
+            
+            var ex = await Assert.ThrowsAsync<RuleValidationException>(() => mission.AssignRocketAsync(rocket, stub));
 
             Assert.Contains("Rocket not available", ex.Message);
             Assert.Empty(mission.GetUncommittedChanges());
@@ -309,12 +343,16 @@ namespace RocketLaunch.Domain.Tests
                 LaunchPadIsAvailable = false
             };
 
-            await mission.AssignRocketAsync(rocketId, stub);
+            var rocket = NewRocket(out _);
+            
+            await mission.AssignRocketAsync(rocket, stub);
             mission.MarkChangesAsCommitted();
 
             var padId = new LaunchPadId(Guid.NewGuid());
-
-            var ex = await Assert.ThrowsAsync<RuleValidationException>(() => mission.AssignLaunchPadAsync(padId, stub));
+            
+            var launchPad = NewLaunchPad(out _);
+            
+            var ex = await Assert.ThrowsAsync<RuleValidationException>(() => mission.AssignLaunchPadAsync(launchPad, stub));
 
             Assert.Contains("LaunchPad not available", ex.Message);
             Assert.Empty(mission.GetUncommittedChanges());
@@ -332,8 +370,11 @@ namespace RocketLaunch.Domain.Tests
                 CrewIsAvailable = false
             };
 
-            await mission.AssignRocketAsync(new RocketId(Guid.NewGuid()), stub);
-            await mission.AssignLaunchPadAsync(new LaunchPadId(Guid.NewGuid()), stub);
+            var rocket = NewRocket(out _);
+            
+            await mission.AssignRocketAsync(rocket, stub);
+            var launchPad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(launchPad, stub);
             mission.MarkChangesAsCommitted();
 
             var crew = new[]

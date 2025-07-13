@@ -7,18 +7,12 @@ using RocketLaunch.SharedKernel.ValueObjects;
 namespace RocketLaunch.SharedKernel.Events.Mission
 {
     [DomainEventType]
-    public sealed class MissionAborted : DomainEvent
+    public sealed class MissionAborted(
+        MissionId missionId,
+        int targetVersion = -1) : DomainEvent(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         private const int CurrentClassVersion = 1;
 
-        public MissionId MissionId { get; }
-
-        public MissionAborted(
-            MissionId missionId,
-            int targetVersion = -1
-        ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
-        {
-            MissionId = missionId;
-        }
+        public MissionId MissionId { get; } = missionId;
     }
 }

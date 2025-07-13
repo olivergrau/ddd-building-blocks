@@ -3,9 +3,9 @@ namespace RocketLaunch.ReadModel.Core.Model;
 public class Rocket
 {
     public Guid RocketId { get; set; }
-    public string RocketName { get; set; } = default!;
-    public string VehicleType { get; set; } = default!; // e.g., Falcon 9, Starship
-
+    public string Name { get; set; } = default!;
+    
+    public double ThrustCapacity { get; set; }
     public int PayloadCapacityKg { get; set; }
     public int CrewCapacity { get; set; }
 
