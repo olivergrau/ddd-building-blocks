@@ -5,6 +5,7 @@ namespace RocketLaunch.ReadModel.Core.Service;
 public interface IRocketService
 {
     Rocket? GetById(Guid rocketId);
+    IEnumerable<Rocket> GetAll();
 
     /// <summary>
     /// Returns true if the rocket is available (e.g., not assigned, not in maintenance)

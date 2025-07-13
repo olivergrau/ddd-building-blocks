@@ -14,6 +14,11 @@ namespace RocketLaunch.ReadModel.InMemory.Service
             return rocket;
         }
 
+        public IEnumerable<Rocket> GetAll()
+        {
+            return _rockets.Values;
+        }
+
         public Rocket? FindByAssignedMission(Guid missionId)
         {
             return _rockets.Values.FirstOrDefault(r => r.AssignedMissionId == missionId);
