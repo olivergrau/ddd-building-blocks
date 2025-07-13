@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RocketLaunch.Domain\RocketLaunch.Domain.csproj" />
+      <ProjectReference Include="..\RocketLaunch.ReadModel.Core\RocketLaunch.ReadModel.Core.csproj" />
     </ItemGroup>
 
 </Project>

@@ -2,6 +2,6 @@
 {
     public enum ErrorClassification
     {
-        NotSpecified, InputDataError, NotFound, ProcessingError, Infrastructure, ProgrammingError, InvalidState
+        NotSpecified, InputDataError, NotFound, ProcessingError, Infrastructure, ProgrammingError, InvalidState, TransientFailure
     }
 }
