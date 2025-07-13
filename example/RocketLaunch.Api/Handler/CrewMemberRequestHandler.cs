@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using RocketLaunch.Application;
 using RocketLaunch.Application.Command.CrewMember;
 using RocketLaunch.ReadModel.Core.Service;
@@ -53,8 +54,15 @@ internal static class CrewMemberRequestHandler
 
         group.MapGet("/{crewMemberId:guid}", async ([FromServices] ICrewMemberService service, [FromRoute] Guid crewMemberId) =>
         {
-            var crew = await service.GetByIdAsync(crewMemberId);
-            return crew is null ? Results.NotFound() : Results.Ok(crew);
+            try
+            {
+                var crew = await service.GetByIdAsync(crewMemberId);
+                return crew is null ? Results.NotFound() : Results.Ok(crew);
+            }
+            catch (ClassifiedErrorException ce)
+            {
+                return ce.ToApiResult();
+            }
         });
 
         group.MapGet("/", async ([FromServices] ICrewMemberService service) => Results.Ok(await service.GetAllAsync()));
