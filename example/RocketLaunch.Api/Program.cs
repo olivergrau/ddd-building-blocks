@@ -79,11 +79,18 @@ services.AddHostedService(sp =>
 services.AddSingleton<IEventStorageProvider>(sp =>
     new PureInMemoryEventStorageProvider(sp.GetRequiredService<EventPublishingTable>()));
 
-var snapshotPath = rocketOptions.SnapshotPath;
+var snapshotPath = Path.Combine(Path.GetTempPath(), rocketOptions.SnapshotPath);
+
 if (!Path.IsPathRooted(snapshotPath))
 {
     snapshotPath = Path.Combine(AppContext.BaseDirectory, snapshotPath);
 }
+
+if (!Directory.Exists(snapshotPath))
+{
+    Directory.CreateDirectory(snapshotPath);
+}
+
 services.AddSingleton<ISnapshotStorageProvider>(sp =>
     new InMemorySnapshotStorageProvider(rocketOptions.SnapshotThreshold, snapshotPath));
 
@@ -120,29 +127,29 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next();
-        
-        // Log non-successful responses (e.g., 400, 404, etc.)
-        if (context.Response.StatusCode >= 400)
-        {
-            var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
-                .CreateLogger("GlobalLogger");
-            logger.LogWarning("Request returned status code {StatusCode} for path {Path}", 
-                context.Response.StatusCode, context.Request.Path);
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
-            .CreateLogger("GlobalException");
-        logger.LogError(ex, "Unhandled exception occurred for path {Path}", context.Request.Path);
-        throw;
-    }
-});
+// app.Use(async (context, next) =>
+// {
+//     try
+//     {
+//         await next();
+//         
+//         // Log non-successful responses (e.g., 400, 404, etc.)
+//         if (context.Response.StatusCode >= 400)
+//         {
+//             var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+//                 .CreateLogger("GlobalLogger");
+//             logger.LogWarning("Request returned status code {StatusCode} for path {Path}", 
+//                 context.Response.StatusCode, context.Request.Path);
+//         }
+//     }
+//     catch (Exception ex)
+//     {
+//         var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+//             .CreateLogger("GlobalException");
+//         logger.LogError(ex, "Unhandled exception occurred for path {Path}", context.Request.Path);
+//         throw;
+//     }
+// });
 
 app.UseSwagger();
 app.UseSwaggerUI();

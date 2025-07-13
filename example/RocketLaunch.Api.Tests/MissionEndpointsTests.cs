@@ -8,6 +8,7 @@ using ReadModelLaunchPadStatus = RocketLaunch.ReadModel.Core.Model.LaunchPadStat
 using RocketLaunch.ReadModel.Core.Service;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using System.Text.Json;
 using Xunit;
 
 namespace RocketLaunch.Api.Tests;
@@ -40,29 +41,7 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         var rocketId = Guid.NewGuid();
         var padId = Guid.NewGuid();
         var crewId = Guid.NewGuid();
-
-        // seed available rocket and launch pad in read model
-        var rocketService = _factory.Services.GetRequiredService<IRocketService>();
-        await rocketService.CreateOrUpdateAsync(new Rocket
-        {
-            RocketId = rocketId,
-            Name = "Falcon 9",
-            ThrustCapacity = 7600,
-            PayloadCapacityKg = 22800,
-            CrewCapacity = 7,
-            Status = ReadModelRocketStatus.Available
-        });
-
-        var padService = _factory.Services.GetRequiredService<ILaunchPadService>();
-        await padService.CreateOrUpdateAsync(new LaunchPad
-        {
-            LaunchPadId = padId,
-            PadName = "Pad 39A",
-            Location = "Cape",
-            SupportedRocketTypes = new List<string> { "Falcon 9" },
-            Status = ReadModelLaunchPadStatus.Available
-        });
-
+        
         // register crew member
         var crewRegister = new
         {
@@ -105,7 +84,6 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         var rocketResp = await _client.PostAsJsonAsync($"/missions/{missionId}/assign-rocket", assignRocket);
         rocketResp.EnsureSuccessStatusCode();
         await Task.Delay(100);
-        await Task.Delay(100);
 
         // assign pad
         var assignPad = new
@@ -118,24 +96,22 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         var padResp = await _client.PostAsJsonAsync($"/missions/{missionId}/assign-pad", assignPad);
         padResp.EnsureSuccessStatusCode();
         await Task.Delay(100);
-        await Task.Delay(100);
 
         // assign crew
         var assignCrew = new { CrewMemberIds = new[] { crewId } };
         var crewAssignResp = await _client.PostAsJsonAsync($"/missions/{missionId}/assign-crew", assignCrew);
         crewAssignResp.EnsureSuccessStatusCode();
-        await Task.Delay(100);
+        await Task.Delay(1000);
 
         // schedule
         var scheduleResp = await _client.PostAsync($"/missions/{missionId}/schedule", null);
         scheduleResp.EnsureSuccessStatusCode();
-        await Task.Delay(100);
-        await Task.Delay(100);
+        await Task.Delay(1000);
 
         // launch
         var launchResp = await _client.PostAsync($"/missions/{missionId}/launch", null);
         launchResp.EnsureSuccessStatusCode();
-        await Task.Delay(100);
+        await Task.Delay(1000);
 
         // arrive
         var arrive = new
@@ -149,9 +125,16 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         arriveResp.EnsureSuccessStatusCode();
 
         // wait a bit for projections
-        await Task.Delay(100);
+        await Task.Delay(1000);
 
-        var mission = await _client.GetFromJsonAsync<Mission>($"/missions/{missionId}");
+        //var mission = await _client.GetFromJsonAsync<Mission>($"/missions/{missionId}");
+        
+        var response = await _client.GetAsync($"/missions/{missionId}");
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        var mission = JsonSerializer.Deserialize<Mission>(json);
+
+        
         Assert.NotNull(mission);
         Assert.Equal(MissionStatus.Arrived, mission!.Status);
         Assert.Equal(rocketId, mission.AssignedRocketId);

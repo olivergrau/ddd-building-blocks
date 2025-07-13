@@ -29,7 +29,7 @@ namespace RocketLaunch.ReadModel.InMemory.Service
         {
             var rocket = await GetByIdAsync(rocketId);
             if (rocket == null)
-                return false;
+                return true;
             return rocket.Status == RocketStatus.Available;
         }
 
