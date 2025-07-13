@@ -5,6 +5,7 @@ namespace RocketLaunch.ReadModel.Core.Service;
 public interface ILaunchPadService
 {
     LaunchPad? GetById(Guid padId);
+    IEnumerable<LaunchPad> GetAll();
 
     /// <summary>
     /// Returns true if the launch pad is available for the given time window

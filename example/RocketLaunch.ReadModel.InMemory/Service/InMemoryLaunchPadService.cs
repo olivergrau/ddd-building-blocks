@@ -14,6 +14,11 @@ namespace RocketLaunch.ReadModel.InMemory.Service
             return pad;
         }
 
+        public IEnumerable<LaunchPad> GetAll()
+        {
+            return _pads.Values;
+        }
+
         public bool IsAvailable(Guid padId, DateTime windowStart, DateTime windowEnd)
         {
             var pad = GetById(padId);
