@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using DDD.BuildingBlocks.Core.ErrorHandling;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 
@@ -10,6 +12,9 @@ namespace RocketLaunch.ReadModel.InMemory.Service
 
         public Task<LaunchPad?> GetByIdAsync(Guid padId)
         {
+            if (padId == Guid.Empty)
+                throw new ReadModelServiceException("Invalid launch pad id", ErrorClassification.InputDataError);
+
             _pads.TryGetValue(padId, out var pad);
             return Task.FromResult(pad);
         }
@@ -21,8 +26,11 @@ namespace RocketLaunch.ReadModel.InMemory.Service
 
         public async Task<bool> IsAvailableAsync(Guid padId, DateTime windowStart, DateTime windowEnd)
         {
+            if (padId == Guid.Empty)
+                throw new ReadModelServiceException("Invalid launch pad id", ErrorClassification.InputDataError);
+
             var pad = await GetByIdAsync(padId);
-            
+
             if (pad == null)
                 return true;
             
@@ -37,6 +45,9 @@ namespace RocketLaunch.ReadModel.InMemory.Service
 
         public Task<LaunchPad?> FindByAssignedMissionAsync(Guid missionId)
         {
+            if (missionId == Guid.Empty)
+                throw new ReadModelServiceException("Invalid mission id", ErrorClassification.InputDataError);
+
             var pad = _pads.Values.FirstOrDefault(p =>
                 p.OccupiedWindows.Any(w => w.MissionId == missionId));
             return Task.FromResult(pad);
