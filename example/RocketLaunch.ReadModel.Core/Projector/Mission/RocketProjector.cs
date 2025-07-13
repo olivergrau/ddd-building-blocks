@@ -1,5 +1,7 @@
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using DDD.BuildingBlocks.Core.Event;
 using Microsoft.Extensions.Logging;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
@@ -40,7 +42,9 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
         if (rocket == null)
         {
             _logger.LogWarning("No rocket found assigned to mission {MissionId}", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"No rocket found assigned to mission {@event.MissionId}",
+                ErrorClassification.NotFound);
         }
 
         rocket.Status = RocketStatus.Available;

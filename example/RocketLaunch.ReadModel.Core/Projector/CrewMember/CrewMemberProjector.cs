@@ -1,5 +1,7 @@
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using DDD.BuildingBlocks.Core.Event;
 using Microsoft.Extensions.Logging;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events.CrewMember;
@@ -25,7 +27,9 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for assignment", @event.CrewMemberId);
-                return;
+                throw new ReadModelException(
+                    $"Crew member with ID {@event.CrewMemberId} not found for assignment",
+                    ErrorClassification.NotFound);
             }
 
             member.Status = CrewMemberStatus.Assigned;
@@ -38,7 +42,9 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for certification update", @event.CrewMemberId);
-                return;
+                throw new ReadModelException(
+                    $"Crew member with ID {@event.CrewMemberId} not found for assignment",
+                    ErrorClassification.NotFound);
             }
 
             member.CertificationLevels = new List<string>(@event.Certifications);
@@ -65,7 +71,9 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for release", @event.CrewMemberId);
-                return;
+                throw new ReadModelException(
+                    $"Crew member with ID {@event.CrewMemberId} not found for assignment",
+                    ErrorClassification.NotFound);
             }
 
             member.Status = CrewMemberStatus.Available;
@@ -78,14 +86,16 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for status change", @event.CrewMemberId);
-                return;
+                throw new ReadModelException(
+                    $"Crew member with ID {@event.CrewMemberId} not found for assignment",
+                    ErrorClassification.NotFound);
             }
 
             member.Status = @event.Status switch
             {
-                RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Available => CrewMemberStatus.Available,
-                RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Assigned => CrewMemberStatus.Assigned,
-                RocketLaunch.SharedKernel.Enums.CrewMemberStatus.Unavailable => CrewMemberStatus.Unavailable,
+                SharedKernel.Enums.CrewMemberStatus.Available => CrewMemberStatus.Available,
+                SharedKernel.Enums.CrewMemberStatus.Assigned => CrewMemberStatus.Assigned,
+                SharedKernel.Enums.CrewMemberStatus.Unavailable => CrewMemberStatus.Unavailable,
                 _ => CrewMemberStatus.Unknown
             };
             await _crewService.CreateOrUpdateAsync(member);

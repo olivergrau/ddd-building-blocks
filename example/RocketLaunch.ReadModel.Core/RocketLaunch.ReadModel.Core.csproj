@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Exceptions\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\src\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
       <ProjectReference Include="..\RocketLaunch.SharedKernel\RocketLaunch.SharedKernel.csproj" />
     </ItemGroup>

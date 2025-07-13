@@ -32,7 +32,7 @@ namespace RocketLaunch.ReadModel.InMemory.Service
         {
             var mission = await _missionService.GetByIdAsync(missionId);
             if (mission == null)
-                return Enumerable.Empty<CrewMember>();
+                return [];
 
             var members = await Task.WhenAll(mission.CrewMemberIds.Select(id => GetByIdAsync(id)));
             return members.Where(m => m != null)!.Select(m => m!);

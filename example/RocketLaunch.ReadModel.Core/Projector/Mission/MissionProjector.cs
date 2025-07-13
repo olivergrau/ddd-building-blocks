@@ -6,7 +6,7 @@ using RocketLaunch.SharedKernel.Events.Mission;
 
 namespace RocketLaunch.ReadModel.Core.Projector.Mission;
 
-public class MissionProjector(IMissionService missionService, ILogger<MissionProjector> logger)
+public class MissionProjector(IMissionService missionService, ICrewMemberService crewMemberService, ILogger<MissionProjector> logger)
     :
         ISubscribe<MissionCreated>,
         ISubscribe<RocketAssigned>,
@@ -17,6 +17,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
         ISubscribe<MissionLaunched>,
         ISubscribe<MissionArrivedAtLunarOrbit>
 {
+    private readonly ICrewMemberService _crewMemberService = crewMemberService ?? throw new ArgumentNullException(nameof(crewMemberService));
     private readonly IMissionService _missionService = missionService ?? throw new ArgumentNullException(nameof(missionService));
     private readonly ILogger<MissionProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -73,13 +74,23 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
             _logger.LogWarning("Mission {MissionId} not found for CrewAssigned", @event.MissionId);
             return;
         }
-
+        
         foreach (var crew in @event.Crew)
         {
             if (!mission.CrewMemberIds.Contains(crew.Value))
             {
                 mission.CrewMemberIds.Add(crew.Value);
             }
+            
+            var member = await _crewMemberService.GetByIdAsync(crew.Value);
+            if (member == null)
+            {
+                _logger.LogError("Crew member {CrewMemberId} not found for assignment", crew.Value);
+                return;
+            }
+            
+            member.Status = CrewMemberStatus.Assigned;
+            await _crewMemberService.CreateOrUpdateAsync(member);
         }
 
         await _missionService.CreateOrUpdateAsync(mission);

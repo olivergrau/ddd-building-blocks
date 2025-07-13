@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.InMemory.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
+using CrewMemberStatus = RocketLaunch.ReadModel.Core.Model.CrewMemberStatus;
 
 namespace RocketLaunch.ReadModel.Tests;
 
@@ -14,7 +16,8 @@ public class MissionProjectorTests
     public async Task MissionCreated_creates_mission()
     {
         var service = new InMemoryMissionService();
-        var projector = new MissionProjector(service, NullLogger<MissionProjector>.Instance);
+        var crewService = new InMemoryCrewService(service);
+        var projector = new MissionProjector(service, crewService, NullLogger<MissionProjector>.Instance);
 
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
@@ -30,12 +33,34 @@ public class MissionProjectorTests
     public async Task CrewAssigned_adds_members()
     {
         var service = new InMemoryMissionService();
-        var projector = new MissionProjector(service, NullLogger<MissionProjector>.Instance);
+        var crewService = new InMemoryCrewService(service);
+        var projector = new MissionProjector(service, crewService, NullLogger<MissionProjector>.Instance);
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
-        await projector.WhenAsync(new MissionCreated(new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window));
+        await projector.WhenAsync(
+            new MissionCreated(
+                new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window));
 
         var crewIds = new[] { new CrewMemberId(Guid.NewGuid()), new CrewMemberId(Guid.NewGuid()) };
+        
+        await crewService.CreateOrUpdateAsync(new CrewMember
+        {
+            CrewMemberId = crewIds[0].Value,
+            Name = "Alice",
+            Role = "Pilot",
+            CertificationLevels = ["Basic"],
+            Status = CrewMemberStatus.Assigned
+        });
+        
+        await crewService.CreateOrUpdateAsync(new CrewMember
+        {
+            CrewMemberId = crewIds[1].Value,
+            Name = "Bob",
+            Role = "Engineer",
+            CertificationLevels = ["Advanced"],
+            Status = CrewMemberStatus.Assigned
+        });
+        
         await projector.WhenAsync(new CrewAssigned(new MissionId(missionId), crewIds));
 
         var mission = (await service.GetByIdAsync(missionId))!;

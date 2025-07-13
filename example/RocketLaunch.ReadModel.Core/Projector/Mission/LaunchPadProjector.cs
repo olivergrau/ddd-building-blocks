@@ -1,5 +1,7 @@
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using DDD.BuildingBlocks.Core.Event;
 using Microsoft.Extensions.Logging;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Events.Mission;
@@ -56,7 +58,9 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
         if (pad == null)
         {
             _logger.LogWarning("No LaunchPad found assigned to mission {MissionId}", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"No LaunchPad found assigned to mission {@event.MissionId}",
+                ErrorClassification.NotFound);
         }
 
         pad.OccupiedWindows.RemoveAll(w => w.MissionId == @event.MissionId.Value);
@@ -75,7 +79,9 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
         if (pad == null)
         {
             _logger.LogWarning("LaunchPad not found for launched mission {MissionId}", @event.MissionId);
-            return;
+            throw new ReadModelException(
+                $"No LaunchPad found assigned to mission {@event.MissionId}",
+                ErrorClassification.NotFound);
         }
 
         pad.OccupiedWindows.RemoveAll(w => w.MissionId == @event.MissionId.Value);
