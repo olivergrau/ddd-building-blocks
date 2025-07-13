@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.InMemory.Service;
+using RocketLaunch.ReadModel.Core.Service;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
@@ -103,6 +105,25 @@ public class MissionProjectorTests
             projector.WhenAsync(
                 new CrewAssigned(
                     new MissionId(missionId),
-                    new[] { new CrewMemberId(Guid.NewGuid()) })));        
+                    new[] { new CrewMemberId(Guid.NewGuid()) })));
+    }
+
+    [Fact]
+    public async Task CreateOrUpdate_failure_throws_service_exception()
+    {
+        var crewService = new InMemoryCrewService(new InMemoryMissionService());
+        var projector = new MissionProjector(new FailingMissionService(), crewService, NullLogger<MissionProjector>.Instance);
+
+        var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
+
+        await Assert.ThrowsAsync<ReadModelServiceException>(() =>
+            projector.WhenAsync(new MissionCreated(new MissionId(Guid.NewGuid()), new MissionName("T"), new TargetOrbit("L"), new PayloadDescription("P"), window)));
+    }
+
+    private class FailingMissionService : IMissionService
+    {
+        public Task<Mission?> GetByIdAsync(Guid missionId) => Task.FromResult<Mission?>(null);
+        public Task<IEnumerable<Mission>> GetAllAsync() => Task.FromResult<IEnumerable<Mission>>(Array.Empty<Mission>());
+        public Task CreateOrUpdateAsync(Mission mission) => throw new Exception("fail");
     }
 }

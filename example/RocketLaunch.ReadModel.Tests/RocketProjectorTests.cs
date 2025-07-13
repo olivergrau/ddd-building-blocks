@@ -3,6 +3,8 @@ using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Projector;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.InMemory.Service;
+using RocketLaunch.ReadModel.Core.Service;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
@@ -56,5 +58,23 @@ public class RocketProjectorTests
         var rocket = (await service.GetByIdAsync(rocketId))!;
         Assert.Equal(RocketStatus.Available, rocket.Status);
         Assert.Null(rocket.AssignedMissionId);
+    }
+
+    [Fact]
+    public async Task CreateOrUpdate_failure_throws_service_exception()
+    {
+        var projector = new RocketProjector(new FailingRocketService(), NullLogger<RocketProjector>.Instance);
+        await Assert.ThrowsAsync<ReadModelServiceException>(() =>
+            projector.WhenAsync(new RocketAssigned(new MissionId(Guid.NewGuid()), new RocketId(Guid.NewGuid()), "R", 1, 1, 1)));
+    }
+
+    private class FailingRocketService : IRocketService
+    {
+        public Task<Rocket?> GetByIdAsync(Guid rocketId) => Task.FromResult<Rocket?>(null);
+        public Task<IEnumerable<Rocket>> GetAllAsync() => Task.FromResult<IEnumerable<Rocket>>(Array.Empty<Rocket>());
+        public Task<bool> IsAvailableAsync(Guid rocketId) => Task.FromResult(false);
+        public Task<IEnumerable<Rocket>> FindAvailableAsync(int minPayloadKg, int minCrewCapacity) => Task.FromResult<IEnumerable<Rocket>>(Array.Empty<Rocket>());
+        public Task<Rocket?> FindByAssignedMissionAsync(Guid missionId) => Task.FromResult<Rocket?>(null);
+        public Task CreateOrUpdateAsync(Rocket rocket) => throw new Exception("fail");
     }
 }

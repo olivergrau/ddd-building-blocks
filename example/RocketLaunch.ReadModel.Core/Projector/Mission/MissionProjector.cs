@@ -36,7 +36,14 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
             Status = SharedKernel.Enums.MissionStatus.Planned
         };
 
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(RocketAssigned @event)
@@ -51,7 +58,14 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
 
         mission.AssignedRocketId = @event.RocketId.Value;
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(LaunchPadAssigned @event)
@@ -69,7 +83,14 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         mission.LaunchWindowStart = @event.LaunchWindow.Start;
         mission.LaunchWindowEnd = @event.LaunchWindow.End;
 
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(CrewAssigned @event)
@@ -100,10 +121,24 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
             }
             
             member.Status = CrewMemberStatus.Assigned;
-            await _crewMemberService.CreateOrUpdateAsync(member);
+            try
+            {
+                await _crewMemberService.CreateOrUpdateAsync(member);
+            }
+            catch (Exception ex)
+            {
+                throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+            }
         }
 
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(MissionScheduled @event)
@@ -118,7 +153,14 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Scheduled;
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(MissionAborted @event)
@@ -133,7 +175,14 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Aborted;
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(MissionLaunched @event)
@@ -148,7 +197,14 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Launched;
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(MissionArrivedAtLunarOrbit @event)
@@ -163,6 +219,13 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
 
         mission.Status = SharedKernel.Enums.MissionStatus.Arrived;
-        await _missionService.CreateOrUpdateAsync(mission);
+        try
+        {
+            await _missionService.CreateOrUpdateAsync(mission);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 }

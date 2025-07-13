@@ -48,7 +48,14 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
             MissionId = @event.MissionId.Value
         });
 
-        await _padService.CreateOrUpdateAsync(pad);
+        try
+        {
+            await _padService.CreateOrUpdateAsync(pad);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(MissionAborted @event)
@@ -69,7 +76,14 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
             ? LaunchPadStatus.Available
             : LaunchPadStatus.Occupied;
 
-        await _padService.CreateOrUpdateAsync(pad);
+        try
+        {
+            await _padService.CreateOrUpdateAsync(pad);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
         
     public async Task WhenAsync(MissionLaunched @event)
@@ -87,6 +101,13 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
         pad.OccupiedWindows.RemoveAll(w => w.MissionId == @event.MissionId.Value);
         pad.Status = pad.OccupiedWindows.Count == 0 ? LaunchPadStatus.Available : LaunchPadStatus.Occupied;
 
-        await _padService.CreateOrUpdateAsync(pad);
+        try
+        {
+            await _padService.CreateOrUpdateAsync(pad);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 }

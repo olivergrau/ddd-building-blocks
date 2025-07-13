@@ -33,7 +33,14 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
 
             member.Status = CrewMemberStatus.Assigned;
-            await _crewService.CreateOrUpdateAsync(member);
+            try
+            {
+                await _crewService.CreateOrUpdateAsync(member);
+            }
+            catch (Exception ex)
+            {
+                throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+            }
         }
 
         public async Task WhenAsync(CrewMemberCertificationSet @event)
@@ -48,7 +55,14 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
 
             member.CertificationLevels = new List<string>(@event.Certifications);
-            await _crewService.CreateOrUpdateAsync(member);
+            try
+            {
+                await _crewService.CreateOrUpdateAsync(member);
+            }
+            catch (Exception ex)
+            {
+                throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+            }
         }
 
         public async Task WhenAsync(CrewMemberRegistered @event)
@@ -62,7 +76,14 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
                 Status = CrewMemberStatus.Available
             };
 
-            await _crewService.CreateOrUpdateAsync(member);
+            try
+            {
+                await _crewService.CreateOrUpdateAsync(member);
+            }
+            catch (Exception ex)
+            {
+                throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+            }
         }
 
         public async Task WhenAsync(CrewMemberReleased @event)
@@ -77,7 +98,14 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
 
             member.Status = CrewMemberStatus.Available;
-            await _crewService.CreateOrUpdateAsync(member);
+            try
+            {
+                await _crewService.CreateOrUpdateAsync(member);
+            }
+            catch (Exception ex)
+            {
+                throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+            }
         }
 
         public async Task WhenAsync(CrewMemberStatusSet @event)
@@ -98,7 +126,14 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
                 SharedKernel.Enums.CrewMemberStatus.Unavailable => CrewMemberStatus.Unavailable,
                 _ => CrewMemberStatus.Unknown
             };
-            await _crewService.CreateOrUpdateAsync(member);
+            try
+            {
+                await _crewService.CreateOrUpdateAsync(member);
+            }
+            catch (Exception ex)
+            {
+                throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+            }
         }
     }
 }

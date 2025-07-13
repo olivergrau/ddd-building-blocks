@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Projector.CrewMember;
 using RocketLaunch.ReadModel.InMemory.Service;
+using RocketLaunch.ReadModel.Core.Service;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.SharedKernel.Events.CrewMember;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
@@ -39,5 +41,29 @@ public class CrewMemberProjectorTests
 
         var member = (await service.GetByIdAsync(memberId))!;
         Assert.Equal(CrewMemberStatus.Assigned, member.Status);
+    }
+
+    [Fact]
+    public async Task CreateOrUpdate_failure_throws_service_exception()
+    {
+        var projector = new CrewMemberProjector(new FailingCrewService(), NullLogger<CrewMemberProjector>.Instance);
+
+        await Assert.ThrowsAsync<ReadModelServiceException>(() =>
+            projector.WhenAsync(
+                new CrewMemberRegistered(
+                    new CrewMemberId(Guid.NewGuid()),
+                    "X",
+                    SharedKernel.Enums.CrewRole.Commander,
+                    ["A"])));
+    }
+
+    private class FailingCrewService : ICrewMemberService
+    {
+        public Task<CrewMember?> GetByIdAsync(Guid id) => Task.FromResult<CrewMember?>(null);
+        public Task<IEnumerable<CrewMember>> GetAllAsync() => Task.FromResult<IEnumerable<CrewMember>>(Array.Empty<CrewMember>());
+        public Task<bool> IsAvailableAsync(Guid crewMemberId, string requiredRole) => Task.FromResult(false);
+        public Task<IEnumerable<CrewMember>> FindByAssignedMissionAsync(Guid missionId) => Task.FromResult<IEnumerable<CrewMember>>(Array.Empty<CrewMember>());
+        public Task<IEnumerable<CrewMember>> FindAvailableAsync(string role, string? certification = null) => Task.FromResult<IEnumerable<CrewMember>>(Array.Empty<CrewMember>());
+        public Task CreateOrUpdateAsync(CrewMember member) => throw new Exception("fail");
     }
 }

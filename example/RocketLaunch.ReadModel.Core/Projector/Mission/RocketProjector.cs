@@ -31,7 +31,14 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
         rocket.Status = RocketStatus.Assigned;
         rocket.AssignedMissionId = @event.MissionId.Value;
 
-        await _rocketService.CreateOrUpdateAsync(rocket);
+        try
+        {
+            await _rocketService.CreateOrUpdateAsync(rocket);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 
     public async Task WhenAsync(MissionAborted @event)
@@ -50,6 +57,13 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
         rocket.Status = RocketStatus.Available;
         rocket.AssignedMissionId = null;
 
-        await _rocketService.CreateOrUpdateAsync(rocket);
+        try
+        {
+            await _rocketService.CreateOrUpdateAsync(rocket);
+        }
+        catch (Exception ex)
+        {
+            throw new ReadModelServiceException(ex.Message, ErrorClassification.Infrastructure);
+        }
     }
 }
