@@ -5,6 +5,7 @@ using RocketLaunch.Application;
 using RocketLaunch.Application.Command.CrewMember;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.SharedKernel.Enums;
+using RocketLaunch.Api.Handler;
 
 namespace RocketLaunch.Api.Handler;
 
@@ -19,35 +20,35 @@ internal static class CrewMemberRequestHandler
         {
             var cmd = new RegisterCrewMemberCommand(request.CrewMemberId, request.Name, request.Role, request.Certifications);
             var result = await entry.ExecuteAsync(cmd);
-            return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
+            return result.ToApiResult();
         });
 
         group.MapPost("/{crewMemberId:guid}/assign", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId) =>
         {
             var cmd = new AssignCrewMemberCommand(crewMemberId);
             var result = await entry.ExecuteAsync(cmd);
-            return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
+            return result.ToApiResult();
         });
 
         group.MapPost("/{crewMemberId:guid}/release", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId) =>
         {
             var cmd = new ReleaseCrewMemberCommand(crewMemberId);
             var result = await entry.ExecuteAsync(cmd);
-            return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
+            return result.ToApiResult();
         });
 
         group.MapPost("/{crewMemberId:guid}/certifications", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, [FromBody] SetCrewMemberCertificationsRequest request) =>
         {
             var cmd = new SetCrewMemberCertificationsCommand(crewMemberId, request.Certifications);
             var result = await entry.ExecuteAsync(cmd);
-            return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
+            return result.ToApiResult();
         });
 
         group.MapPost("/{crewMemberId:guid}/status", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, [FromBody] SetCrewMemberStatusRequest request) =>
         {
             var cmd = new SetCrewMemberStatusCommand(crewMemberId, request.Status);
             var result = await entry.ExecuteAsync(cmd);
-            return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
+            return result.ToApiResult();
         });
 
         group.MapGet("/{crewMemberId:guid}", async ([FromServices] ICrewMemberService service, [FromRoute] Guid crewMemberId) =>
