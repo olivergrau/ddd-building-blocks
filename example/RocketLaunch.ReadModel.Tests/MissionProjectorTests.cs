@@ -20,7 +20,7 @@ public class MissionProjectorTests
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
         await projector.WhenAsync(new MissionCreated(new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window));
 
-        var mission = service.GetById(missionId)!;
+        var mission = (await service.GetByIdAsync(missionId))!;
         Assert.Equal("Test", mission.Name);
         Assert.Equal(MissionStatus.Planned, mission.Status);
         Assert.Equal(window.Start, mission.LaunchWindowStart);
@@ -38,7 +38,7 @@ public class MissionProjectorTests
         var crewIds = new[] { new CrewMemberId(Guid.NewGuid()), new CrewMemberId(Guid.NewGuid()) };
         await projector.WhenAsync(new CrewAssigned(new MissionId(missionId), crewIds));
 
-        var mission = service.GetById(missionId)!;
+        var mission = (await service.GetByIdAsync(missionId))!;
         Assert.Equal(2, mission.CrewMemberIds.Count);
         Assert.Contains(crewIds[0].Value, mission.CrewMemberIds);
         Assert.Contains(crewIds[1].Value, mission.CrewMemberIds);

@@ -8,36 +8,38 @@ namespace RocketLaunch.ReadModel.InMemory.Service
     {
         private readonly ConcurrentDictionary<Guid, Rocket> _rockets = new();
 
-        public Rocket? GetById(Guid rocketId)
+        public Task<Rocket?> GetByIdAsync(Guid rocketId)
         {
             _rockets.TryGetValue(rocketId, out var rocket);
-            return rocket;
+            return Task.FromResult(rocket);
         }
 
-        public IEnumerable<Rocket> GetAll()
+        public Task<IEnumerable<Rocket>> GetAllAsync()
         {
-            return _rockets.Values;
+            return Task.FromResult<IEnumerable<Rocket>>(_rockets.Values);
         }
 
-        public Rocket? FindByAssignedMission(Guid missionId)
+        public Task<Rocket?> FindByAssignedMissionAsync(Guid missionId)
         {
-            return _rockets.Values.FirstOrDefault(r => r.AssignedMissionId == missionId);
+            var rocket = _rockets.Values.FirstOrDefault(r => r.AssignedMissionId == missionId);
+            return Task.FromResult(rocket);
         }
-        
-        public bool IsAvailable(Guid rocketId)
+
+        public async Task<bool> IsAvailableAsync(Guid rocketId)
         {
-            var rocket = GetById(rocketId);
+            var rocket = await GetByIdAsync(rocketId);
             if (rocket == null)
                 return false;
             return rocket.Status == RocketStatus.Available;
         }
 
-        public IEnumerable<Rocket> FindAvailable(int minPayloadKg, int minCrewCapacity)
+        public Task<IEnumerable<Rocket>> FindAvailableAsync(int minPayloadKg, int minCrewCapacity)
         {
-            return _rockets.Values.Where(r =>
+            var result = _rockets.Values.Where(r =>
                 r.Status == RocketStatus.Available &&
                 r.PayloadCapacityKg >= minPayloadKg &&
                 r.CrewCapacity >= minCrewCapacity);
+            return Task.FromResult<IEnumerable<Rocket>>(result);
         }
 
         public Task CreateOrUpdateAsync(Rocket rocket)

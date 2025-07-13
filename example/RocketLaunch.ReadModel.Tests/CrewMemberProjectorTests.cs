@@ -20,7 +20,7 @@ public class CrewMemberProjectorTests
         var memberId = Guid.NewGuid();
         await projector.WhenAsync(new CrewMemberRegistered(new CrewMemberId(memberId), "Alice", SharedKernel.Enums.CrewRole.Commander, ["Flight"]));
 
-        var member = service.GetById(memberId)!;
+        var member = (await service.GetByIdAsync(memberId))!;
         Assert.Equal("Alice", member.Name);
         Assert.Equal(CrewMemberStatus.Available, member.Status);
     }
@@ -37,7 +37,7 @@ public class CrewMemberProjectorTests
 
         await projector.WhenAsync(new CrewMemberAssigned(new CrewMemberId(memberId)));
 
-        var member = service.GetById(memberId)!;
+        var member = (await service.GetByIdAsync(memberId))!;
         Assert.Equal(CrewMemberStatus.Assigned, member.Status);
     }
 }

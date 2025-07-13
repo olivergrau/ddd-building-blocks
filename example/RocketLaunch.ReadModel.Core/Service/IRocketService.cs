@@ -4,18 +4,18 @@ namespace RocketLaunch.ReadModel.Core.Service;
 
 public interface IRocketService
 {
-    Rocket? GetById(Guid rocketId);
-    IEnumerable<Rocket> GetAll();
+    Task<Rocket?> GetByIdAsync(Guid rocketId);
+    Task<IEnumerable<Rocket>> GetAllAsync();
 
     /// <summary>
     /// Returns true if the rocket is available (e.g., not assigned, not in maintenance)
     /// </summary>
-    bool IsAvailable(Guid rocketId);
+    Task<bool> IsAvailableAsync(Guid rocketId);
 
     /// <summary>
     /// Returns all available rockets with at least the given payload and crew capacity
     /// </summary>
-    IEnumerable<Rocket> FindAvailable(int minPayloadKg, int minCrewCapacity);
+    Task<IEnumerable<Rocket>> FindAvailableAsync(int minPayloadKg, int minCrewCapacity);
     
     /// <summary>
     /// Saves a new rocket to the read model
@@ -29,7 +29,7 @@ public interface IRocketService
     /// </summary>
     /// <param name="missionId"></param>
     /// <returns></returns>
-    Rocket? FindByAssignedMission(Guid missionId);
+    Task<Rocket?> FindByAssignedMissionAsync(Guid missionId);
 
 
 }

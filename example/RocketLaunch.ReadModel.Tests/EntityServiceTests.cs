@@ -14,7 +14,7 @@ public class EntityServiceTests
         await service.CreateOrUpdateAsync(new Rocket { RocketId = Guid.NewGuid(), Name = "A" });
         await service.CreateOrUpdateAsync(new Rocket { RocketId = Guid.NewGuid(), Name = "B" });
 
-        var all = service.GetAll().ToList();
+        var all = (await service.GetAllAsync()).ToList();
         Assert.Equal(2, all.Count);
         Assert.Contains(all, r => r.Name == "A");
         Assert.Contains(all, r => r.Name == "B");
@@ -27,7 +27,7 @@ public class EntityServiceTests
         await service.CreateOrUpdateAsync(new LaunchPad { LaunchPadId = Guid.NewGuid(), PadName = "P1" });
         await service.CreateOrUpdateAsync(new LaunchPad { LaunchPadId = Guid.NewGuid(), PadName = "P2" });
 
-        var all = service.GetAll().ToList();
+        var all = (await service.GetAllAsync()).ToList();
         Assert.Equal(2, all.Count);
         Assert.Contains(all, p => p.PadName == "P1");
         Assert.Contains(all, p => p.PadName == "P2");

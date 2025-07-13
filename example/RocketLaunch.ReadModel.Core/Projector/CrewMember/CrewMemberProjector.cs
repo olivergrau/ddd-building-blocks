@@ -21,7 +21,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
 
         public async Task WhenAsync(CrewMemberAssigned @event)
         {
-            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for assignment", @event.CrewMemberId);
@@ -34,7 +34,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
 
         public async Task WhenAsync(CrewMemberCertificationSet @event)
         {
-            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for certification update", @event.CrewMemberId);
@@ -61,7 +61,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
 
         public async Task WhenAsync(CrewMemberReleased @event)
         {
-            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for release", @event.CrewMemberId);
@@ -74,7 +74,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
 
         public async Task WhenAsync(CrewMemberStatusSet @event)
         {
-            var member = _crewService.GetById(@event.CrewMemberId.Value);
+            var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
             {
                 _logger.LogWarning("Crew member {CrewMemberId} not found for status change", @event.CrewMemberId);

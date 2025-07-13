@@ -8,20 +8,20 @@ namespace RocketLaunch.ReadModel.InMemory.Service
     {
         private readonly ConcurrentDictionary<Guid, LaunchPad> _pads = new();
 
-        public LaunchPad? GetById(Guid padId)
+        public Task<LaunchPad?> GetByIdAsync(Guid padId)
         {
             _pads.TryGetValue(padId, out var pad);
-            return pad;
+            return Task.FromResult(pad);
         }
 
-        public IEnumerable<LaunchPad> GetAll()
+        public Task<IEnumerable<LaunchPad>> GetAllAsync()
         {
-            return _pads.Values;
+            return Task.FromResult<IEnumerable<LaunchPad>>(_pads.Values);
         }
 
-        public bool IsAvailable(Guid padId, DateTime windowStart, DateTime windowEnd)
+        public async Task<bool> IsAvailableAsync(Guid padId, DateTime windowStart, DateTime windowEnd)
         {
-            var pad = GetById(padId);
+            var pad = await GetByIdAsync(padId);
             
             if (pad == null)
                 return true;
@@ -35,18 +35,20 @@ namespace RocketLaunch.ReadModel.InMemory.Service
             return !overlaps && pad.Status == LaunchPadStatus.Available;
         }
 
-        public LaunchPad? FindByAssignedMission(Guid missionId)
+        public Task<LaunchPad?> FindByAssignedMissionAsync(Guid missionId)
         {
-            return _pads.Values.FirstOrDefault(p =>
+            var pad = _pads.Values.FirstOrDefault(p =>
                 p.OccupiedWindows.Any(w => w.MissionId == missionId));
+            return Task.FromResult(pad);
         }
 
-        public IEnumerable<LaunchPad> FindAvailable(string rocketType, DateTime windowStart, DateTime windowEnd)
+        public Task<IEnumerable<LaunchPad>> FindAvailableAsync(string rocketType, DateTime windowStart, DateTime windowEnd)
         {
-            return _pads.Values.Where(p =>
+            var result = _pads.Values.Where(p =>
                 p.Status != LaunchPadStatus.UnderMaintenance &&
                 p.SupportedRocketTypes.Contains(rocketType) &&
                 !p.OccupiedWindows.Any(w => w.Start < windowEnd && windowStart < w.End));
+            return Task.FromResult<IEnumerable<LaunchPad>>(result);
         }
 
         public Task CreateOrUpdateAsync(LaunchPad pad)

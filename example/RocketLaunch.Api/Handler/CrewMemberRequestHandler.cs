@@ -50,13 +50,13 @@ internal static class CrewMemberRequestHandler
             return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
         });
 
-        group.MapGet("/{crewMemberId:guid}", ([FromServices] ICrewMemberService service, [FromRoute] Guid crewMemberId) =>
+        group.MapGet("/{crewMemberId:guid}", async ([FromServices] ICrewMemberService service, [FromRoute] Guid crewMemberId) =>
         {
-            var crew = service.GetById(crewMemberId);
+            var crew = await service.GetByIdAsync(crewMemberId);
             return crew is null ? Results.NotFound() : Results.Ok(crew);
         });
 
-        group.MapGet("/", ([FromServices] ICrewMemberService service) => Results.Ok(service.GetAll()));
+        group.MapGet("/", async ([FromServices] ICrewMemberService service) => Results.Ok(await service.GetAllAsync()));
     }
 }
 

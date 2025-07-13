@@ -16,7 +16,7 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
 
     public async Task WhenAsync(LaunchPadAssigned @event)
     {
-        var pad = _padService.GetById(@event.PadId.Value) ?? new LaunchPad
+        var pad = await _padService.GetByIdAsync(@event.PadId.Value) ?? new LaunchPad
         {
             LaunchPadId = @event.PadId.Value,
             PadName = @event.Name,
@@ -51,7 +51,7 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
 
     public async Task WhenAsync(MissionAborted @event)
     {
-        var pad = _padService.FindByAssignedMission(@event.MissionId.Value);
+        var pad = await _padService.FindByAssignedMissionAsync(@event.MissionId.Value);
 
         if (pad == null)
         {
@@ -70,7 +70,7 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
         
     public async Task WhenAsync(MissionLaunched @event)
     {
-        var pad = _padService.FindByAssignedMission(@event.MissionId.Value);
+        var pad = await _padService.FindByAssignedMissionAsync(@event.MissionId.Value);
 
         if (pad == null)
         {

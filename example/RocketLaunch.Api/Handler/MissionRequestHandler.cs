@@ -70,17 +70,17 @@ internal static class MissionRequestHandler
             return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.FailReason);
         });
 
-        group.MapGet("/{missionId:guid}", ([FromServices] IMissionService service, [FromRoute] Guid missionId) =>
+        group.MapGet("/{missionId:guid}", async ([FromServices] IMissionService service, [FromRoute] Guid missionId) =>
         {
-            var mission = service.GetById(missionId);
+            var mission = await service.GetByIdAsync(missionId);
             return mission is null ? Results.NotFound() : Results.Ok(mission);
         });
 
-        group.MapGet("/", ([FromServices] IMissionService service) => Results.Ok(service.GetAll()));
+        group.MapGet("/", async ([FromServices] IMissionService service) => Results.Ok(await service.GetAllAsync()));
 
-        group.MapGet("/rockets/{id:guid}", ([FromServices] IRocketService service, [FromRoute] Guid id) =>
+        group.MapGet("/rockets/{id:guid}", async ([FromServices] IRocketService service, [FromRoute] Guid id) =>
         {
-            var rocket = service.GetById(id);
+            var rocket = await service.GetByIdAsync(id);
             return rocket is null ? Results.NotFound() : Results.Ok(rocket);
         });
     }

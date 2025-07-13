@@ -10,20 +10,19 @@ internal static class EntityRequestHandler
         var group = app.MapGroup("entities")
             .WithTags("Entities");
 
-        group.MapGet("/rockets/{rocketId:guid}", ([FromServices] IRocketService service, [FromRoute] Guid rocketId) =>
+        group.MapGet("/rockets/{rocketId:guid}", async ([FromServices] IRocketService service, [FromRoute] Guid rocketId) =>
         {
-            var rocket = service.GetById(rocketId);
+            var rocket = await service.GetByIdAsync(rocketId);
             return rocket is null ? Results.NotFound() : Results.Ok(rocket);
         });
 
-        group.MapGet("/rockets", ([FromServices] IRocketService service) => Results.Ok(service.GetAll()));
+        group.MapGet("/rockets", async ([FromServices] IRocketService service) => Results.Ok(await service.GetAllAsync()));
 
-        group.MapGet("/launchpads/{padId:guid}", ([FromServices] ILaunchPadService service, [FromRoute] Guid padId) =>
+        group.MapGet("/launchpads/{padId:guid}", async ([FromServices] ILaunchPadService service, [FromRoute] Guid padId) =>
         {
-            var pad = service.GetById(padId);
+            var pad = await service.GetByIdAsync(padId);
             return pad is null ? Results.NotFound() : Results.Ok(pad);
         });
-
-        group.MapGet("/launchpads", ([FromServices] ILaunchPadService service) => Results.Ok(service.GetAll()));
+        group.MapGet("/launchpads", async ([FromServices] ILaunchPadService service) => Results.Ok(await service.GetAllAsync()));
     }
 }
