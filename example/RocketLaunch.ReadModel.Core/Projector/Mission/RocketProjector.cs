@@ -16,7 +16,7 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
 
     public async Task WhenAsync(RocketAssigned @event)
     {
-        var rocket = _rocketService.GetById(@event.RocketId.Value) ?? new Rocket
+        var rocket = await _rocketService.GetByIdAsync(@event.RocketId.Value) ?? new Rocket
         {
             RocketId = @event.RocketId.Value,
             Name = @event.Name,
@@ -35,7 +35,7 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
     public async Task WhenAsync(MissionAborted @event)
     {
         // Find the rocket that was assigned to this mission
-        var rocket = _rocketService.FindByAssignedMission(@event.MissionId.Value);
+        var rocket = await _rocketService.FindByAssignedMissionAsync(@event.MissionId.Value);
 
         if (rocket == null)
         {

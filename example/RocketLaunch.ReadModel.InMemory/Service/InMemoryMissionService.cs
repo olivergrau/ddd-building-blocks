@@ -8,15 +8,15 @@ public class InMemoryMissionService : IMissionService
 {
     private readonly ConcurrentDictionary<Guid, Mission> _missions = new();
 
-    public Mission? GetById(Guid missionId)
+    public Task<Mission?> GetByIdAsync(Guid missionId)
     {
         _missions.TryGetValue(missionId, out var mission);
-        return mission;
+        return Task.FromResult(mission);
     }
 
-    public IEnumerable<Mission> GetAll()
+    public Task<IEnumerable<Mission>> GetAllAsync()
     {
-        return _missions.Values;
+        return Task.FromResult<IEnumerable<Mission>>(_missions.Values);
     }
 
     public Task CreateOrUpdateAsync(Mission mission)

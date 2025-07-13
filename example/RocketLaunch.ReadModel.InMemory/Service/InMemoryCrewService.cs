@@ -9,43 +9,42 @@ namespace RocketLaunch.ReadModel.InMemory.Service
         private readonly ConcurrentDictionary<Guid, CrewMember> _crew = new();
         private readonly IMissionService _missionService = missionService;
 
-        public CrewMember? GetById(Guid id)
+        public Task<CrewMember?> GetByIdAsync(Guid id)
         {
             _crew.TryGetValue(id, out var member);
-            return member;
+            return Task.FromResult(member);
         }
 
-        public IEnumerable<CrewMember> GetAll()
+        public Task<IEnumerable<CrewMember>> GetAllAsync()
         {
-            return _crew.Values;
+            return Task.FromResult<IEnumerable<CrewMember>>(_crew.Values);
         }
 
-        public bool IsAvailable(Guid crewMemberId, string requiredRole)
+        public Task<bool> IsAvailableAsync(Guid crewMemberId, string requiredRole)
         {
             if (!_crew.TryGetValue(crewMemberId, out var member))
-                return false;
+                return Task.FromResult(false);
 
-            return member.Status == CrewMemberStatus.Available && member.Role == requiredRole;
+            return Task.FromResult(member.Status == CrewMemberStatus.Available && member.Role == requiredRole);
         }
 
-        public IEnumerable<CrewMember> FindByAssignedMission(Guid missionId)
+        public async Task<IEnumerable<CrewMember>> FindByAssignedMissionAsync(Guid missionId)
         {
-            var mission = _missionService.GetById(missionId);
+            var mission = await _missionService.GetByIdAsync(missionId);
             if (mission == null)
                 return Enumerable.Empty<CrewMember>();
 
-            return mission.CrewMemberIds
-                .Select(id => GetById(id))
-                .Where(m => m != null)
-                .Select(m => m!);
+            var members = await Task.WhenAll(mission.CrewMemberIds.Select(id => GetByIdAsync(id)));
+            return members.Where(m => m != null)!.Select(m => m!);
         }
 
-        public IEnumerable<CrewMember> FindAvailable(string role, string? certification = null)
+        public Task<IEnumerable<CrewMember>> FindAvailableAsync(string role, string? certification = null)
         {
-            return _crew.Values.Where(c =>
+            var result = _crew.Values.Where(c =>
                 c.Status == CrewMemberStatus.Available &&
                 c.Role == role &&
                 (certification == null || c.CertificationLevels.Contains(certification)));
+            return Task.FromResult<IEnumerable<CrewMember>>(result);
         }
 
         public Task CreateOrUpdateAsync(CrewMember member)

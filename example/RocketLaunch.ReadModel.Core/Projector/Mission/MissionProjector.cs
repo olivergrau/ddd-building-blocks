@@ -38,7 +38,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(RocketAssigned @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for RocketAssigned", @event.MissionId);
@@ -51,7 +51,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(LaunchPadAssigned @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for LaunchPadAssigned", @event.MissionId);
@@ -67,7 +67,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(CrewAssigned @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for CrewAssigned", @event.MissionId);
@@ -87,7 +87,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(MissionScheduled @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionScheduled", @event.MissionId);
@@ -100,7 +100,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(MissionAborted @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionAborted", @event.MissionId);
@@ -113,7 +113,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(MissionLaunched @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionLaunched", @event.MissionId);

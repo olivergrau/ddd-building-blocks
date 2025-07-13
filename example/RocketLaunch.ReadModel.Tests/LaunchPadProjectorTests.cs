@@ -32,7 +32,7 @@ public class LaunchPadProjectorTests
             new LaunchPadAssigned(
                 new MissionId(missionId), new LaunchPadId(padId), "Launch Pad M-1", "Cape Carnival", ["Falcon 9"], window));
 
-        var pad = service.GetById(padId)!;
+        var pad = (await service.GetByIdAsync(padId))!;
         Assert.Equal(LaunchPadStatus.Occupied, pad.Status);
         Assert.Single(pad.OccupiedWindows);
         var scheduled = pad.OccupiedWindows[0];
@@ -68,7 +68,7 @@ public class LaunchPadProjectorTests
 
         await projector.WhenAsync(new MissionAborted(new MissionId(missionId)));
 
-        var pad = service.GetById(padId)!;
+        var pad = (await service.GetByIdAsync(padId))!;
         Assert.Equal(LaunchPadStatus.Available, pad.Status);
         Assert.Empty(pad.OccupiedWindows);
     }
@@ -100,7 +100,7 @@ public class LaunchPadProjectorTests
 
         await projector.WhenAsync(new MissionLaunched(new MissionId(missionId)));
 
-        var pad = service.GetById(padId)
+        var pad = (await service.GetByIdAsync(padId))
             ?? throw new InvalidOperationException("Launch pad not found");
         Assert.Equal(LaunchPadStatus.Available, pad.Status);
         Assert.Empty(pad.OccupiedWindows);

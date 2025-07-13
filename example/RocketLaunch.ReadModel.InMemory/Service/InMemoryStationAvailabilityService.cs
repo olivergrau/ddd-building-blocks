@@ -11,22 +11,20 @@ namespace RocketLaunch.ReadModel.InMemory.Service
         ICrewMemberService crewService)
         : IResourceAvailabilityService
     {
-        public Task<bool> IsRocketAvailableAsync(RocketId rocketId, LaunchWindow window)
+        public async Task<bool> IsRocketAvailableAsync(RocketId rocketId, LaunchWindow window)
         {
-            return Task.FromResult(
-                rocketService.IsAvailable(rocketId.Value));
+            return await rocketService.IsAvailableAsync(rocketId.Value);
         }
 
-        public Task<bool> IsLaunchPadAvailableAsync(LaunchPadId padId, LaunchWindow window)
+        public async Task<bool> IsLaunchPadAvailableAsync(LaunchPadId padId, LaunchWindow window)
         {
-            return Task.FromResult(
-                padService.IsAvailable(padId.Value, window.Start, window.End));
+            return await padService.IsAvailableAsync(padId.Value, window.Start, window.End);
         }
 
-        public Task<bool> AreCrewMembersAvailableAsync(IEnumerable<CrewMemberId> crewIds, LaunchWindow window)
+        public async Task<bool> AreCrewMembersAvailableAsync(IEnumerable<CrewMemberId> crewIds, LaunchWindow window)
         {
-            return Task.FromResult(
-                !crewIds.Select(id => crewService.GetById(id.Value)).Any(member => member is not { Status: CrewMemberStatus.Available }));
+            var members = await Task.WhenAll(crewIds.Select(id => crewService.GetByIdAsync(id.Value)));
+            return members.All(member => member is { Status: CrewMemberStatus.Available });
         }
     }
 }

@@ -4,7 +4,7 @@ namespace RocketLaunch.ReadModel.Core.Service;
 
 public interface IMissionService
 {
-    Mission? GetById(Guid missionId);
-    IEnumerable<Mission> GetAll();
+    Task<Mission?> GetByIdAsync(Guid missionId);
+    Task<IEnumerable<Mission>> GetAllAsync();
     Task CreateOrUpdateAsync(Mission mission);
 }
