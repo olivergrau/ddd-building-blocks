@@ -134,4 +134,114 @@ This read model receives `OrderPlaced` events and stores a simplified view which
 
 ---
 
+## 5. Add multiple business methods
+
+Aggregates often require more than just one command. You can freely define **multiple business methods** that:
+
+* Enforce invariants and rules,
+* Emit domain events via `ApplyEvent(...)`,
+* Use injected services for domain-level validation (e.g. availability checks).
+
+Here’s a more advanced example using a `Mission` aggregate:
+
+```csharp
+public class Mission : AggregateRoot<MissionId>
+{
+    public MissionName Name { get; private set; }
+    public MissionStatus Status { get; private set; }
+    public RocketId? AssignedRocket { get; private set; }
+
+    public Mission(MissionId id, MissionName name)
+        : base(id)
+    {
+        ApplyEvent(new MissionCreated(id, name));
+    }
+
+    public async Task AssignRocketAsync(Rocket rocket, IResourceAvailabilityService validator)
+    {
+        if (Status != MissionStatus.Planned)
+            throw new AggregateValidationException(Id, nameof(Status), Status, "Can only assign rocket in Planned state");
+
+        if (!await validator.IsRocketAvailableAsync(rocket.Id))
+            throw new RuleValidationException(Id, "Rocket not available", $"RocketId: {rocket.Id}");
+
+        ApplyEvent(new RocketAssigned(Id, rocket.Id, CurrentVersion));
+    }
+
+    public void Schedule()
+    {
+        if (AssignedRocket is null)
+            throw new AggregateException(Id, "Rocket not assigned");
+        if (Status != MissionStatus.Planned)
+            throw new AggregateException(Id, "Already scheduled");
+
+        ApplyEvent(new MissionScheduled(Id, CurrentVersion));
+    }
+
+    [InternalEventHandler]
+    private void On(MissionCreated e)
+    {
+        Name = e.Name;
+        Status = MissionStatus.Planned;
+    }
+
+    [InternalEventHandler]
+    private void On(RocketAssigned e)
+    {
+        AssignedRocket = e.RocketId;
+    }
+
+    [InternalEventHandler]
+    private void On(MissionScheduled e)
+    {
+        Status = MissionStatus.Scheduled;
+    }
+
+    protected override MissionId GetIdFromStringRepresentation(string value) => new(Guid.Parse(value));
+}
+```
+
+> ✅ **Best practice**: Make each method express a business decision. Don’t use setters. Always enforce domain rules before emitting events.
+
+---
+
+## 6. Work with domain relations (referencing other aggregates)
+
+Sometimes you want to **refer to other aggregates** (e.g. `Rocket`, `CrewMember`, `LaunchPad`) **without loading them into memory**. For this, the framework provides `DomainRelation`.
+
+```csharp
+public List<DomainRelation> Crew { get; } = new();
+
+// Example: assigning crew members to a mission
+public async Task AssignCrewAsync(IEnumerable<CrewMemberId> crew, IResourceAvailabilityService validator)
+{
+    if (!await validator.AreCrewMembersAvailableAsync(crew))
+        throw new RuleValidationException(Id, "Crew not available");
+
+    ApplyEvent(new CrewAssigned(Id, crew, CurrentVersion));
+}
+
+[InternalEventHandler]
+private void On(CrewAssigned e)
+{
+    Crew.AddRange(e.Crew.Select(id => new DomainRelation(id.Value.ToString())));
+}
+```
+
+> 🧠 `DomainRelation` is a simple ValueObject wrapping another aggregate’s ID. This keeps aggregates clean and decoupled — especially useful in distributed or event-sourced systems.
+
+You can rehydrate `DomainRelation` later when projecting or querying, but **you don’t model foreign aggregate state inside your own**.
+
+---
+
+This completes the quickstart for advanced scenarios. You now know how to:
+
+* Define multiple business actions in one aggregate,
+* Keep aggregates clean and rule-driven,
+* Use domain relations instead of cross-aggregate loading.
+
+For deeper architectural guidance, refer to the [Tactical DDD Concepts Guide](./tactical_ddd_guide.md).
+
+---
+
 With these pieces in place you can quickly model domains with commands, aggregates and read models using the building blocks provided by this framework.
