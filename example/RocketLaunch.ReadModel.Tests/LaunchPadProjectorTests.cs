@@ -3,6 +3,8 @@ using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Projector;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.InMemory.Service;
+using RocketLaunch.ReadModel.Core.Service;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.ValueObjects;
 using Xunit;
@@ -104,5 +106,26 @@ public class LaunchPadProjectorTests
             ?? throw new InvalidOperationException("Launch pad not found");
         Assert.Equal(LaunchPadStatus.Available, pad.Status);
         Assert.Empty(pad.OccupiedWindows);
+    }
+
+    [Fact]
+    public async Task CreateOrUpdate_failure_throws_service_exception()
+    {
+        var projector = new LaunchPadProjector(new FailingPadService(), NullLogger<LaunchPadProjector>.Instance);
+        var missionId = Guid.NewGuid();
+        var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
+
+        await Assert.ThrowsAsync<ReadModelServiceException>(() =>
+            projector.WhenAsync(new LaunchPadAssigned(new MissionId(missionId), new LaunchPadId(Guid.NewGuid()), "Pad", "Loc", ["A"], window)));
+    }
+
+    private class FailingPadService : ILaunchPadService
+    {
+        public Task<LaunchPad?> GetByIdAsync(Guid padId) => Task.FromResult<LaunchPad?>(null);
+        public Task<IEnumerable<LaunchPad>> GetAllAsync() => Task.FromResult<IEnumerable<LaunchPad>>(Array.Empty<LaunchPad>());
+        public Task<bool> IsAvailableAsync(Guid padId, DateTime windowStart, DateTime windowEnd) => Task.FromResult(false);
+        public Task<IEnumerable<LaunchPad>> FindAvailableAsync(string rocketType, DateTime windowStart, DateTime windowEnd) => Task.FromResult<IEnumerable<LaunchPad>>(Array.Empty<LaunchPad>());
+        public Task<LaunchPad?> FindByAssignedMissionAsync(Guid missionId) => Task.FromResult<LaunchPad?>(null);
+        public Task CreateOrUpdateAsync(LaunchPad pad) => throw new Exception("fail");
     }
 }
