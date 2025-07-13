@@ -1,4 +1,7 @@
 using DDD.BuildingBlocks.Core.Commanding;
+using DDD.BuildingBlocks.Core.ErrorHandling;
+using DDD.BuildingBlocks.Core.Exception;
+using DDD.BuildingBlocks.Core.Exception.Constants;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using RocketLaunch.Application.Command;
 using RocketLaunch.Application.Command.CrewMember.Handler;
@@ -58,7 +61,27 @@ namespace RocketLaunch.Application
         public async Task<ICommandExecutionResult> ExecuteAsync<TCommand>(TCommand command)
             where TCommand : DDD.BuildingBlocks.Core.Commanding.Command
         {
-            return await _commandProcessor.ExecuteAsync(command);
+            var result = await _commandProcessor.ExecuteAsync(command);
+
+            if (result.IsSuccess || result.ResultException == null)
+            {
+                return result;
+            }
+
+            if (result.ResultException is ClassifiedErrorException)
+            {
+                var ce = (ClassifiedErrorException)result.ResultException;
+                return new CommandExecutionResult(false, ce.ErrorInfo.Message, ce);
+            }
+
+            ClassifiedErrorException wrapped = result.ResultException switch
+            {
+                NotFoundException nf => new ClassifiedErrorException(
+                    new ClassificationInfo(nf.Message, ErrorOrigin.ApplicationLevel, ErrorClassification.NotFound), nf),
+                _ => new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, result.ResultException)
+            };
+
+            return new CommandExecutionResult(false, wrapped.ErrorInfo.Message, wrapped);
         }
     }
 }
