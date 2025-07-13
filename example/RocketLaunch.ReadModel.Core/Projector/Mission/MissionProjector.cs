@@ -126,7 +126,7 @@ public class MissionProjector(IMissionService missionService, ILogger<MissionPro
 
     public async Task WhenAsync(MissionArrivedAtLunarOrbit @event)
     {
-        var mission = _missionService.GetById(@event.MissionId.Value);
+        var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
         {
             _logger.LogWarning("Mission {MissionId} not found for MissionArrivedAtLunarOrbit", @event.MissionId);
