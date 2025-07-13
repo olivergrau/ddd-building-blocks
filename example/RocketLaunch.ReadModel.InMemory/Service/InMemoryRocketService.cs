@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using DDD.BuildingBlocks.Core.ErrorHandling;
+using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.ReadModel.Core.Model;
 using RocketLaunch.ReadModel.Core.Service;
 
@@ -10,6 +12,9 @@ namespace RocketLaunch.ReadModel.InMemory.Service
 
         public Task<Rocket?> GetByIdAsync(Guid rocketId)
         {
+            if (rocketId == Guid.Empty)
+                throw new ReadModelServiceException("Invalid rocket id", ErrorClassification.InputDataError);
+
             _rockets.TryGetValue(rocketId, out var rocket);
             return Task.FromResult(rocket);
         }
@@ -21,12 +26,18 @@ namespace RocketLaunch.ReadModel.InMemory.Service
 
         public Task<Rocket?> FindByAssignedMissionAsync(Guid missionId)
         {
+            if (missionId == Guid.Empty)
+                throw new ReadModelServiceException("Invalid mission id", ErrorClassification.InputDataError);
+
             var rocket = _rockets.Values.FirstOrDefault(r => r.AssignedMissionId == missionId);
             return Task.FromResult(rocket);
         }
 
         public async Task<bool> IsAvailableAsync(Guid rocketId)
         {
+            if (rocketId == Guid.Empty)
+                throw new ReadModelServiceException("Invalid rocket id", ErrorClassification.InputDataError);
+
             var rocket = await GetByIdAsync(rocketId);
             if (rocket == null)
                 return true;
