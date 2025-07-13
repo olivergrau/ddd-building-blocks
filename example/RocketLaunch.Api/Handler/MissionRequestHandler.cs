@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using RocketLaunch.Application;
 using RocketLaunch.Application.Command.Mission;
 using RocketLaunch.Application.Dto;
@@ -73,16 +74,30 @@ internal static class MissionRequestHandler
 
         group.MapGet("/{missionId:guid}", async ([FromServices] IMissionService service, [FromRoute] Guid missionId) =>
         {
-            var mission = await service.GetByIdAsync(missionId);
-            return mission is null ? Results.NotFound() : Results.Ok(mission);
+            try
+            {
+                var mission = await service.GetByIdAsync(missionId);
+                return mission is null ? Results.NotFound() : Results.Ok(mission);
+            }
+            catch (ClassifiedErrorException ce)
+            {
+                return ce.ToApiResult();
+            }
         });
 
         group.MapGet("/", async ([FromServices] IMissionService service) => Results.Ok(await service.GetAllAsync()));
 
         group.MapGet("/rockets/{id:guid}", async ([FromServices] IRocketService service, [FromRoute] Guid id) =>
         {
-            var rocket = await service.GetByIdAsync(id);
-            return rocket is null ? Results.NotFound() : Results.Ok(rocket);
+            try
+            {
+                var rocket = await service.GetByIdAsync(id);
+                return rocket is null ? Results.NotFound() : Results.Ok(rocket);
+            }
+            catch (ClassifiedErrorException ce)
+            {
+                return ce.ToApiResult();
+            }
         });
     }
 }
