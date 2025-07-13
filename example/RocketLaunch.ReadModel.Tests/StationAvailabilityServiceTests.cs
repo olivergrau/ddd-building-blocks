@@ -81,7 +81,8 @@ public class StationAvailabilityServiceTests
     {
         var padService = new InMemoryLaunchPadService();
         var missionService = new InMemoryMissionService();
-        var sut = new InMemoryStationAvailabilityService(new InMemoryRocketService(), padService, new InMemoryCrewService(missionService));
+        var sut = new InMemoryStationAvailabilityService(
+            new InMemoryRocketService(), padService, new InMemoryCrewService(missionService));
 
         var padId = Guid.NewGuid();
         var window1 = new LaunchWindow(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2));

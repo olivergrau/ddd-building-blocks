@@ -13,24 +13,14 @@ namespace RocketLaunch.ReadModel.InMemory.Service
     {
         public Task<bool> IsRocketAvailableAsync(RocketId rocketId, LaunchWindow window)
         {
-            var rocket = rocketService.GetById(rocketId.Value);
-            return Task.FromResult(rocket is null or { Status: RocketStatus.Available });
+            return Task.FromResult(
+                rocketService.IsAvailable(rocketId.Value));
         }
 
         public Task<bool> IsLaunchPadAvailableAsync(LaunchPadId padId, LaunchWindow window)
         {
-            var pad = padService.GetById(padId.Value);
-            
-            if (pad == null || pad.Status == LaunchPadStatus.Available)
-                return Task.FromResult(true);
-            
-            if (pad.Status == LaunchPadStatus.UnderMaintenance)
-                return Task.FromResult(false);
-
-            var overlaps = pad.OccupiedWindows.Any(w =>
-                w.Start < window.End && window.Start < w.End);
-
-            return Task.FromResult(!overlaps);
+            return Task.FromResult(
+                padService.IsAvailable(padId.Value, window.Start, window.End));
         }
 
         public Task<bool> AreCrewMembersAvailableAsync(IEnumerable<CrewMemberId> crewIds, LaunchWindow window)

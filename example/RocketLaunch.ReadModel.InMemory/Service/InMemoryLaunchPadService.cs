@@ -22,10 +22,17 @@ namespace RocketLaunch.ReadModel.InMemory.Service
         public bool IsAvailable(Guid padId, DateTime windowStart, DateTime windowEnd)
         {
             var pad = GetById(padId);
-            if (pad == null || pad.Status == LaunchPadStatus.UnderMaintenance)
+            
+            if (pad == null)
+                return true;
+            
+            if (pad.Status == LaunchPadStatus.UnderMaintenance)
                 return false;
 
-            return !pad.OccupiedWindows.Any(w => w.Start < windowEnd && windowStart < w.End);
+            var overlaps = pad.OccupiedWindows.Any(w =>
+                w.Start < windowEnd && windowStart < w.End);
+
+            return !overlaps && pad.Status == LaunchPadStatus.Available;
         }
 
         public LaunchPad? FindByAssignedMission(Guid missionId)
