@@ -9,6 +9,7 @@ using RocketLaunch.ReadModel.Core.Service;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Xunit;
 
 namespace RocketLaunch.Api.Tests;
@@ -35,7 +36,7 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
     }
 
     [Fact]
-    public async Task MissionLifecycle_HappyPath()
+    public async Task MissionLifecycle_FullCycle()
     {
         var missionId = Guid.NewGuid();
         var rocketId = Guid.NewGuid();
@@ -127,13 +128,13 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         // wait a bit for projections
         await Task.Delay(1000);
 
-        //var mission = await _client.GetFromJsonAsync<Mission>($"/missions/{missionId}");
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
         
-        var response = await _client.GetAsync($"/missions/{missionId}");
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        var mission = JsonSerializer.Deserialize<Mission>(json);
-
+        var mission = await _client.GetFromJsonAsync<Mission>($"/missions/{missionId}", options);
         
         Assert.NotNull(mission);
         Assert.Equal(MissionStatus.Arrived, mission!.Status);
@@ -148,27 +149,6 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         var missionId = Guid.NewGuid();
         var rocketId = Guid.NewGuid();
         var padId = Guid.NewGuid();
-
-        var rocketService = _factory.Services.GetRequiredService<IRocketService>();
-        await rocketService.CreateOrUpdateAsync(new Rocket
-        {
-            RocketId = rocketId,
-            Name = "Falcon",
-            ThrustCapacity = 7600,
-            PayloadCapacityKg = 22800,
-            CrewCapacity = 7,
-            Status = ReadModelRocketStatus.Available
-        });
-
-        var padService = _factory.Services.GetRequiredService<ILaunchPadService>();
-        await padService.CreateOrUpdateAsync(new LaunchPad
-        {
-            LaunchPadId = padId,
-            PadName = "Pad",
-            Location = "Cape",
-            SupportedRocketTypes = new List<string> { "Falcon" },
-            Status = ReadModelLaunchPadStatus.Available
-        });
 
         // register mission
         var registerMission = new
@@ -213,17 +193,23 @@ public class MissionEndpointsTests : IClassFixture<RocketLaunchApiFactory>
         // abort
         var abortResp = await _client.PostAsync($"/missions/{missionId}/abort", null);
         abortResp.EnsureSuccessStatusCode();
-        await Task.Delay(100);
-
-        var mission = await _client.GetFromJsonAsync<Mission>($"/missions/{missionId}");
+        await Task.Delay(1000);
+        
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+        
+        var mission = await _client.GetFromJsonAsync<Mission>($"/missions/{missionId}", options);
         Assert.NotNull(mission);
         Assert.Equal(MissionStatus.Aborted, mission!.Status);
 
-        var rocket = await _client.GetFromJsonAsync<Rocket>($"/entities/rockets/{rocketId}");
+        var rocket = await _client.GetFromJsonAsync<Rocket>($"/entities/rockets/{rocketId}", options);
         Assert.NotNull(rocket);
         Assert.Equal(ReadModelRocketStatus.Available, rocket!.Status);
 
-        var pad = await _client.GetFromJsonAsync<LaunchPad>($"/entities/launchpads/{padId}");
+        var pad = await _client.GetFromJsonAsync<LaunchPad>($"/entities/launchpads/{padId}", options);
         Assert.NotNull(pad);
         Assert.Equal(ReadModelLaunchPadStatus.Available, pad!.Status);
     }
