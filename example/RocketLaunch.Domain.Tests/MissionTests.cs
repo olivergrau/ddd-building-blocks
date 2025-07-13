@@ -4,6 +4,8 @@ using DDD.BuildingBlocks.Core.Exception;
 using RocketLaunch.Domain.Model;
 using RocketLaunch.Domain.Model.Entities;
 using RocketLaunch.Domain.Tests.Mocks;
+using RocketLaunch.ReadModel.Core.Exceptions;
+using DDD.BuildingBlocks.Core.ErrorHandling;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.Events;
 using RocketLaunch.SharedKernel.Events.Mission;
@@ -388,6 +390,76 @@ namespace RocketLaunch.Domain.Tests
             Assert.Contains("Crew not available", ex.Message);
             Assert.Empty(mission.GetUncommittedChanges());
             Assert.Empty(mission.Crew);
+        }
+
+        [Fact]
+        public async Task AssignRocket_When_Service_Fails_Should_Bubble_Up()
+        {
+            var mission = NewPlannedMission(out _);
+            var rocket = NewRocket(out _);
+            var failing = new FailingAvailabilityService(FailMode.Rocket);
+
+            await Assert.ThrowsAsync<ReadModelServiceException>(() => mission.AssignRocketAsync(rocket, failing));
+        }
+
+        [Fact]
+        public async Task AssignLaunchPad_When_Service_Fails_Should_Bubble_Up()
+        {
+            var mission = NewPlannedMission(out _);
+            var rocket = NewRocket(out _);
+            await mission.AssignRocketAsync(rocket, new StubResourceAvailabilityService());
+            mission.MarkChangesAsCommitted();
+
+            var pad = NewLaunchPad(out _);
+            var failing = new FailingAvailabilityService(FailMode.Pad);
+
+            await Assert.ThrowsAsync<ReadModelServiceException>(() => mission.AssignLaunchPadAsync(pad, failing));
+        }
+
+        [Fact]
+        public async Task AssignCrew_When_Service_Fails_Should_Bubble_Up()
+        {
+            var mission = NewPlannedMission(out _);
+            var rocket = NewRocket(out _);
+            await mission.AssignRocketAsync(rocket, new StubResourceAvailabilityService());
+            var pad = NewLaunchPad(out _);
+            await mission.AssignLaunchPadAsync(pad, new StubResourceAvailabilityService());
+            mission.MarkChangesAsCommitted();
+
+            var crew = new[] { new CrewMemberId(Guid.NewGuid()) };
+            var failing = new FailingAvailabilityService(FailMode.Crew);
+
+            await Assert.ThrowsAsync<ReadModelServiceException>(() => mission.AssignCrewAsync(crew, failing));
+        }
+
+        private enum FailMode { Rocket, Pad, Crew }
+
+        private class FailingAvailabilityService : IResourceAvailabilityService
+        {
+            private readonly FailMode _mode;
+
+            public FailingAvailabilityService(FailMode mode) => _mode = mode;
+
+            public Task<bool> IsRocketAvailableAsync(RocketId rocketId, LaunchWindow window)
+            {
+                if (_mode == FailMode.Rocket)
+                    throw new ReadModelServiceException("fail", ErrorClassification.TransientFailure);
+                return Task.FromResult(true);
+            }
+
+            public Task<bool> IsLaunchPadAvailableAsync(LaunchPadId padId, LaunchWindow window)
+            {
+                if (_mode == FailMode.Pad)
+                    throw new ReadModelServiceException("fail", ErrorClassification.TransientFailure);
+                return Task.FromResult(true);
+            }
+
+            public Task<bool> AreCrewMembersAvailableAsync(IEnumerable<CrewMemberId> crewIds, LaunchWindow window)
+            {
+                if (_mode == FailMode.Crew)
+                    throw new ReadModelServiceException("fail", ErrorClassification.TransientFailure);
+                return Task.FromResult(true);
+            }
         }
     }
 }
