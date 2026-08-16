@@ -1,4 +1,3 @@
-﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +5,7 @@ namespace DDD.BuildingBlocks.Core.Domain
 {
     public abstract class ValueObject<T> where T : ValueObject<T>
     {
-        protected abstract IEnumerable<object> GetAttributesToIncludeInEqualityCheck();
+        protected abstract IEnumerable<object?> GetAttributesToIncludeInEqualityCheck();
 
         public override bool Equals(object? other)
         {
@@ -21,7 +20,7 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         public static bool operator ==(ValueObject<T>? left, ValueObject<T>? right)
         {
-            return StructuralComparisons.StructuralEqualityComparer.Equals(left, right);
+            return Equals(left, right);
         }
 
         public static bool operator !=(ValueObject<T>? left, ValueObject<T>? right)
@@ -32,7 +31,7 @@ namespace DDD.BuildingBlocks.Core.Domain
         public override int GetHashCode()
         {
             return GetAttributesToIncludeInEqualityCheck().Aggregate(17,
-                (current, obj) => current * 31 + obj.GetHashCode());
+                (current, obj) => current * 31 + (obj?.GetHashCode() ?? 0));
         }
     }
 }

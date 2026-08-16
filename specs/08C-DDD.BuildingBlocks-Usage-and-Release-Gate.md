@@ -16,7 +16,7 @@ DDD.BuildingBlocks is used as a tactical DDD foundation and is specifically mode
 
 In particular, the following are taken over:
 
-- `Entity`, `EntityId`, `ValueObject`, and `EventSourcedAggregateRoot`;
+- `Entity`, `EntityId`, `ValueObject`, and `AggregateRoot`;
 - event-sourced domain aggregates with explicit stream semantics;
 - Command and event processing;
 - Provider interfaces;
@@ -50,9 +50,9 @@ F0 reproduce the baseline
 
 ### Tactical model
 
-- event-sourcing semantics are explicit in `EventSourcedAggregateRoot<TKey>`;
+- event-sourcing semantics are explicit in `AggregateRoot<TKey>`;
 - no conventional or plain aggregate-root abstraction dilutes the framework contract;
-- the intentional `AggregateRoot<TKey>` rename is covered by migration guidance;
+- the retained `AggregateRoot<TKey>` name is documented as the single event-sourced root model;
 - uncommitted events and replay are encapsulated;
 - Apply is deterministic;
 - Version semantics are documented;

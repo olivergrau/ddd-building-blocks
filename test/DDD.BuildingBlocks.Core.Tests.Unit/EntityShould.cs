@@ -2,11 +2,14 @@
 {
     using System;
     using FluentAssertions;
+    using DDD.BuildingBlocks.Core.Domain;
     using DDD.BuildingBlocks.Tests.Abstracts.Model;
     using Xunit;
 
     public class EntityShould
 	{
+		private sealed class DifferentEntity(OrderId id) : Entity<OrderId>(id);
+
 		[Fact(DisplayName = "Return false when compared with different entity instance")]
 		[Trait("Category", "Unittest")]
 		public void Return_false_when_compared_with_different_entity_instance()
@@ -52,6 +55,17 @@
 
 			// Assert
 			result.Should().BeTrue();
+		}
+
+		[Fact(DisplayName = "Return false for a different entity type with the same identifier")]
+		[Trait("Category", "Unittest")]
+		public void Return_false_for_a_different_entity_type_with_the_same_identifier()
+		{
+			var id = new OrderId(Guid.NewGuid().ToString());
+			var order = new Order(id.ToString(), "Title", "Comment", OrderState.Open);
+			var other = new DifferentEntity(id);
+
+			order.Equals(other).Should().BeFalse();
 		}
 
 		[Fact(DisplayName = "Return different hash codes when compared with non equal entity instance")]

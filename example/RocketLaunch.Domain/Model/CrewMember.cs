@@ -14,7 +14,7 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     public CrewMember(CrewMemberId id, string name, CrewRole role, IEnumerable<string> certifications)
         : base(id)
     {
-        ApplyEvent(new CrewMemberRegistered(id, name, role, certifications));
+        RaiseEvent(new CrewMemberRegistered(id, name, role, certifications));
     }
 
     // For rehydration
@@ -30,24 +30,24 @@ public class CrewMember : AggregateRoot<CrewMemberId>
         if (Status != CrewMemberStatus.Available)
             throw new Exception("Crew member is not available");
 
-        ApplyEvent(new CrewMemberAssigned(Id, CurrentVersion));
+        RaiseEvent(new CrewMemberAssigned(Id, CurrentVersion));
     }
 
     public void Release()
     {
-        ApplyEvent(new CrewMemberReleased(Id, CurrentVersion));
+        RaiseEvent(new CrewMemberReleased(Id, CurrentVersion));
     }
 
     public void SetCertifications(IEnumerable<string> certifications)
     {
-        ApplyEvent(new CrewMemberCertificationSet(Id,
+        RaiseEvent(new CrewMemberCertificationSet(Id,
             certifications ?? throw new ArgumentNullException(nameof(certifications)),
             CurrentVersion));
     }
 
     public void SetStatus(CrewMemberStatus status)
     {
-        ApplyEvent(new CrewMemberStatusSet(Id, status, CurrentVersion));
+        RaiseEvent(new CrewMemberStatusSet(Id, status, CurrentVersion));
     }
 
     // Event handlers

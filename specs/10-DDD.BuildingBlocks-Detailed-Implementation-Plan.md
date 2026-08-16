@@ -2,8 +2,8 @@
 
 ## Detailed implementation plan for modernization and playground release
 
-**Status:** ACTIVE — F1 complete; F2 architecture decided  
-**Version:** 1.1  
+**Status:** ACTIVE — F2 implemented; awaiting Gate G2 review
+**Version:** 1.2
 **Date:** 2026-08-16  
 **Initial status:** Commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
 
@@ -159,10 +159,9 @@ For `Entity`, `EntityId`, `ValueObject`, Aggregate Roots, Domain Errors and even
 - Reflection assumptions;
 - known consumers in examples and tests.
 
-### F2.2 Explicit Event-Sourced Aggregate Root
+### F2.2 Aggregate Root Contract
 
-- Rename `AggregateRoot<TKey>` to `EventSourcedAggregateRoot<TKey>` immediately;
-- treat the rename as an intentional breaking change and document consumer migration;
+- retain the established `AggregateRoot<TKey>` name as the single event-sourced aggregate-root model;
 - do not add `ConventionalAggregateRoot<TKey>` or `PlainAggregateRoot<TKey>`;
 - do not add a marker-only `IAggregateRoot<TKey>` without a concrete consumer;
 - keep relational projections and technical or operational state outside the aggregate-root model;
@@ -170,14 +169,14 @@ For `Entity`, `EntityId`, `ValueObject`, Aggregate Roots, Domain Errors and even
 - unchangeably expose uncommitted events;
 - Fully validate apply handler;
 - Clearly define `NoStream` and first version;
-- Prepare version range to `long`;
+- document and prepare the coordinated migration of stream versions to `long`; do not create a mixed core/provider contract before Gate G2;
 - Clear-Uncommitted only after a successful commit;
 - no infrastructure or serializer dependency.
 
 ### F2.3 Tests
 
 - Equality and typed IDs;
-- migration of known consumers to `EventSourcedAggregateRoot<TKey>`;
+- existing consumers continue to compile against `AggregateRoot<TKey>`;
 - new event is applied exactly once;
 - Replay does not generate uncommitted events;
 - missing apply handler clearly fails;

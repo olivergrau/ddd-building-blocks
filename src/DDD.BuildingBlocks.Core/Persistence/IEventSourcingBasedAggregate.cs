@@ -15,7 +15,7 @@ public interface IEventSourcingBasedAggregate
     StreamState GetStreamState();
     
     bool HasUncommittedChanges();
-    
+
     IEnumerable<IDomainEvent> GetUncommittedChanges();
     
     void MarkChangesAsCommitted();

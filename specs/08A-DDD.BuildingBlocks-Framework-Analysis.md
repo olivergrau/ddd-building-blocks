@@ -110,7 +110,7 @@ This is a good starting point for controlled modernization.
 |---|---|---|---|
 | Tactical DDD Types | available | suitable | Gently modernize API |
 | Event-sourced Aggregates | available | suitable with changes | Harden metadata, type identity, versioning |
-| Event-sourced aggregate naming | generic `AggregateRoot<TKey>` name | misleading | rename to `EventSourcedAggregateRoot<TKey>` now |
+| Aggregate-root naming | `AggregateRoot<TKey>` is the only root type | suitable | retain the established public name |
 | Conventional aggregate abstraction | not available | intentionally unnecessary | keep the framework focused on event-sourced domain aggregates |
 | Optimistic Concurrency | available | usable | make atomic provider testing mandatory |
 | Uncommitted Events | available | suitable | ensure immutable exposure |
@@ -132,17 +132,17 @@ This is a good starting point for controlled modernization.
 
 ## 6. Key technical risks and solutions
 
-### F-01: `AggregateRoot<TKey>` hides its event-sourcing semantics
+### F-01: `AggregateRoot<TKey>` represents the framework's event-sourced aggregate model
 
-The existing `AggregateRoot<TKey>` necessarily implements `IEventSourcingBasedAggregate`. Its generic name obscures the fact that every derived aggregate is reconstructed and persisted through an event stream.
+The existing `AggregateRoot<TKey>` implements `IEventSourcingBasedAggregate`. Every genuine domain aggregate supported by this focused framework is reconstructed and persisted through an event stream.
 
-**Impact:** The name encourages consumers to treat the type as a persistence-neutral aggregate root even though its versioning, replay, and commit behavior are event-sourcing-specific.
+**Impact:** No ambiguity remains once conventional aggregate persistence is outside the framework scope. Introducing a second name would create migration cost without distinguishing two supported root models.
 
-**Decision:** Rename it directly to `EventSourcedAggregateRoot<TKey>`. This is an intentional breaking change made before a stable 1.0 API. Do not introduce `ConventionalAggregateRoot<TKey>`, `PlainAggregateRoot<TKey>`, or a marker-only `IAggregateRoot<TKey>` without a demonstrated framework use case.
+**Decision:** Keep the established `AggregateRoot<TKey>` name. Do not introduce `ConventionalAggregateRoot<TKey>`, `PlainAggregateRoot<TKey>`, or a marker-only `IAggregateRoot<TKey>` without a demonstrated framework use case.
 
 ```text
 Entity<TKey>
-  └── EventSourcedAggregateRoot<TKey>
+  └── AggregateRoot<TKey>
 ```
 
 All genuine Playground domain aggregates use this event-sourced model. Relational tables remain valid for projections, checkpoints, operational state, and other data that is not an aggregate source of truth.
@@ -270,7 +270,7 @@ Should be specifically replaced or expanded:
 - Projection Dispatch, Checkpoints and Rebuild;
 - Cancellation;
 - DI integration;
-- explicit `EventSourcedAggregateRoot<TKey>` naming and migration guidance;
+- explicit documentation of the event-sourced `AggregateRoot<TKey>` contract;
 - serialization;
 - Time and version semantics.
 

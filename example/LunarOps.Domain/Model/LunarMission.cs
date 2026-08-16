@@ -46,7 +46,7 @@ namespace LunarOps.Domain.Model
             if (!validator.HasSupportedVehicleTypeAsync(assignedStationId, vehicleType).GetAwaiter().GetResult())
                 throw new RuleValidationException(missionId, "Station has no support for the vehicle type");
 
-            ApplyEvent(new LunarMissionRegistered(
+            RaiseEvent(new LunarMissionRegistered(
                 missionId,
                 arrivalTime,
                 vehicleType,
@@ -68,7 +68,7 @@ namespace LunarOps.Domain.Model
             if (Status != LunarMissionStatus.Registered)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Only registered missions can assign a docking port.");
 
-            ApplyEvent(new DockingPortAssigned(Id, portId, CurrentVersion));
+            RaiseEvent(new DockingPortAssigned(Id, portId, CurrentVersion));
         }
 
         public void CompleteDocking()
@@ -79,7 +79,7 @@ namespace LunarOps.Domain.Model
             if (Status != LunarMissionStatus.DockingScheduled)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Only docking-scheduled missions can complete docking.");
 
-            ApplyEvent(new LunarMissionDocked(Id, CurrentVersion));
+            RaiseEvent(new LunarMissionDocked(Id, CurrentVersion));
         }
         
         public void UnloadPayload()
@@ -91,7 +91,7 @@ namespace LunarOps.Domain.Model
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Mission must be docked before unloading payload.");
 
             var payloads = PayloadManifest.Select(p => new LunarPayload(p.Item, p.Mass, "Unknown")).ToList(); // fix if DestinationArea exists
-            ApplyEvent(new PayloadUnloaded(Id, payloads, CurrentVersion));
+            RaiseEvent(new PayloadUnloaded(Id, payloads, CurrentVersion));
         }
         
         public void TransferCrew(IEnumerable<LunarCrewMemberId> crewIds)
@@ -102,7 +102,7 @@ namespace LunarOps.Domain.Model
             if (Status != LunarMissionStatus.Docked && Status != LunarMissionStatus.PayloadUnloaded)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Mission must be docked to transfer crew.");
 
-            ApplyEvent(new CrewTransferred(Id, crewIds, CurrentVersion));
+            RaiseEvent(new CrewTransferred(Id, crewIds, CurrentVersion));
         }
         
         public void MarkInService()
@@ -113,7 +113,7 @@ namespace LunarOps.Domain.Model
             if (Status != LunarMissionStatus.ReadyForService)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Mission must have transferred crew and unloaded payload before marking as in-service.");
 
-            ApplyEvent(new LunarMissionInService(Id, CurrentVersion));
+            RaiseEvent(new LunarMissionInService(Id, CurrentVersion));
         }
         
         public void Depart()
@@ -121,7 +121,7 @@ namespace LunarOps.Domain.Model
             if (Status != LunarMissionStatus.InService)
                 throw new AggregateValidationException(Id, nameof(Status), Status, "Mission is not in service and cannot depart.");
 
-            ApplyEvent(new LunarMissionDeparted(Id, CurrentVersion));
+            RaiseEvent(new LunarMissionDeparted(Id, CurrentVersion));
         }
 
         // Event Handlers

@@ -5,6 +5,7 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Attribute;
     using FluentAssertions;
     using Domain;
     using Event;
@@ -404,6 +405,32 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
 			uncommittedChanges.Should().BeEmpty();
 		}
 
+        [Fact(DisplayName = "Expose uncommitted changes as a read-only snapshot")]
+        [Trait("Category", "Unittest")]
+        public void Expose_uncommitted_changes_as_a_read_only_snapshot()
+        {
+            var aggregateRoot = new Order(Guid.NewGuid().ToString(), _defaultTitle, _defaultComment, OrderState.Open);
+            var changes = aggregateRoot.UncommittedChanges;
+
+            Action mutate = () => ((IList<IDomainEvent>)changes).Clear();
+
+            mutate.Should().Throw<NotSupportedException>();
+            aggregateRoot.UncommittedChanges.Should().ContainSingle();
+        }
+
+        [Fact(DisplayName = "Reject replay while uncommitted changes exist")]
+        [Trait("Category", "Unittest")]
+        public void Reject_replay_while_uncommitted_changes_exist()
+        {
+            var aggregateRoot = new Order(Guid.NewGuid().ToString(), _defaultTitle, _defaultComment, OrderState.Open);
+            var history = CreateEventListForOrder(Guid.NewGuid(), "Comment", "Title");
+
+            Action replay = () => aggregateRoot.ReplayEvents(history);
+
+            replay.Should().Throw<InvalidOperationException>();
+            aggregateRoot.UncommittedChanges.Should().ContainSingle();
+        }
+
 		[Fact(DisplayName = "Have no new uncommitted changes after a snapshot was taken")]
 		[Trait("Category", "Unittest")]
 		public void Have_no_new_uncommitted_changes_after_a_snapshot_was_taken()
@@ -489,6 +516,9 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
 			var aggregateRoot = new Order();
 			Action action = () => aggregateRoot.ReplayEvents(eventList);
 			action.Should().Throw<AggregateEventOnApplyMethodMissingException>();
+			aggregateRoot.CurrentVersion.Should().Be(2);
+			aggregateRoot.LastCommittedVersion.Should().Be(-1);
+			aggregateRoot.UncommittedChanges.Should().BeEmpty();
 		}
 
 		[Fact(DisplayName = "Return correct last committed version when events have been applied")]
@@ -518,6 +548,35 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
 
             aggregateRoot.Id.Should().Be(lookupKey);
             aggregateRoot.Id.Should().Be(StringBasedEntityKey.GetNewId("myid"));
+        }
+
+        [Fact(DisplayName = "Reject duplicate event handlers when aggregate metadata is initialized")]
+        [Trait("Category", "Unittest")]
+        public void Reject_duplicate_event_handlers_when_aggregate_metadata_is_initialized()
+        {
+            Action action = () => _ = new AggregateWithDuplicateHandlers();
+
+            action.Should().Throw<AggregateEventHandlerConfigurationException>()
+                .WithMessage("*Multiple methods found handling same event*");
+        }
+
+        private sealed class AggregateWithDuplicateHandlers()
+            : AggregateRoot<StringBasedEntityKey>(StringBasedEntityKey.GetNewId("duplicate-handler-test"))
+        {
+            protected override EntityId<StringBasedEntityKey> GetIdFromStringRepresentation(string value)
+            {
+                return StringBasedEntityKey.GetNewId(value);
+            }
+
+            [InternalEventHandler]
+            private void ApplyFirst(OrderCreatedEvent @event)
+            {
+            }
+
+            [InternalEventHandler]
+            private void ApplySecond(OrderCreatedEvent @event)
+            {
+            }
         }
 
 		private static List<IDomainEvent> CreateEventListForOrder(Guid orderId, string changedComment, string changedTitle)

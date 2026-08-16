@@ -26,7 +26,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 
         public AggregateWithStringBasedKey(StringBasedEntityKey key) : base(key)
         {
-            ApplyEvent(new AggregateACreationEvent(key));
+            RaiseEvent(new AggregateACreationEvent(key));
         }
 
         [InternalEventHandler]

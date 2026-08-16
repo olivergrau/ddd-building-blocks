@@ -10,9 +10,8 @@
 - Branch: `modernization-2026`.
 - F0 is complete and its gate was approved.
 - F1 is implemented, verified, and approved at Gate G1.
-- The F2 architecture is decided; no F2 implementation has started yet.
-- Do not start F2 implementation until the user explicitly requests it.
-- Agreed F2 direction: rename the existing `AggregateRoot<TKey>` to `EventSourcedAggregateRoot<TKey>` as an intentional breaking change.
+- F2 is implemented and verified; Gate G2 is awaiting explicit approval.
+- Agreed F2 direction: keep the existing `AggregateRoot<TKey>` name because the framework supports only event-sourced domain aggregates.
 - Do not introduce `ConventionalAggregateRoot<TKey>` or `PlainAggregateRoot<TKey>`; DDD.BuildingBlocks remains focused on event-sourced domain aggregates.
 - Do not introduce a marker-only `IAggregateRoot<TKey>` without a concrete consumer.
 - Playground domain aggregates use event sourcing; relational persistence is reserved for projections and non-aggregate technical or operational state.
@@ -28,12 +27,15 @@
 - Removed the obsolete runtime roll-forward workaround.
 - Verified public API compatibility against F0 commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`; no breaking changes were found.
 - Organized and translated all specifications into English.
+- Hardened tactical domain primitives: runtime-type-aware entity equality, null-safe value-object equality, explicit `RaiseEvent` semantics, protected replay boundaries, immutable uncommitted-event snapshots, and validated event-handler metadata.
+- Preserved the public `AggregateRoot<TKey>` and `ApplyEvent` APIs; the latter remains as a compatibility alias while known consumers use `RaiseEvent`.
+- Documented the coordinated post-G2 migration boundary from `int` to `long` stream versions across event, snapshot, provider, and storage contracts.
 
 ## Verification status
 
 - Restore succeeds.
 - Build succeeds with zero warnings and zero errors.
-- Core: 57 passed.
+- Core: 63 passed.
 - DevelopmentPackage integration: 22 passed.
 - MSSQL integration: 33 passed, 2 skipped; SQL Server runs through Testcontainers.
 - RocketLaunch Domain: 21 passed; LunarOps Domain: 53 passed.
@@ -41,6 +43,8 @@
 - Package build produces six `.nupkg` and six `.snupkg` files.
 - Package vulnerability scan, API compatibility check, consumer smoke test, and manual API smoke test pass.
 - Known pre-existing issue: the API integration suite is flaky because it does not deterministically wait for asynchronous projection updates. The latest F1 run passed 5 of 7 tests; this was explicitly accepted for Gate G1 review.
+- Latest F2 full run: every non-API suite passed; API remained at 5/7 with the same accepted projection race.
+- F2 API compatibility against the approved F1 assembly passes with no breaking changes.
 
 ## Working references
 
@@ -48,6 +52,7 @@
 - Detailed plan: `specs/10-DDD.BuildingBlocks-Detailed-Implementation-Plan.md`.
 - F0 report: `specs/reports/13-DDD.BuildingBlocks-F0-Baseline-Report.md`.
 - F1/G1 report: `specs/reports/14-DDD.BuildingBlocks-F1-Outcome-Report.md`.
+- F2/G2 report: `specs/reports/15-DDD.BuildingBlocks-F2-Tactical-Domain-Primitives-Report.md`.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.
 

@@ -34,7 +34,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
         ArgumentNullException.ThrowIfNull(payload);
         ArgumentNullException.ThrowIfNull(window);
 
-        ApplyEvent(
+        RaiseEvent(
             new MissionCreated(id, name, target, payload, window));
     }
 
@@ -63,7 +63,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
             throw new RuleValidationException(
                 Id, "Rocket not available", $"RocketId: {rocket.Id}");
 
-        ApplyEvent(new RocketAssigned(
+        RaiseEvent(new RocketAssigned(
             Id, rocket.Id, 
             rocket.Name,
             rocket.ThrustCapacity,
@@ -83,7 +83,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
             throw new RuleValidationException(
                 Id, "LaunchPad not available", $"LaunchPadId: {pad.Id}");
             
-        ApplyEvent(new LaunchPadAssigned(Id, pad.Id, 
+        RaiseEvent(new LaunchPadAssigned(Id, pad.Id,
             pad.Name, pad.Location, pad.SupportedRocketTypes.ToArray(),
             Window, CurrentVersion));
     }
@@ -98,7 +98,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
             throw new RuleValidationException(
                 Id, "Crew not available");
             
-        ApplyEvent(new CrewAssigned(Id, crew, CurrentVersion));
+        RaiseEvent(new CrewAssigned(Id, crew, CurrentVersion));
     }
 
     public void Schedule()
@@ -107,21 +107,21 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
             throw new AggregateException(Id, "Resources incomplete");
         if (Status != MissionStatus.Planned)
             throw new AggregateException(Id, "Mission already scheduled or started");
-        ApplyEvent(new MissionScheduled(Id, CurrentVersion));
+        RaiseEvent(new MissionScheduled(Id, CurrentVersion));
     }
 
     public void Abort()
     {
         if (Status == MissionStatus.Launched)
             throw new AggregateException(Id, "Cannot abort after launch");
-        ApplyEvent(new MissionAborted(Id, CurrentVersion));
+        RaiseEvent(new MissionAborted(Id, CurrentVersion));
     }
 
     public void MarkLaunched()
     {
         if (Status != MissionStatus.Scheduled)
             throw new AggregateException(Id, "Only scheduled missions can launch");
-        ApplyEvent(new MissionLaunched(Id, CurrentVersion));
+        RaiseEvent(new MissionLaunched(Id, CurrentVersion));
     }
 
     public void MarkArrived(DateTime arrivalTime,
@@ -131,7 +131,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
     {
         if (Status != MissionStatus.Launched)
             throw new AggregateException(Id, "Only launched missions can arrive");
-        ApplyEvent(new MissionArrivedAtLunarOrbit(
+        RaiseEvent(new MissionArrivedAtLunarOrbit(
             Id, arrivalTime, vehicleType, crewManifest, payloadManifest, CurrentVersion));
     }
 

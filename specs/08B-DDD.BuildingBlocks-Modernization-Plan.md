@@ -2,8 +2,8 @@
 
 ## DDD.BuildingBlocks modernization plan
 
-**Status:** ACTIVE — F1 complete; F2 architecture decided  
-**Version:** 1.2  
+**Status:** ACTIVE — M3/F2 implemented; awaiting Gate G2 review
+**Version:** 1.3
 **Date:** 2026-08-16  
 **Base:** Framework analysis on commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
 
@@ -18,7 +18,7 @@ The framework will be brought to a robust .NET 10 baseline before production use
 - .NET 10 LTS and current compatible packages;
 - Warning-free and nullable hardening;
 - Cancellation in I/O contracts;
-- explicit event-sourced aggregate naming and semantics;
+- explicit event-sourced aggregate semantics;
 - Event envelope and stable event type registry;
 - Optimistic Concurrency Contract;
 - production event-store adapter and snapshot provider after an explicit technology decision;
@@ -89,19 +89,20 @@ DDD.BuildingBlocks.DependencyInjection
 - Warnings as Errors for your own code;
 - Linux build successful.
 
-### M3: Event-Sourced Aggregate Root and Core Contracts
+### M3: Aggregate Root and Core Contracts
 
 **Goal:** Make the framework's event-sourcing focus explicit in its type model.
 
 **Acceptance:**
 
-- existing `AggregateRoot<TKey>` renamed to `EventSourcedAggregateRoot<TKey>` as an intentional breaking change;
+- existing `AggregateRoot<TKey>` name retained as the framework's single aggregate-root model;
 - no conventional or plain aggregate-root abstraction introduced;
 - no marker-only aggregate-root interface introduced without a concrete consumer;
 - uncommitted events only exposed in a readable manner;
 - replay and application of new events clearly separated;
 - tests for version transitions and missing apply handlers;
-- migration guidance covers the public type rename.
+- documentation explicitly describes the event-sourcing semantics of the root type.
+- the existing `int` stream-version contract is preserved until its coordinated `long` migration with event contracts, snapshots, providers, and storage schemas after Gate G2.
 
 ### M4: Event Envelope and Event Codec
 

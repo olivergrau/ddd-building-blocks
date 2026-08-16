@@ -7,6 +7,7 @@ using System.Reflection;
 using DDD.BuildingBlocks.Core.Attribute;
 using DDD.BuildingBlocks.Core.Domain;
 using DDD.BuildingBlocks.Core.Event;
+using DDD.BuildingBlocks.Core.Exception;
 
 namespace DDD.BuildingBlocks.Core.Extension;
 
@@ -33,7 +34,7 @@ public static class ReflectionHelper
                         where eventHandlers.TryAdd(parameter.ParameterType, m.Name) == false
                         select m).Any())
                 {
-                    throw new System.Exception(
+                    throw new AggregateEventHandlerConfigurationException(
                         $"Multiple methods found handling same event in {aggregateType.Name}");
                 }
             }
@@ -42,7 +43,7 @@ public static class ReflectionHelper
             {
                 if (!AggregateEventHandlerCache.ContainsKey(aggregateType))
                 {
-                    throw new System.Exception(
+                    throw new AggregateEventHandlerConfigurationException(
                         $"Error registering methods for handling events in {aggregateType.Name}");
                 }
             }

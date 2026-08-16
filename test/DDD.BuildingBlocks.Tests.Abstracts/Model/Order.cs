@@ -87,8 +87,8 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 
             // The following method are how external command interact with our aggregate
 			// A command will result in following methods being executed and resulting events will be fired
-			// Pattern: Create the event and call ApplyEvent(Event)
-			ApplyEvent(new OrderCreatedEvent(Id.OrderNumber, CurrentVersion, title, comment, (int) state, ApplicationTime.Current));
+			// Pattern: Create the event and call RaiseEvent(Event)
+			RaiseEvent(new OrderCreatedEvent(Id.OrderNumber, CurrentVersion, title, comment, (int) state, ApplicationTime.Current));
 		}
 
 		#endregion
@@ -97,27 +97,27 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 
         public void CloseOrder()
         {
-            ApplyEvent(new OrderClosedEvent(Id.OrderNumber, CurrentVersion));
+            RaiseEvent(new OrderClosedEvent(Id.OrderNumber, CurrentVersion));
         }
 
 		public void SetOptionalCertificate(string prefix, string code)
 		{
-			ApplyEvent(new OrderCertificateChangedEvent(Id.OrderNumber, CurrentVersion, prefix, code));
+			RaiseEvent(new OrderCertificateChangedEvent(Id.OrderNumber, CurrentVersion, prefix, code));
 		}
 
 		public void Cancel()
 		{
-			ApplyEvent(new OrderCancelledEvent(Id.OrderNumber, CurrentVersion));
+			RaiseEvent(new OrderCancelledEvent(Id.OrderNumber, CurrentVersion));
 		}
 
 		public void ChangeTitle(string newTitle)
 		{
             ArgumentNullException.ThrowIfNull(newTitle);
 
-            //Pattern: Create the event and call ApplyEvent(Event)
+            //Pattern: Create the event and call RaiseEvent(Event)
             if (Title != newTitle)
             {
-                ApplyEvent(new OrderTitleChangedEvent(Id.OrderNumber, CurrentVersion, newTitle));
+                RaiseEvent(new OrderTitleChangedEvent(Id.OrderNumber, CurrentVersion, newTitle));
             }
         }
 
@@ -125,7 +125,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 		{
 			if (Comment != newComment)
             {
-                ApplyEvent(new OrderCommentChangedEvent(Id.OrderNumber, CurrentVersion, newComment));
+                RaiseEvent(new OrderCommentChangedEvent(Id.OrderNumber, CurrentVersion, newComment));
             }
         }
 
@@ -133,7 +133,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 		{
 			if (!_orderItems.Exists(q => q.AggregateId.Equals(item.Id.ToString(), StringComparison.Ordinal)))
             {
-                ApplyEvent(new OrderItemAddedToOrderEvent(Id.ToString(), CurrentVersion, item.Id.ToString()));
+                RaiseEvent(new OrderItemAddedToOrderEvent(Id.ToString(), CurrentVersion, item.Id.ToString()));
             }
             else
             {
@@ -145,7 +145,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 		{
 			if (_orderItems.Exists(q => q.AggregateId.Equals(item.Id.ToString(), StringComparison.Ordinal)))
             {
-                ApplyEvent(new OrderItemRemovedFromOrderEvent(Id.ToString(), CurrentVersion, item.Id.ToString()));
+                RaiseEvent(new OrderItemRemovedFromOrderEvent(Id.ToString(), CurrentVersion, item.Id.ToString()));
             }
             else
             {
