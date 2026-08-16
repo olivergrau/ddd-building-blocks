@@ -7,7 +7,7 @@ namespace DDD.BuildingBlocks.Core.Event
         /// <summary>
         ///     The TargetVersion of the aggregate. If not match, changes won't be applied.
         /// </summary>
-        public int TargetVersion { get; set; }
+        public long TargetVersion { get; set; }
 
         /// <summary>
         ///     Aggregate Id in serialized representation.
@@ -35,7 +35,7 @@ namespace DDD.BuildingBlocks.Core.Event
         {
         }
 
-        protected DomainEvent(string? serializedAggregateId, int targetVersion, int eventClassVersion)
+        protected DomainEvent(string? serializedAggregateId, long targetVersion, int eventClassVersion)
         {
             if (string.IsNullOrWhiteSpace(serializedAggregateId))
             {

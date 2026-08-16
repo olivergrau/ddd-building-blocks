@@ -27,7 +27,7 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
             _sourcing = new AggregateSourcing(_repository);
         }
 
-        public class TestAggregateCommand(string serializedAggregateId, int targetVersion) : Command(serializedAggregateId, targetVersion);
+        public class TestAggregateCommand(string serializedAggregateId, long targetVersion) : Command(serializedAggregateId, targetVersion);
 
         public class RepositoryMock : IEventSourcingRepository
         {
@@ -35,7 +35,7 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
             public readonly List<TestAggregate> Aggregates = [];
 #pragma warning restore CA1051
 
-            public Task<object?> GetByIdAsync(string id, Type type, int version = -1)
+            public Task<object?> GetByIdAsync(string id, Type type, long version = -1)
             {
                 throw new NotImplementedException();
                 //return Task.FromResult(Aggregates.SingleOrDefault(q => Equals(q.Id, id)));

@@ -24,16 +24,16 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         protected bool Deactivated { get; set; }
 
-        private const int NoStreamVersion = (int)StreamState.NoStream;
+        private const long NoStreamVersion = (long)StreamState.NoStream;
         private readonly List<IDomainEvent> _uncommittedChanges = [];
         private readonly IReadOnlyDictionary<Type, string> _eventHandlerCache;
 
         protected IEnumerable<string> CorrelationIds => _correlationIds.AsReadOnly();
         private readonly List<string> _correlationIds = [];
 
-        public int CurrentVersion { get; protected set; }
+        public long CurrentVersion { get; protected set; }
 
-        public int LastCommittedVersion { get; protected set; }
+        public long LastCommittedVersion { get; protected set; }
 
         public IReadOnlyList<IDomainEvent> UncommittedChanges
         {

@@ -26,7 +26,7 @@ namespace RocketLaunch.SharedKernel.Events.Mission
             string location,
             string[] supportedRockets,
             LaunchWindow launchWindow,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;

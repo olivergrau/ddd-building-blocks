@@ -8,12 +8,12 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Event
     [DomainEventType]
 	public class OrderCreatedEvent(
         string serializedAggregateId,
-        int version,
+        long targetVersion,
         string title,
         string comment,
         int state,
         DateTime createdTime
-    ) : DomainEvent(serializedAggregateId, version, _currentTypeVersion)
+    ) : DomainEvent(serializedAggregateId, targetVersion, _currentTypeVersion)
     {
 		private static int _currentTypeVersion = 1;
 

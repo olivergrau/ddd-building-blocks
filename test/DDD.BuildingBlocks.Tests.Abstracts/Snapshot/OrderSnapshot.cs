@@ -10,7 +10,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Snapshot
     [Serializable]
 	public class OrderSnapshot(
         string serializedAggregateId,
-        int version,
+        long version,
         DateTime createdDate,
         string name,
         string description,

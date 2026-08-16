@@ -66,6 +66,16 @@ namespace DDD.BuildingBlocks.MSSQLPackage
             return parameter;
         }
 
+        public static SqlParameter ToSqlParameter(this long value, string name)
+        {
+            return new SqlParameter
+            {
+                ParameterName = name,
+                SqlDbType = SqlDbType.BigInt,
+                Value = value
+            };
+        }
+
         public static SqlParameter ToSqlParameter(this string value, string name)
         {
             var parameter = new SqlParameter

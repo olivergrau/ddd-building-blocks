@@ -2,8 +2,8 @@
 
 ## DDD.BuildingBlocks modernization plan
 
-**Status:** ACTIVE — M3/F2 implemented; awaiting Gate G2 review
-**Version:** 1.3
+**Status:** ACTIVE — M4/F3 implemented; awaiting Gate G3 review
+**Version:** 1.4
 **Date:** 2026-08-16  
 **Base:** Framework analysis on commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
 
@@ -136,6 +136,8 @@ Payload
 - at least one upcaster test;
 - no assembly qualified names in new records.
 
+`IEventCodec` is the provider-facing abstraction. `SystemTextJsonEventCodec` is the default implementation, and stream-related versions use `long` consistently across core and legacy-provider contracts.
+
 ### M5: Async and cancellation
 
 **Goal:** Controllable I/O operations.
@@ -246,7 +248,7 @@ projection_checkpoints
 ## 6. Deliberately postponed questions
 
 - Whether a shared aggregate interface is ever needed; none is introduced without a concrete consumer.
-- Whether the event codec uses `System.Text.Json` or a replaceable codec interface in the long term. An explicitly versioned codec is sufficient for the playground.
+- Whether additional codecs beyond the approved `IEventCodec` abstraction and default `SystemTextJsonEventCodec` will ever be needed. No second implementation is added without a concrete consumer.
 - Whether the event store and read models use the same PostgreSQL instance or whether the event store is later operated externally. For the MVP, a shared PostgreSQL instance remains the simpler starting hypothesis.
 - From which stream length snapshots are activated. This is measured, not guessed.
 

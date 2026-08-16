@@ -28,10 +28,10 @@ internal static class EventStorageProviderHelper
 
     internal static void ReconstituteEvent(IDataRecord reader, ICollection<IDomainEvent> events)
     {
-        (Guid id, byte[]? data, int version, string type, string key) eventData = (Guid.Empty, null, 0, "", "");
+        (Guid id, byte[]? data, long version, string type, string key) eventData = (Guid.Empty, null, 0, "", "");
         eventData.id = reader.GetGuid(0);
 
-        eventData.version = reader.GetInt32(2);
+        eventData.version = reader.GetInt64(2);
         eventData.type = reader.GetString(3);
         eventData.key = reader.GetString(5);
         var startIndex = 0;

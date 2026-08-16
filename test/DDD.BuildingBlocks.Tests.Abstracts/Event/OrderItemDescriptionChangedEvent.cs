@@ -5,8 +5,8 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Event
     using Core.Attribute;
 
     [DomainEventType]
-	public class OrderItemDescriptionChangedEvent(string serializedAggregateId, int version, string description)
-        : DomainEvent(serializedAggregateId, version, _currentTypeVersion)
+	public class OrderItemDescriptionChangedEvent(string serializedAggregateId, long targetVersion, string description)
+        : DomainEvent(serializedAggregateId, targetVersion, _currentTypeVersion)
     {
 		private static int _currentTypeVersion = 1;
 

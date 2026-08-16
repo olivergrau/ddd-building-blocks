@@ -9,7 +9,7 @@ namespace RocketLaunch.SharedKernel.Events.Mission
     [DomainEventType]
     public sealed class MissionAborted(
         MissionId missionId,
-        int targetVersion = -1) : DomainEvent(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
+        long targetVersion = -1) : DomainEvent(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         private const int CurrentClassVersion = 1;
 

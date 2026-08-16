@@ -11,7 +11,7 @@ public class SnapshotCreationService(IEventSourcingRepository repository, IAggre
 {
     private readonly ILogger _log = loggerFactory.CreateLogger<SnapshotCreationService>();
 
-    public async Task<Snapshot?> CreateSnapshotFrom(string aggregateId, int version = -1)
+    public async Task<Snapshot?> CreateSnapshotFrom(string aggregateId, long version = -1)
     {
         var aggregateType = await informationService.GetTypeForAggregateId(aggregateId);
 

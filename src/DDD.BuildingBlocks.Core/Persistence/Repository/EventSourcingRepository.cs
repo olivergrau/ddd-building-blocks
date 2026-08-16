@@ -38,7 +38,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
     {
         private readonly IEventStorageProvider _eventStorageProvider = eventStorageProvider ?? throw new ArgumentNullException(nameof(eventStorageProvider));
 
-        public virtual async Task<object?> GetByIdAsync(string id, Type type, int version = -1)
+        public virtual async Task<object?> GetByIdAsync(string id, Type type, long version = -1)
         {
             object? item = default;
 
@@ -70,7 +70,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
                 if (version < 0 || ((IEventSourcingBasedAggregate)item).CurrentVersion < version)
                 {
                     var events =
-                        await _eventStorageProvider.GetEventsAsync(type, id, snapshot.Version + 1, int.MaxValue);
+                        await _eventStorageProvider.GetEventsAsync(type, id, snapshot.Version + 1, long.MaxValue);
 
                     if(events != null)
                     {
@@ -80,7 +80,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
             }
             else
             {
-                var eventsList = await _eventStorageProvider.GetEventsAsync(type, id, 0, version >= 0 ? version + 1 : int.MaxValue);
+                var eventsList = await _eventStorageProvider.GetEventsAsync(type, id, 0, version >= 0 ? version + 1 : long.MaxValue);
 
                 if (eventsList == null)
                 {
@@ -122,7 +122,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
                 item = ReflectionHelper.CreateInstance<T, TKey>();
                 ((ISnapshotEnabled) item).ApplySnapshot(snapshot);
                 var events =
-                    await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString() ?? throw new InvalidOperationException(), snapshot.Version + 1, int.MaxValue);
+                    await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString() ?? throw new InvalidOperationException(), snapshot.Version + 1, long.MaxValue);
 
                 if(events != null)
                 {
@@ -131,7 +131,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
             }
             else
             {
-                var eventsList = await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString() ?? throw new InvalidOperationException(), 0, int.MaxValue);
+                var eventsList = await _eventStorageProvider.GetEventsAsync(typeof(T), id.ToString() ?? throw new InvalidOperationException(), 0, long.MaxValue);
 
                 if (eventsList == null)
                 {
@@ -164,7 +164,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
 
             var item = await _eventStorageProvider.GetLastEventAsync(aggregate.GetType(), aggregate.SerializedId);
 
-            if (item != null && expectedVersion == (int) StreamState.NoStream)
+                if (item != null && expectedVersion == (long) StreamState.NoStream)
             {
                 throw new AggregateCreationException(
                     $"Aggregate {item.CorrelationId} can't be created as it already exists with version {item.TargetVersion + 1}");

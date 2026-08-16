@@ -12,7 +12,7 @@ namespace LunarOps.SharedKernel.Events.LunarMission
         private const int CurrentClassVersion = 1;
         public ExternalMissionId MissionId { get; }
 
-        public LunarMissionInService(ExternalMissionId missionId, int targetVersion = -1)
+        public LunarMissionInService(ExternalMissionId missionId, long targetVersion = -1)
             : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;

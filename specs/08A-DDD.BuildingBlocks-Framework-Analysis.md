@@ -114,9 +114,9 @@ This is a good starting point for controlled modernization.
 | Conventional aggregate abstraction | not available | intentionally unnecessary | keep the framework focused on event-sourced domain aggregates |
 | Optimistic Concurrency | available | usable | make atomic provider testing mandatory |
 | Uncommitted Events | available | suitable | ensure immutable exposure |
-| Event Metadata | partially | inadequate | Add envelope |
-| Event Schema Version | `ClassVersion` exists | partially | stable event names and upcaster concept complement |
-| Event type resolution | CLR/name reflection | risky | Use stable logical type keys |
+| Event Metadata | provider-neutral envelope implemented in F3 | suitable for provider adoption | assign global position only during production commit |
+| Event Schema Version | registry and sequential upcasting implemented in F3 | suitable | preserve historical fixtures |
+| Event type resolution | explicit stable-key registry implemented in F3 | suitable for new records | migrate providers only after Gate G3 |
 | Cancellation | largely missing | inadequate | Add `CancellationToken` throughout |
 | Async | available | partially | Modernize contracts and error handling |
 | PostgreSQL | missing | gap | implement new provider |
@@ -151,7 +151,7 @@ All genuine Playground domain aggregates use this event-sourced model. Relationa
 
 Events are identified using simple class names and sometimes `AssemblyQualifiedName`. Simple names can clash. Assembly names and versions are not stable technical contracts.
 
-**Suggested solution:** Persisted `EventType` becomes an explicit stable string, for example `session.participant-spoke`. An explicit registry maps it to CLR types. `SchemaVersion` is stored separately. Upcasters read older schemas.
+**Implemented F3 contract:** Persisted `EventType` is an explicit stable string, for example `session.participant-spoke`. `EventTypeRegistry` maps it uniquely to a CLR type, `SchemaVersion` is stored separately, and sequential JSON upcasters read older schemas. Legacy providers retain their old format until a post-G3 provider migration.
 
 ### F-03: Event metadata is incomplete
 
@@ -164,7 +164,7 @@ Available are aggregate ID, target version, commit time, correlation ID and clas
 - clean actor reference;
 - optional `TurnId` and technical inference reference.
 
-**Suggested solution:** Domain events and the persisted `EventEnvelope` are separated. The event contains only domain payload. The envelope carries technical metadata.
+**Implemented F3 contract:** Domain payload and the immutable `EventEnvelope` are separated. The default codec removes legacy technical properties from new payload JSON, while the envelope carries the technical metadata. `GlobalPosition` remains unassigned until a production provider commits the record.
 
 ### F-04: Projection offset is not robust enough
 

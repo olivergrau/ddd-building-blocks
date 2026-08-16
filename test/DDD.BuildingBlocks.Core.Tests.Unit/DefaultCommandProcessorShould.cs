@@ -15,7 +15,7 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
     {
         // ReSharper disable once NotAccessedField.Local
 
-	    private sealed class TestCommand(string serializedAggregateId, int targetVersion) : Command(serializedAggregateId, targetVersion);
+	    private sealed class TestCommand(string serializedAggregateId, long targetVersion) : Command(serializedAggregateId, targetVersion);
 
         private sealed class TestCommandHandler : ICommandHandler<TestCommand>
         {

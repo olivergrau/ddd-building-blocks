@@ -7,7 +7,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Storage
 {
     public interface IEventStorageProvider
     {
-        Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, int start, int count);
+        Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count);
 
         Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key);
 

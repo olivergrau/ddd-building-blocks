@@ -116,7 +116,7 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
         }
     }
 
-    public async Task<Snapshot?> GetSnapshotAsync(string aggregateId, int version)
+    public async Task<Snapshot?> GetSnapshotAsync(string aggregateId, long version)
     {
         await using (var connection = new SqlConnection(_settings.CurrentValue.ConnectionString))
         await using (var command = connection.CreateCommand())
@@ -168,10 +168,10 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
     {
         //snapshot = null;
 
-        (Guid id, byte[] data, int version, string type) snapshotData = (Guid.Empty, null, 0, "")!;
+        (Guid id, byte[] data, long version, string type) snapshotData = (Guid.Empty, null, 0, "")!;
         snapshotData.id = reader.GetGuid(0);
 
-        snapshotData.version = reader.GetInt32(1);
+        snapshotData.version = reader.GetInt64(1);
         snapshotData.type = reader.GetString(2);
 
         var startIndex = 0;

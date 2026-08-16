@@ -10,7 +10,7 @@ namespace DDD.BuildingBlocks.Core.Persistence.Storage
         
         Task<Snapshot?> GetSnapshotAsync(string aggregateId);
         
-        Task<Snapshot?> GetSnapshotAsync(string aggregateId, int version);
+        Task<Snapshot?> GetSnapshotAsync(string aggregateId, long version);
         
         Task SaveSnapshotAsync(Snapshot snapshot);
     }

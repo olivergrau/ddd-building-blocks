@@ -17,7 +17,7 @@ namespace RocketLaunch.SharedKernel.Events.Mission
         public CrewAssigned(
             MissionId missionId,
             IEnumerable<CrewMemberId> crew,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;

@@ -81,12 +81,12 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
 
         public class ProductCreatedEvent(
             string serializedAggregateId,
-            int version,
+            long targetVersion,
             string name,
             string description,
             int state,
             DateTime createdTime
-        ) : DomainEvent(serializedAggregateId, version, _currentTypeVersion)
+        ) : DomainEvent(serializedAggregateId, targetVersion, _currentTypeVersion)
         {
             private static readonly int _currentTypeVersion = 1;
 
@@ -96,8 +96,8 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
             public int State { get; } = state;
         }
 
-        public class CategoryCreatedEvent(string serializedAggregateId, int version, string name, string description, DateTime createdTime)
-            : DomainEvent(serializedAggregateId, version, _currentTypeVersion)
+        public class CategoryCreatedEvent(string serializedAggregateId, long targetVersion, string name, string description, DateTime createdTime)
+            : DomainEvent(serializedAggregateId, targetVersion, _currentTypeVersion)
         {
             private static readonly int _currentTypeVersion = 1;
 

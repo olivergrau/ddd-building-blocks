@@ -7,9 +7,9 @@
     {
         public string AggregateTypeIdentifier { get; }
         public string SerializedAggregateId { get; }
-        public int Version { get; }
+        public long Version { get; }
 
-        protected Snapshot(string serializedAggregateId, int version, string aggregateTypeIdentifier)
+        protected Snapshot(string serializedAggregateId, long version, string aggregateTypeIdentifier)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(version);
 

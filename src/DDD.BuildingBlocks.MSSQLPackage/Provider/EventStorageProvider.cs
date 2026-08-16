@@ -30,8 +30,8 @@ public sealed class EventStorageProvider : IEventStorageProvider
         _settings = settings;
     }
 
-    public async Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, int start,
-        int count)
+    public async Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start,
+        long count)
     {
         await using var connection = new SqlConnection(_settings.CurrentValue.ConnectionString);
         await using var command = connection.CreateCommand();
@@ -50,9 +50,8 @@ public sealed class EventStorageProvider : IEventStorageProvider
 
             command.Parameters.Add(key.ToSqlParameter("@key"));
             command.Parameters.Add(start.ToSqlParameter("@start1"));
-            command.Parameters.Add(count == int.MaxValue
-                ? (int.MaxValue - start).ToSqlParameter("@end2")
-                : (start + count - 1).ToSqlParameter("@end2"));
+            var end = count >= long.MaxValue - start ? long.MaxValue : start + count - 1;
+            command.Parameters.Add(end.ToSqlParameter("@end2"));
 
             var reader = await command.ExecuteReaderAsync();
 
@@ -120,7 +119,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
                 var reader = await sqlCommand1.ExecuteReaderAsync(); // ODP.NET returns integers as decimals...
 
                 Guid physicalId;
-                var version = -1;
+                long version = -1;
 
                 if (!await reader.ReadAsync())
                 {
@@ -129,12 +128,12 @@ public sealed class EventStorageProvider : IEventStorageProvider
                 else
                 {
                     physicalId = reader.GetGuid(0);
-                    version = reader.GetInt32(1);
+                    version = reader.GetInt64(1);
                 }
 
                 await reader.CloseAsync();
 
-                if (Convert.ToInt32(version) != lastCommittedVersion)
+                if (version != lastCommittedVersion)
                 {
                     throw new ProviderException(
                         $"Concurrency problem with target version: {version} != {lastCommittedVersion}");
@@ -165,8 +164,8 @@ public sealed class EventStorageProvider : IEventStorageProvider
         }
     }
 
-    private static async Task<int> AppendNewEventsAsync(IDomainEvent[] domainEvents, SqlConnection connection, SqlTransaction transaction, Guid physicalId,
-        int eventCount
+    private static async Task<long> AppendNewEventsAsync(IDomainEvent[] domainEvents, SqlConnection connection, SqlTransaction transaction, Guid physicalId,
+        long eventCount
     )
     {
         foreach (var @event in domainEvents)

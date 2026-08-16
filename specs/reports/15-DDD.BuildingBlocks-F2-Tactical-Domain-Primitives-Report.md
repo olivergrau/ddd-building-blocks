@@ -42,7 +42,7 @@ The domain primitives do not reference ASP.NET Core, EF Core, Npgsql, HTTP, or h
 
 `NoStream` remains `-1`; the first successfully applied event moves the aggregate to version `0`. An event's `TargetVersion` is the version against which it applies, while `CurrentVersion` is the last applied event version and `LastCommittedVersion` is the last replayed or successfully marked committed version.
 
-The current public contracts use `int`. Moving only the aggregate root to `long` would create an inconsistent API because commands, events, snapshots, repository/provider interfaces, provider implementations, and SQL schemas participate in the same version contract. F2 therefore records this complete migration boundary; the breaking conversion must be coordinated after Gate G2 with the event-contract and provider work.
+At the F2 gate, the public contracts still used `int`. Moving only the aggregate root to `long` would have created an inconsistent API because commands, events, snapshots, repository/provider interfaces, provider implementations, and SQL schemas participate in the same version contract. F2 therefore recorded this complete migration boundary. The coordinated breaking conversion was subsequently implemented in F3 after Gate G2 approval.
 
 ## Compatibility assessment
 

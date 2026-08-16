@@ -33,7 +33,7 @@ public class FileInMemoryEventStorageProvider : PureInMemoryEventStorageProvider
         RefreshFromFiles();
     }
 
-    public override Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, int start, int count)
+    public override Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count)
     {
         RefreshFromFiles();
         return base.GetEventsAsync(aggregateType, key, start, count);

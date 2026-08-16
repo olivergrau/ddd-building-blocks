@@ -23,7 +23,7 @@ namespace RocketLaunch.SharedKernel.Events.Mission
             string vehicleType,
             IEnumerable<(string Name, string Role)> crewManifest,
             IEnumerable<(string Item, double Mass)> payloadManifest,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId       = missionId;

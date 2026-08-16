@@ -17,7 +17,7 @@ namespace LunarOps.SharedKernel.Events.LunarMission
         public DockingPortAssigned(
             ExternalMissionId missionId,
             DockingPortId portId,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;

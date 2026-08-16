@@ -29,7 +29,7 @@ public sealed class EventSourcingRepositoryShould
 
     private sealed class FailingEventStorageProvider : IEventStorageProvider
     {
-        public Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, int start, int count)
+        public Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count)
         {
             return Task.FromResult<IEnumerable<IDomainEvent>?>(null);
         }

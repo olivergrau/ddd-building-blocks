@@ -8,5 +8,5 @@ public interface ICommand : IMessage
 
     string? SerializedAggregateId { get; }
 
-    int TargetVersion { get; }
+    long TargetVersion { get; }
 }

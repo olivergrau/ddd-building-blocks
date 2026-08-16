@@ -55,7 +55,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Storage
             throw new ProviderException($"Mapping for key {key} exists, but no snapshot data found.");
         }
 
-        public async Task<Snapshot?> GetSnapshotAsync(string key, int version)
+        public async Task<Snapshot?> GetSnapshotAsync(string key, long version)
         {
             ArgumentNullException.ThrowIfNull(key);
 

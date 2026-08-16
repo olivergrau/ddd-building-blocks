@@ -32,8 +32,8 @@ public class PureInMemoryEventStorageProvider : IEventStorageProvider
         }
     }
 
-    public virtual async Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, int start,
-        int count)
+    public virtual async Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start,
+        long count)
     {
         try
         {
@@ -45,17 +45,13 @@ public class PureInMemoryEventStorageProvider : IEventStorageProvider
             var aggregateId = IdMapping.Single(q => q.AggregateType == aggregateType && q.Key == key)
                 .PhysicalId;
 
-            //this is needed for make sure it doesn't fail when we have int.maxValue for count
-            if (count > int.MaxValue - start)
-            {
-                count = int.MaxValue - start;
-            }
+            var end = count >= long.MaxValue - start ? long.MaxValue : start + count;
 
             return
                 EventStream[aggregateId].Where(
                         o =>
                             EventStream[aggregateId].IndexOf(o) >= start &&
-                            EventStream[aggregateId].IndexOf(o) < start + count)
+                            EventStream[aggregateId].IndexOf(o) < end)
                     .ToArray();
         }
         catch (Exception ex)

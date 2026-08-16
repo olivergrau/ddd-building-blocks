@@ -19,7 +19,7 @@ public sealed class CrewMemberAssignedToStation : DomainEvent
         LunarCrewMemberId crewMemberId,
         string name,
         string role,
-        int targetVersion = -1
+        long targetVersion = -1
     ) : base(stationId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         StationId = stationId;

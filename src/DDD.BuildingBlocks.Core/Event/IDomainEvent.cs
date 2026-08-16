@@ -8,7 +8,7 @@ namespace DDD.BuildingBlocks.Core.Event
         /// <summary>
         /// Target version of the Aggregate this event will be applied against
         /// </summary>
-        int TargetVersion { get; set; }
+        long TargetVersion { get; set; }
         
         /// <summary>
         /// The aggregateID of the aggregate

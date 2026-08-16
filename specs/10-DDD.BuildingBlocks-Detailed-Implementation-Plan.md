@@ -2,8 +2,8 @@
 
 ## Detailed implementation plan for modernization and playground release
 
-**Status:** ACTIVE — F2 implemented; awaiting Gate G2 review
-**Version:** 1.2
+**Status:** ACTIVE — F3 implemented; awaiting Gate G3 review
+**Version:** 1.3
 **Date:** 2026-08-16  
 **Initial status:** Commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
 
@@ -221,11 +221,13 @@ The global position is assigned only during the production commit. Domain events
 
 ### F3.3 Codec and Upcasting
 
-- `System.Text.Json` is the preferred default implementation;
+- `IEventCodec` is the provider-facing abstraction and `SystemTextJsonEventCodec` is the default implementation;
 - Providers store payload plus type and schema metadata;
 - Upcasters work from one known schema version to the next;
 - Original events will not be rewritten in place;
 - historical JSON fixtures ensure compatibility.
+
+Stream, event, command, snapshot, repository, and provider version contracts use `long`. The legacy MSSQL schema uses `BIGINT` for these versions.
 
 ### F3.4 Compatibility
 

@@ -6,14 +6,14 @@ namespace RocketLaunch.SharedKernel.Snapshots;
 [Serializable]
 public class MissionSnapshot : Snapshot
 {
-    public MissionSnapshot(string serializedAggregateId, int version)
+    public MissionSnapshot(string serializedAggregateId, long version)
         : base(serializedAggregateId, version, "Mission")
     {
     }
     
     public Guid Id { get; init; }
-    public int CurrentVersion { get; init; }
-    public int LastCommittedVersion { get; init; }
+    public long CurrentVersion { get; init; }
+    public long LastCommittedVersion { get; init; }
 
     public required string Name { get; init; }
     public required string TargetOrbit { get; init; }
