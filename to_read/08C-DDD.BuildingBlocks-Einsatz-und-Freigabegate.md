@@ -17,7 +17,7 @@ DDD.BuildingBlocks wird als taktische DDD-Grundlage verwendet und vor Beginn der
 Übernommen werden insbesondere:
 
 - Entity, EntityId, ValueObject und Aggregate Root;
-- klassische und eventgesourcte Aggregate;
+- eventgesourcte Aggregate sowie taktische Entities und Value Objects;
 - Command- und Eventverarbeitung;
 - Provider-Schnittstellen;
 - Event Store, Snapshot- und Projection-Konzepte;
@@ -50,7 +50,8 @@ F0 Baseline reproduzieren
 
 ### Taktisches Modell
 
-- klassische und eventgesourcte Aggregate sind sauber getrennt;
+- der Event-Sourcing-Root ist eindeutig benannt und von technischen Persistenzrecords getrennt;
+- kein konventioneller Aggregate-Root wurde vorsorglich eingeführt;
 - uncommitted Events und Replay sind gekapselt;
 - Apply ist deterministisch;
 - Versionssemantik ist dokumentiert;
@@ -110,7 +111,7 @@ Die Technik wird nicht in der Spezifikationsphase vorweggenommen. Am Gate F6 wer
 - Wartungs- und Upgradeaufwand;
 - zusätzlicher Infrastrukturbedarf.
 
-PostgreSQL ist die bevorzugte Ausgangshypothese, weil es ohnehin für klassische Aggregate und Read Models gesetzt ist. Ein externer Event Store ist nur dann vorzuziehen, wenn er einen belegbaren funktionalen oder betrieblichen Vorteil liefert, der die zusätzliche Komplexität rechtfertigt.
+PostgreSQL ist die bevorzugte Ausgangshypothese, weil es ohnehin für Read Models und technische Persistenz gesetzt ist. Ein externer Event Store ist nur dann vorzuziehen, wenn er einen belegbaren funktionalen oder betrieblichen Vorteil liefert, der die zusätzliche Komplexität rechtfertigt.
 
 ## 6. Release-Artefakt
 
@@ -172,4 +173,3 @@ READY FOR PLAYGROUND
 - PostgreSQL ist Präferenz, aber keine unbegründete Vorabfestlegung des Event Stores.
 - reale Integrations- und Contract-Tests sind verpflichtend.
 - es existiert genau eine freigegebene taktische Grundlage.
-

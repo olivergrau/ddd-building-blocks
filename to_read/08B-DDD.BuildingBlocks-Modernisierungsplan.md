@@ -91,12 +91,13 @@ DDD.BuildingBlocks.DependencyInjection
 
 ### M3: Aggregate-Typen und Kerncontracts
 
-**Ziel:** Selektives Event Sourcing im Typmodell ausdrücken.
+**Ziel:** Das fokussierte Event-Sourcing-Denkmodell im Typmodell eindeutig ausdrücken.
 
 **Akzeptanz:**
 
-- nicht eventgesourcter Aggregate Root vorhanden;
-- bestehender ES-Typ bleibt zunächst kompatibel;
+- `EventSourcedAggregateRoot<TKey>` ist der eindeutig benannte Root-Typ;
+- kein `ConventionalAggregateRoot<TKey>` und kein allgemeiner Root-Vertrag ohne konkreten Verbraucher;
+- bestehender Typname bleibt nur bei belegtem Kompatibilitätsbedarf vorübergehend als obsoleter Alias erhalten;
 - uncommitted Events nur lesbar exponiert;
 - Replay und neues Apply eindeutig getrennt;
 - Tests für Versionsübergänge und fehlende Apply-Handler.
@@ -225,7 +226,7 @@ projection_checkpoints
 - alle Unit- und Integrationstests grün;
 - API-Dokumentation aktualisiert;
 - Migrations- und Recovery-Test erfolgreich;
-- kleines Playground-nahes Beispiel für eventgesourcte `Session` und klassisches `Persona` Aggregate;
+- kleines Playground-nahes Beispiel für eventgesourcte `Session` und `Persona` Aggregate;
 - Frameworkversion gepinnt;
 - keine offene kritische Finding-Kategorie.
 

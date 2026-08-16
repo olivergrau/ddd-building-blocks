@@ -15,12 +15,12 @@ namespace LunarOps.Domain.Model
     public class MoonStation : AggregateRoot<StationId>
     {
         // Core Info
-        public string Name { get; private set; }
-        public string Location { get; private set; }
+        public string Name { get; private set; } = null!;
+        public string Location { get; private set; } = null!;
         public StationStatus OperationalStatus { get; private set; }
 
         // Supported Config
-        private readonly HashSet<VehicleType> _supportedVehicleTypes;
+        private readonly HashSet<VehicleType> _supportedVehicleTypes = null!;
         public IReadOnlyCollection<VehicleType> SupportedVehicleTypes => _supportedVehicleTypes;
 
         // Capacity

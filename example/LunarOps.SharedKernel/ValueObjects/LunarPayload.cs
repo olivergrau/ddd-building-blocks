@@ -8,9 +8,9 @@ namespace LunarOps.SharedKernel.ValueObjects
 {
     public class LunarPayload : ValueObject<LunarPayload>
     {
-        public string Description       { get; }
+        public string Description       { get; } = null!;
         public double Mass              { get; }
-        public string DestinationArea   { get; }
+        public string DestinationArea   { get; } = null!;
 
         public LunarPayload(
             string description,

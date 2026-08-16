@@ -17,14 +17,18 @@ For detailed documentation of the library itself refer to [`src/DDD.BuildingBloc
 
 ## Building and Testing
 
-The solution targets .NET 9.0.  You can build everything and run the full test suite using the .NET CLI:
+The solution targets .NET 10.0 LTS. The SDK version is pinned in `global.json`. You can build everything and run the full test suite using the .NET CLI:
 
 ```bash
 # Build all projects
- dotnet build DDD.BuildingBlocks.sln
+dotnet restore DDD.BuildingBlocks.sln
+dotnet build DDD.BuildingBlocks.sln --no-restore
 
 # Execute all unit and integration tests
- dotnet test DDD.BuildingBlocks.sln
+dotnet test DDD.BuildingBlocks.sln --no-build
+
+# Create the six framework packages from the Debug build
+dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages
 ```
 
 Integration tests that rely on SQL Server use Testcontainers to start a temporary database instance.

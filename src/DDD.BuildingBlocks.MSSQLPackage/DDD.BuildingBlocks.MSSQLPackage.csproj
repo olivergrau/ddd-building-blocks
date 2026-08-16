@@ -2,8 +2,7 @@
 
     <PropertyGroup>
       <Description>Package with implementations for IEventBus, ICommandDispatcher with MSSQL Server based implementations.</Description>
-      <TargetFramework>net9.0</TargetFramework>
-      <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+      <PackageReference Include="Microsoft.Data.SqlClient" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "DDD.BuildingBlocks.sln",
+    "projects": [
+      "src/DDD.BuildingBlocks.AzurePackage/DDD.BuildingBlocks.AzurePackage.csproj",
+      "src/DDD.BuildingBlocks.Core/DDD.BuildingBlocks.Core.csproj",
+      "src/DDD.BuildingBlocks.DevelopmentPackage/DDD.BuildingBlocks.DevelopmentPackage.csproj",
+      "src/DDD.BuildingBlocks.DI.Extensions/DDD.BuildingBlocks.DI.Extensions.csproj",
+      "src/DDD.BuildingBlocks.Hosting.Background/DDD.BuildingBlocks.Hosting.Background.csproj",
+      "src/DDD.BuildingBlocks.MSSQLPackage/DDD.BuildingBlocks.MSSQLPackage.csproj"
+    ]
+  }
+}

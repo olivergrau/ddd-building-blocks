@@ -7,7 +7,6 @@ using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
-using RocketLaunch.ReadModel.Core.Exceptions;
 using Xunit;
 using CrewMemberStatus = RocketLaunch.ReadModel.Core.Model.CrewMemberStatus;
 

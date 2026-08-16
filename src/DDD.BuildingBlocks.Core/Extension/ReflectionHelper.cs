@@ -144,7 +144,8 @@ public static class ReflectionHelper
 
     public static T CreateInstance<T, TKey>() where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
     {
-        return (T)Activator.CreateInstance(typeof(T))
-            ?? throw new InvalidOperationException($"Cannot create instance of type {typeof(T).FullName}");
+        return Activator.CreateInstance(typeof(T)) is T instance
+            ? instance
+            : throw new InvalidOperationException($"Cannot create instance of type {typeof(T).FullName}");
     }
 }

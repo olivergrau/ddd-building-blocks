@@ -149,7 +149,10 @@ namespace DDD.BuildingBlocks.Core.Domain
             if (GetStreamState() == StreamState.NoStream)
             {
                 //This is only needed for the very first event as every other event CAN ONLY apply to a matching ID
-                Id = GetIdFromStringRepresentation(@event.SerializedAggregateId) as TKey
+                var serializedAggregateId = @event.SerializedAggregateId
+                    ?? throw new AggregateCreationException("Cannot determine ID value from string representation. Aggregate could not be created.");
+
+                Id = GetIdFromStringRepresentation(serializedAggregateId) as TKey
                      ?? throw new AggregateCreationException("Cannot determine ID value from string representation. Aggregate could not be created.");
             }
 

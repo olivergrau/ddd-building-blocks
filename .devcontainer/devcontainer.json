@@ -11,8 +11,7 @@
     "source=${localEnv:HOME}/.local/share/nuget/persona-feed,target=/workspaces/local-nuget-feed,type=bind"
   ],
   "containerEnv": {
-    "NUGET_PACKAGES": "/home/vscode/.nuget/packages",
-    "DOTNET_ROLL_FORWARD": "Major"
+    "NUGET_PACKAGES": "/home/vscode/.nuget/packages"
   },
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}

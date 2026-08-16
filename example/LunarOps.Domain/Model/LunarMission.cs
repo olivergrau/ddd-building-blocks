@@ -13,12 +13,12 @@ namespace LunarOps.Domain.Model
     public class LunarMission : AggregateRoot<ExternalMissionId>
     {
         public DateTime ArrivalTime { get; private set; }
-        public VehicleType VehicleType { get; private set; }
-        public IReadOnlyCollection<(string Name, string Role)> CrewManifest { get; private set; }
-        public IReadOnlyCollection<(string Item, double Mass)> PayloadManifest { get; private set; }
+        public VehicleType VehicleType { get; private set; } = null!;
+        public IReadOnlyCollection<(string Name, string Role)> CrewManifest { get; private set; } = null!;
+        public IReadOnlyCollection<(string Item, double Mass)> PayloadManifest { get; private set; } = null!;
         public LunarMissionStatus Status { get; private set; }
 
-        public DomainRelation StationRelation { get; private set; }
+        public DomainRelation StationRelation { get; private set; } = null!;
         public DockingPortId? AssignedPort { get; private set; }
 
         public LunarMission(

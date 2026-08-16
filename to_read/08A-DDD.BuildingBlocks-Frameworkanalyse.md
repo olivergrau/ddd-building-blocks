@@ -19,8 +19,8 @@ Es wurde kein Widerspruch gefunden, der den geplanten Playground grundsätzlich 
 Die Analyse prüft das Framework gegen die bereits verbindlichen Entscheidungen:
 
 - taktische Typen aus `DDD.BuildingBlocks` werden im Domain Model verwendet;
-- Event Sourcing gilt selektiv für `Session`, nicht pauschal für alle Aggregate;
-- `Persona`, `Scenario` und globale `PersonaRelationship` werden klassisch persistiert;
+- Event Sourcing gilt für alle echten fachlichen Aggregate;
+- technische Records und Read Models bleiben konventionell persistiert, sind aber keine Aggregate;
 - CQRS und rekonstruierbare Read Models sind verbindlich;
 - PostgreSQL ist produktiver Provider;
 - Persistieren geschieht vor Publizieren;
@@ -110,8 +110,8 @@ Das ist eine gute Ausgangslage für eine kontrollierte Modernisierung.
 |---|---|---|---|
 | Taktische DDD-Typen | vorhanden | geeignet | API behutsam modernisieren |
 | Event-sourced Aggregate | vorhanden | geeignet mit Änderungen | Metadaten, Typidentität, Versionierung härten |
-| Klassisches Aggregate | kein eigener Aggregate-Root-Typ | Lücke | nicht eventgesourcten Root-Typ ergänzen |
-| Selektives Event Sourcing | indirekt möglich | teilweise | klare Typtrennung dokumentieren |
+| Zustandsbasiertes Aggregate | kein eigener Aggregate-Root-Typ | kein Defizit im fokussierten Framework | bewusst nicht ergänzen |
+| Einheitliches Event-Sourcing-Write-Model | vorhanden | geeignet mit Härtung | Root eindeutig benennen und dokumentieren |
 | Optimistic Concurrency | vorhanden | brauchbar | atomare Provider-Prüfung verbindlich machen |
 | Uncommitted Events | vorhanden | geeignet | immutable Exposition sicherstellen |
 | Event Metadata | teilweise | unzureichend | Envelope ergänzen |
@@ -132,21 +132,20 @@ Das ist eine gute Ausgangslage für eine kontrollierte Modernisierung.
 
 ## 6. Wesentliche technische Risiken und Lösungen
 
-### F-01: `AggregateRoot<TKey>` bedeutet immer Event Sourcing
+### F-01: `AggregateRoot<TKey>` ist semantisch ein Event-Sourcing-Root
 
-Der vorhandene `AggregateRoot<TKey>` implementiert zwingend `IEventSourcingBasedAggregate`. Dadurch fehlt eine semantisch saubere Root-Abstraktion für klassisch persistierte Aggregate.
+Der vorhandene `AggregateRoot<TKey>` implementiert zwingend `IEventSourcingBasedAggregate`. Das Verhalten passt zur nun bestätigten Frameworkausrichtung, der Name drückt die Semantik jedoch nicht deutlich genug aus.
 
-**Auswirkung:** `Persona` und `Scenario` dürften nicht künstlich eventgesourct werden. Sie nur als gewöhnliche `Entity<TKey>` zu modellieren wäre technisch möglich, bildet ihre Rolle aber schlecht ab.
+**Auswirkung:** `Persona`, `Scenario`, `PersonaRelationship` und `Session` können dasselbe Write-Modell verwenden. Technische Records benötigen keine Aggregate-Basisklasse.
 
-**Lösungsvorschlag:** Einen nicht eventgesourcten Root-Typ ergänzen und die bestehende ES-Abstraktion eindeutig benennen. Kompatibilitätsfreundliche Variante:
+**Lösungsvorschlag:** Die bestehende Abstraktion in einer Major Version eindeutig benennen:
 
 ```text
 Entity<TKey>
-  ├── PlainAggregateRoot<TKey>
-  └── AggregateRoot<TKey>  // bestehender ES-Typ vorerst kompatibel
+  └── EventSourcedAggregateRoot<TKey>
 ```
 
-Langfristig kann `AggregateRoot<TKey>` in einer Major Version zu `EventSourcedAggregateRoot<TKey>` umbenannt werden. Für den Playground ist keine sofortige brechende Umbenennung erforderlich.
+Ein `ConventionalAggregateRoot<TKey>` und ein allgemeines `IAggregateRoot<TKey>` werden nicht vorsorglich eingeführt. Falls Kompatibilität zu bestehenden Verbrauchern nötig ist, kann der alte Name für eine klar begrenzte Übergangsphase als obsoleter Alias bestehen.
 
 ### F-02: Persistierte Eventtypen hängen an CLR-Namen
 
@@ -271,7 +270,7 @@ Gezielt ersetzt oder erweitert werden sollen:
 - Projection Dispatch, Checkpoints und Rebuild;
 - Cancellation;
 - DI-Integration;
-- nicht eventgesourcter Aggregate Root;
+- eindeutig benannter und gehärteter Event-Sourcing-Root;
 - Serialisierung;
 - Zeit- und Versionssemantik.
 
@@ -287,11 +286,10 @@ Nicht übernommen werden sollen:
 
 Die Domainverträge werden nicht an problematische Details des aktuellen Frameworks angepasst. Stattdessen gelten folgende Leitlinien:
 
-- `Session` wird eventgesourct modelliert;
-- klassische Aggregate bleiben klassisch;
+- alle echten Playground-Domain-Aggregate werden eventgesourct modelliert;
+- konventionelle technische Persistenz bleibt außerhalb der Aggregate-Hierarchie;
 - Events besitzen fachlich kleine Payloads;
 - Metadaten liegen im Envelope;
 - Commands tragen `CommandId` und bei Änderungen eine Expected Version;
 - Apply bleibt synchron, deterministisch und seiteneffektfrei;
 - C#-Skizzen in Phase 3B zeigen Zielsemantik und sind keine exakte Kopie der heutigen Framework-API.
-

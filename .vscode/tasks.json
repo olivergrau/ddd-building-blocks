@@ -7,7 +7,7 @@
     { "label": "test-integration", "type": "process", "command": "dotnet", "args": ["test", "DDD.BuildingBlocks.sln", "--no-build", "--filter", "Category=Integration"] },
     { "label": "test-all", "type": "process", "command": "dotnet", "args": ["test", "DDD.BuildingBlocks.sln", "--no-build"] },
     { "label": "format-check", "type": "process", "command": "dotnet", "args": ["format", "DDD.BuildingBlocks.sln", "--verify-no-changes"] },
-    { "label": "pack", "type": "process", "command": "dotnet", "args": ["pack", "DDD.BuildingBlocks.sln", "--no-build", "--configuration", "Debug"] },
+    { "label": "pack", "type": "process", "command": "dotnet", "args": ["pack", "DDD.BuildingBlocks.Packages.slnf", "--no-build", "--configuration", "Debug", "--output", "artifacts/packages"] },
     { "label": "clean", "type": "process", "command": "dotnet", "args": ["clean", "DDD.BuildingBlocks.sln"] }
   ]
 }
