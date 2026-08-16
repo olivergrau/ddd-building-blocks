@@ -1,12 +1,34 @@
 {
-  "name": ".NET 9 Dev",
-  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+  "name": "DDD.BuildingBlocks",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=ddd-building-blocks-nuget,target=/home/vscode/.nuget/packages,type=volume",
+    "source=ddd-building-blocks-codex,target=/home/vscode/.codex,type=volume",
+    "source=${localEnv:HOME}/.local/share/nuget/persona-feed,target=/workspaces/local-nuget-feed,type=bind"
+  ],
+  "containerEnv": {
+    "NUGET_PACKAGES": "/home/vscode/.nuget/packages",
+    "DOTNET_ROLL_FORWARD": "Major"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
   "customizations": {
     "vscode": {
       "extensions": [
+        "ms-dotnettools.csdevkit",
         "ms-dotnettools.csharp",
-        "editorconfig.editorconfig"
+        "openai.chatgpt",
+        "EditorConfig.EditorConfig",
+        "DavidAnson.vscode-markdownlint",
+        "redhat.vscode-yaml",
+        "eamodio.gitlens"
       ]
     }
-  }
+  },
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.nuget/packages /home/vscode/.codex && bash .devcontainer/restore-codex-sessions.sh && dotnet --info && dotnet restore DDD.BuildingBlocks.sln"
 }
