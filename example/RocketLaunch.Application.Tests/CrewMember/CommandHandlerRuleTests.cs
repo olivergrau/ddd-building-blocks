@@ -16,12 +16,12 @@ public class CrewMemberCommandHandlerRuleTests
         var repository = new EventSourcingRepository(store);
         var registerHandler = new RegisterCrewMemberCommandHandler(repository);
         var command = new RegisterCrewMemberCommand(Guid.NewGuid(), "Zed", CrewRole.FlightEngineer, []);
-        await registerHandler.HandleCommandAsync(command);
+        await registerHandler.HandleAsync(command, System.Threading.CancellationToken.None);
 
         var statusHandler = new SetCrewMemberStatusCommandHandler(repository);
-        await statusHandler.HandleCommandAsync(new SetCrewMemberStatusCommand(command.CrewMemberId, CrewMemberStatus.Unavailable));
+        await statusHandler.HandleAsync(new SetCrewMemberStatusCommand(command.CrewMemberId, CrewMemberStatus.Unavailable), System.Threading.CancellationToken.None);
 
         var handler = new AssignCrewMemberCommandHandler(repository);
-        await Assert.ThrowsAsync<Exception>(() => handler.HandleCommandAsync(new AssignCrewMemberCommand(command.CrewMemberId)));
+        await Assert.ThrowsAsync<Exception>(() => handler.HandleAsync(new AssignCrewMemberCommand(command.CrewMemberId), System.Threading.CancellationToken.None));
     }
 }

@@ -9,13 +9,13 @@ namespace RocketLaunch.Application.Command.Mission.Handler;
 public class MarkMissionArrivedCommandHandler(IEventSourcingRepository repository)
     : CommandHandler<MarkMissionArrivedCommand>(repository)
 {
-    public override async Task HandleCommandAsync(MarkMissionArrivedCommand command)
+    public override async Task HandleAsync(MarkMissionArrivedCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.Mission mission;
 
         try
         {
-            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command);
+            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command, [], cancellationToken);
         }
         catch (Exception e)
         {
@@ -26,6 +26,6 @@ public class MarkMissionArrivedCommandHandler(IEventSourcingRepository repositor
         var payload = command.PayloadManifest.Select(p => (p.Item, p.Mass));
         mission.MarkArrived(command.ArrivalTime, command.VehicleType, crew, payload);
 
-        await AggregateRepository.SaveAsync(mission);
+        await AggregateRepository.SaveAsync(mission, cancellationToken);
     }
 }

@@ -11,9 +11,10 @@ public class SnapshotCreationService(IEventSourcingRepository repository, IAggre
 {
     private readonly ILogger _log = loggerFactory.CreateLogger<SnapshotCreationService>();
 
-    public async Task<Snapshot?> CreateSnapshotFrom(string aggregateId, long version = -1)
+    public async Task<Snapshot?> CreateSnapshotFrom(string aggregateId, long version, System.Threading.CancellationToken cancellationToken)
     {
-        var aggregateType = await informationService.GetTypeForAggregateId(aggregateId);
+        cancellationToken.ThrowIfCancellationRequested();
+        var aggregateType = await informationService.GetTypeForAggregateId(aggregateId, cancellationToken);
 
         if (aggregateType == null)
         {
@@ -21,7 +22,7 @@ public class SnapshotCreationService(IEventSourcingRepository repository, IAggre
             throw new Exception($"Aggregate type could not be determined for aggregate id: {aggregateId}");
         }
 
-        var aggregate = await repository.GetByIdAsync(aggregateId, aggregateType, version);
+        var aggregate = await repository.GetByIdAsync(aggregateId, aggregateType, version, cancellationToken);
 
         if (aggregate == null)
         {

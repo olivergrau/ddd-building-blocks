@@ -132,7 +132,7 @@ public class EventProcessingServiceBackgroundWorker : IBackgroundServiceWorker
                 if(_settings.OnlyAllowSendingForCategories == null || _settings.OnlyAllowSendingForCategories.Length == 0
                    || describingAttribute.Category != null && _settings.OnlyAllowSendingForCategories.Contains(describingAttribute.Category))
                 {
-                    await _eventHandler.HandleAsync(@event);
+                    await _eventHandler.HandleAsync(@event, cancellationToken ?? System.Threading.CancellationToken.None);
                 }
                 else
                 {

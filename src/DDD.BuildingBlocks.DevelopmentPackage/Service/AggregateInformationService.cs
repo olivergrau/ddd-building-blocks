@@ -24,7 +24,7 @@ public class AggregateInformationService : IAggregateInformationService
         _memoryDumpFile = memoryDumpFile;
     }
 
-    public Task<Type?> GetTypeForAggregateId(string aggregateId)
+    public Task<Type?> GetTypeForAggregateId(string aggregateId, System.Threading.CancellationToken cancellationToken)
     {
         List<IdMapping> idMapping;
         if (File.Exists(_memoryDumpFile))

@@ -53,7 +53,7 @@ public class OrderAggregate : AggregateRoot<OrderId>
 
     public OrderAggregate(OrderId id) : base(id)
     {
-        ApplyEvent(new OrderPlaced(id, DateTime.UtcNow));
+        RaiseEvent(new OrderPlaced(id, DateTime.UtcNow));
     }
 
     // Needed for rehydration
@@ -88,20 +88,24 @@ public sealed class PlaceOrderCommand : Command
 public sealed class PlaceOrderCommandHandler(IEventSourcingRepository repository)
     : CommandHandler<PlaceOrderCommand>(repository)
 {
-    public override async Task HandleCommandAsync(PlaceOrderCommand command)
+    public override async Task HandleAsync(PlaceOrderCommand command, CancellationToken cancellationToken)
     {
-        var aggregate = await AggregateSourcing.Source<OrderAggregate, OrderId>(command);
-        await AggregateRepository.SaveAsync(aggregate!);
+        var aggregate = await AggregateSourcing.Source<OrderAggregate, OrderId>(command, [], cancellationToken);
+        await AggregateRepository.SaveAsync(aggregate!, cancellationToken);
     }
 }
 ```
 
-Register the handler with an `ICommandProcessor` and execute the command:
+Register and resolve the scoped dispatcher through Microsoft DI:
 
 ```csharp
-var processor = new DefaultCommandProcessor();
-processor.RegisterHandlerFactory(() => new PlaceOrderCommandHandler(repository));
-await processor.ExecuteAsync(new PlaceOrderCommand(Guid.NewGuid()));
+var services = new ServiceCollection();
+services.AddSingleton(repository);
+services.AddDddBuildingBlocksDispatching(typeof(PlaceOrderCommandHandler).Assembly);
+await using var provider = services.BuildServiceProvider();
+
+var dispatcher = provider.GetRequiredService<ICommandDispatcher>();
+await dispatcher.DispatchAsync(new PlaceOrderCommand(Guid.NewGuid()), cancellationToken);
 ```
 
 ## 4. Build a read model
@@ -118,7 +122,7 @@ public interface IOrderReadService
 public sealed class OrderProjector(IOrderReadService service)
     : ISubscribe<OrderPlaced>
 {
-    public async Task WhenAsync(OrderPlaced e)
+    public async Task HandleAsync(OrderPlaced e, CancellationToken cancellationToken)
     {
         var model = new OrderReadModel
         {
@@ -139,7 +143,7 @@ This read model receives `OrderPlaced` events and stores a simplified view which
 Aggregates often require more than just one command. You can freely define **multiple business methods** that:
 
 * Enforce invariants and rules,
-* Emit domain events via `ApplyEvent(...)`,
+* Emit domain events via `RaiseEvent(...)`,
 * Use injected services for domain-level validation (e.g. availability checks).
 
 Here’s a more advanced example using a `Mission` aggregate:
@@ -154,7 +158,7 @@ public class Mission : AggregateRoot<MissionId>
     public Mission(MissionId id, MissionName name)
         : base(id)
     {
-        ApplyEvent(new MissionCreated(id, name));
+        RaiseEvent(new MissionCreated(id, name));
     }
 
     public async Task AssignRocketAsync(Rocket rocket, IResourceAvailabilityService validator)
@@ -165,7 +169,7 @@ public class Mission : AggregateRoot<MissionId>
         if (!await validator.IsRocketAvailableAsync(rocket.Id))
             throw new RuleValidationException(Id, "Rocket not available", $"RocketId: {rocket.Id}");
 
-        ApplyEvent(new RocketAssigned(Id, rocket.Id, CurrentVersion));
+        RaiseEvent(new RocketAssigned(Id, rocket.Id, CurrentVersion));
     }
 
     public void Schedule()
@@ -175,7 +179,7 @@ public class Mission : AggregateRoot<MissionId>
         if (Status != MissionStatus.Planned)
             throw new AggregateException(Id, "Already scheduled");
 
-        ApplyEvent(new MissionScheduled(Id, CurrentVersion));
+        RaiseEvent(new MissionScheduled(Id, CurrentVersion));
     }
 
     [InternalEventHandler]
@@ -218,7 +222,7 @@ public async Task AssignCrewAsync(IEnumerable<CrewMemberId> crew, IResourceAvail
     if (!await validator.AreCrewMembersAvailableAsync(crew))
         throw new RuleValidationException(Id, "Crew not available");
 
-    ApplyEvent(new CrewAssigned(Id, crew, CurrentVersion));
+    RaiseEvent(new CrewAssigned(Id, crew, CurrentVersion));
 }
 
 [InternalEventHandler]

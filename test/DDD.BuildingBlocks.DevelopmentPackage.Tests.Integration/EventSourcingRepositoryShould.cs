@@ -73,8 +73,8 @@
 		public async Task Reset_UncommittedChanges_in_aggregates_to_be_saved()
         {
 			// Act
-            await _eventSourcingRepository.SaveAsync(_order);
-            await _eventSourcingRepository.SaveAsync(_orderItem);
+            await _eventSourcingRepository.SaveAsync(_order, System.Threading.CancellationToken.None);
+            await _eventSourcingRepository.SaveAsync(_orderItem, System.Threading.CancellationToken.None);
 
 			// Assert
             _order.GetUncommittedChanges().Should().HaveCount(0);
@@ -86,11 +86,11 @@
 		public async Task Save_and_reload_an_aggregate_correctly()
         {
 			// Act
-            await _eventSourcingRepository.SaveAsync(_order);
-            await _eventSourcingRepository.SaveAsync(_orderItem);
+            await _eventSourcingRepository.SaveAsync(_order, System.Threading.CancellationToken.None);
+            await _eventSourcingRepository.SaveAsync(_orderItem, System.Threading.CancellationToken.None);
 
-            var order = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(_order.Id);
-            var orderItem = await _eventSourcingRepository.GetByIdAsync<OrderItem, OrderItemId>(_orderItem.Id);
+            var order = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(_order.Id, System.Threading.CancellationToken.None);
+            var orderItem = await _eventSourcingRepository.GetByIdAsync<OrderItem, OrderItemId>(_orderItem.Id, System.Threading.CancellationToken.None);
 
 			// Assert
 			order.Should().NotBeNull();

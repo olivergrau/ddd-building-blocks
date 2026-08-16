@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace DDD.BuildingBlocks.MSSQLPackage.Provider;
 
@@ -31,7 +32,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
     }
 
     public async Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start,
-        long count)
+        long count, System.Threading.CancellationToken cancellationToken)
     {
         await using var connection = new SqlConnection(_settings.CurrentValue.ConnectionString);
         await using var command = connection.CreateCommand();
@@ -39,7 +40,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
 
         try
         {
-            await connection.OpenAsync();
+            await connection.OpenAsync(cancellationToken);
 
             command.CommandText =
                 "SELECT E.*, M.[KEY] FROM dbo.MAPPINGS M INNER JOIN dbo.EVENTS E ON M.AGGREGATEID = E.AGGREGATEID LEFT JOIN dbo.AGGREGATES A " +
@@ -53,9 +54,9 @@ public sealed class EventStorageProvider : IEventStorageProvider
             var end = count >= long.MaxValue - start ? long.MaxValue : start + count - 1;
             command.Parameters.Add(end.ToSqlParameter("@end2"));
 
-            var reader = await command.ExecuteReaderAsync();
+            var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-            while (await reader.ReadAsync())
+            while (await reader.ReadAsync(cancellationToken))
             {
                 EventStorageProviderHelper.ReconstituteEvent(reader, events);
             }
@@ -63,18 +64,18 @@ public sealed class EventStorageProvider : IEventStorageProvider
             await reader.CloseAsync();
             return events;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new ProviderException("Failure reading events from storage.", ex);
         }
     }
 
-    public async Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key)
+    public async Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key, System.Threading.CancellationToken cancellationToken)
     {
         await using var connection = new SqlConnection(_settings.CurrentValue.ConnectionString);
         await using var command = connection.CreateCommand();
 
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
         command.CommandText =
             "SELECT TOP 1 E.*, M.[KEY] FROM dbo.MAPPINGS M INNER JOIN dbo.EVENTS E ON M.AGGREGATEID = E.AGGREGATEID LEFT JOIN dbo.AGGREGATES A ON E.AGGREGATEID = A.AGGREGATEID WHERE M.[KEY] = @id AND M.TYPE = '" +
             aggregateType.AssemblyQualifiedName + "' AND A.TYPE = '" + aggregateType.AssemblyQualifiedName +
@@ -82,10 +83,10 @@ public sealed class EventStorageProvider : IEventStorageProvider
 
         command.Parameters.Add(key.ToSqlParameter("@id"));
 
-        var reader = await command.ExecuteReaderAsync();
+        var reader = await command.ExecuteReaderAsync(cancellationToken);
 
         var events = new List<IDomainEvent>();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(cancellationToken))
         {
             EventStorageProviderHelper.ReconstituteEvent(reader, events);
         }
@@ -93,7 +94,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
         return events.Any() ? events.First() : null;
     }
 
-    public async Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate)
+    public async Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
     {
         var events = aggregate.GetUncommittedChanges();
 
@@ -104,7 +105,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
 
             await using var connection = new SqlConnection(_settings.CurrentValue.ConnectionString);
             await using var sqlCommand1 = connection.CreateCommand();
-            await connection.OpenAsync();
+            await connection.OpenAsync(cancellationToken);
 
             await using var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
             sqlCommand1.Transaction = transaction;
@@ -116,14 +117,14 @@ public sealed class EventStorageProvider : IEventStorageProvider
                     aggregate.GetType().AssemblyQualifiedName + "' AND A.TYPE = '" + aggregate.GetType().AssemblyQualifiedName + "'";
                 sqlCommand1.Parameters.Add(aggregate.SerializedId.ToSqlParameter("@key"));
 
-                var reader = await sqlCommand1.ExecuteReaderAsync(); // ODP.NET returns integers as decimals...
+                var reader = await sqlCommand1.ExecuteReaderAsync(cancellationToken); // ODP.NET returns integers as decimals...
 
                 Guid physicalId;
                 long version = -1;
 
-                if (!await reader.ReadAsync())
+                if (!await reader.ReadAsync(cancellationToken))
                 {
-                    physicalId = await CreateNewAggregateStreamAsync(aggregate, connection, transaction);
+                    physicalId = await CreateNewAggregateStreamAsync(aggregate, connection, transaction, cancellationToken);
                 }
                 else
                 {
@@ -139,8 +140,8 @@ public sealed class EventStorageProvider : IEventStorageProvider
                         $"Concurrency problem with target version: {version} != {lastCommittedVersion}");
                 }
 
-                lastCommittedVersion = await AppendNewEventsAsync(domainEvents, connection, transaction, physicalId, lastCommittedVersion);
-                await EnsureUniqueConstraintsAsync(physicalId, aggregate, connection, transaction);
+                lastCommittedVersion = await AppendNewEventsAsync(domainEvents, connection, transaction, physicalId, lastCommittedVersion, cancellationToken);
+                await EnsureUniqueConstraintsAsync(physicalId, aggregate, connection, transaction, cancellationToken);
 
                 await using var sqlCommand5 = connection.CreateCommand();
                 sqlCommand5.Transaction = transaction;
@@ -152,11 +153,11 @@ public sealed class EventStorageProvider : IEventStorageProvider
                 sqlCommand5.Parameters.Add(lastCommittedVersion.ToSqlParameter("@lastVersion"));
                 sqlCommand5.Parameters.Add(physicalId.ToSqlParameter("@id"));
 
-                await sqlCommand5.ExecuteNonQueryAsync();
+                await sqlCommand5.ExecuteNonQueryAsync(cancellationToken);
 
                 transaction.Commit();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 transaction.Rollback();
                 throw new ProviderException("Failure committing changes to storage.", ex);
@@ -165,7 +166,8 @@ public sealed class EventStorageProvider : IEventStorageProvider
     }
 
     private static async Task<long> AppendNewEventsAsync(IDomainEvent[] domainEvents, SqlConnection connection, SqlTransaction transaction, Guid physicalId,
-        long eventCount
+        long eventCount,
+        CancellationToken cancellationToken
     )
     {
         foreach (var @event in domainEvents)
@@ -187,7 +189,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
                 .Name.ToSqlParameter("@typeHint"));
             sqlCommand4.Parameters.Add(ApplicationTime.Current.ToSqlParameter("@creationdate"));
 
-            var rows = await sqlCommand4.ExecuteNonQueryAsync();
+            var rows = await sqlCommand4.ExecuteNonQueryAsync(cancellationToken);
 
             if (rows <= 0)
             {
@@ -198,7 +200,11 @@ public sealed class EventStorageProvider : IEventStorageProvider
         return eventCount;
     }
 
-    private static async Task<Guid> CreateNewAggregateStreamAsync(IEventSourcingBasedAggregate aggregate, SqlConnection connection, SqlTransaction transaction)
+    private static async Task<Guid> CreateNewAggregateStreamAsync(
+        IEventSourcingBasedAggregate aggregate,
+        SqlConnection connection,
+        SqlTransaction transaction,
+        CancellationToken cancellationToken)
     {
         var physicalId = Guid.NewGuid();
 
@@ -212,7 +218,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
             .AssemblyQualifiedName!.ToSqlParameter("@type"));
         sqlCommand2.Parameters.Add(0.ToSqlParameter("@version"));
 
-        var rows = await sqlCommand2.ExecuteNonQueryAsync();
+        var rows = await sqlCommand2.ExecuteNonQueryAsync(cancellationToken);
 
         if (rows <= 0)
         {
@@ -229,7 +235,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
             .AssemblyQualifiedName!.ToSqlParameter("@type"));
         sqlCommand3.Parameters.Add(aggregate.SerializedId.ToSqlParameter("@key"));
 
-        rows = await sqlCommand3.ExecuteNonQueryAsync();
+        rows = await sqlCommand3.ExecuteNonQueryAsync(cancellationToken);
 
         if (rows <= 0)
         {
@@ -239,7 +245,12 @@ public sealed class EventStorageProvider : IEventStorageProvider
         return physicalId;
     }
 
-    private static async Task EnsureUniqueConstraintsAsync(Guid physicalId, IEventSourcingBasedAggregate aggregate, SqlConnection connection, SqlTransaction transaction)
+    private static async Task EnsureUniqueConstraintsAsync(
+        Guid physicalId,
+        IEventSourcingBasedAggregate aggregate,
+        SqlConnection connection,
+        SqlTransaction transaction,
+        CancellationToken cancellationToken)
     {
         var uniqueProperties = aggregate.GetType().GetProperties().Where(
             prop => Attribute.IsDefined(prop, typeof(UniqueDomainPropertyAttribute)));
@@ -262,7 +273,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
             command4.Parameters.Clear();
             command4.Parameters.Add(physicalId.ToSqlParameter("@id"));
 
-            await command4.ExecuteNonQueryAsync();
+            await command4.ExecuteNonQueryAsync(cancellationToken);
         }
         else
         {
@@ -281,7 +292,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
                 command1.Parameters.Add(physicalId.ToSqlParameter("@id"));
                 command1.Parameters.Add(uniqueProperty.Name.ToSqlParameter("@property"));
 
-                var countValues = await command1.ExecuteScalarAsync();
+                var countValues = await command1.ExecuteScalarAsync(cancellationToken);
                 var hasValue = 0;
 
                 if (countValues != null)
@@ -303,7 +314,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
                         command2.Parameters.Add(physicalId.ToSqlParameter("@id"));
                         command2.Parameters.Add(uniqueProperty.Name.ToSqlParameter("@property"));
 
-                        var updated = await command2.ExecuteNonQueryAsync();
+                        var updated = await command2.ExecuteNonQueryAsync(cancellationToken);
 
                         if (updated <= 0)
                         {
@@ -325,7 +336,7 @@ public sealed class EventStorageProvider : IEventStorageProvider
                         command3.Parameters.Add(uniqueProperty.Name.ToSqlParameter("@property"));
                         command3.Parameters.Add(uniqueProperty.GetValue(aggregate)!.ToString()!.ToSqlParameter("@value"));
 
-                        var inserted = await command3.ExecuteNonQueryAsync();
+                        var inserted = await command3.ExecuteNonQueryAsync(cancellationToken);
 
                         if (inserted <= 0)
                         {

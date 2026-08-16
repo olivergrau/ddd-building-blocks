@@ -24,14 +24,14 @@ public class EventSourcingRepositoryParallelMssqlTests : MSSQLTestBase
 
         // Act
         var repository = GetRepositoryWithoutSnapshotProvider();
-        var aggregateInstance1 = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
-        var aggregateInstance2 = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        var aggregateInstance1 = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
+        var aggregateInstance2 = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
         aggregateInstance1!.ChangeComment(newComment1);
         aggregateInstance2!.ChangeComment(newComment2);
-        await repository.SaveAsync(aggregateInstance2);
+        await repository.SaveAsync(aggregateInstance2, System.Threading.CancellationToken.None);
 
         // Act + Assert
-        Func<Task> functor = async () => await repository.SaveAsync(aggregateInstance1);
+        Func<Task> functor = async () => await repository.SaveAsync(aggregateInstance1, System.Threading.CancellationToken.None);
         await functor.Should().ThrowAsync<ConcurrencyException>();
     }
 
@@ -45,14 +45,14 @@ public class EventSourcingRepositoryParallelMssqlTests : MSSQLTestBase
 
         // Act
         var repository = GetRepositoryWithoutSnapshotProvider();
-        var order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        var order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
         order!.ChangeComment(newComment1);
-        await repository.SaveAsync(order);
-        order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
         order!.ChangeComment(newComment2);
 
         // Act + Assert
-        Func<Task> functor = async () => await repository.SaveAsync(order);
+        Func<Task> functor = async () => await repository.SaveAsync(order, System.Threading.CancellationToken.None);
         await functor.Should().NotThrowAsync();
     }
 
@@ -81,7 +81,7 @@ public class EventSourcingRepositoryParallelMssqlTests : MSSQLTestBase
     private async Task PerformChangesOnAggregate(Guid aggregateId, int count, int saveFrequency, List<Exception> exceptionList)
     {
         var repository = GetRepositoryWithoutSnapshotProvider();
-        var order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(aggregateId.ToString()));
+        var order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(aggregateId.ToString()), System.Threading.CancellationToken.None);
 
         for (var i = 1; i <= count; i++)
         {
@@ -92,7 +92,7 @@ public class EventSourcingRepositoryParallelMssqlTests : MSSQLTestBase
             {
                 try
                 {
-                    await repository.SaveAsync(order);
+                    await repository.SaveAsync(order, System.Threading.CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
@@ -100,7 +100,7 @@ public class EventSourcingRepositoryParallelMssqlTests : MSSQLTestBase
                 }
                 finally
                 {
-                    order = await repository.GetByIdAsync<Order, OrderId>(order.Id);
+                    order = await repository.GetByIdAsync<Order, OrderId>(order.Id, System.Threading.CancellationToken.None);
                 }
             }
         }
@@ -111,7 +111,7 @@ public class EventSourcingRepositoryParallelMssqlTests : MSSQLTestBase
         var orderId = Guid.NewGuid();
         var order = new Order(orderId.ToString(), OrderName, OrderDescription, OrderState);
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
         return orderId;
     }
 }

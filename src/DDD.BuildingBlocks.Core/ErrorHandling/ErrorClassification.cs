@@ -2,6 +2,24 @@
 {
     public enum ErrorClassification
     {
-        NotSpecified, InputDataError, NotFound, ProcessingError, Infrastructure, ProgrammingError, InvalidState, TransientFailure
+        NotSpecified,
+        Validation,
+        DomainRejection,
+        StreamNotFound,
+        StreamAlreadyExists,
+        ConcurrencyConflict,
+        UnknownEventType,
+        UnsupportedSchemaVersion,
+        SerializationFailure,
+        TransientProviderFailure,
+        PermanentProviderFailure,
+        Cancellation,
+        InputDataError,
+        NotFound,
+        ProcessingError,
+        Infrastructure,
+        ProgrammingError,
+        InvalidState,
+        TransientFailure
     }
 }

@@ -2,7 +2,7 @@
 
 ## Detailed implementation plan for modernization and playground release
 
-**Status:** ACTIVE — F3 implemented; awaiting Gate G3 review
+**Status:** ACTIVE — F4 implemented; awaiting Gate G4 review
 **Version:** 1.3
 **Date:** 2026-08-16  
 **Initial status:** Commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
@@ -237,9 +237,11 @@ Existing persisted MSSQL data should only be migrated if there is a real asset t
 
 ## 8. Phase F4: Async, Cancellation, Error and DI
 
+**Implementation status:** Complete. Gate G4 is awaiting explicit approval. The legacy service locator, dependency resolver, and command processor were removed without a compatibility layer, as explicitly decided for this breaking release.
+
 ### F4.1 I/O Contracts
 
-`CancellationToken` is the last parameter at all I/O boundaries, with a default only where API compatibility requires it. Pure domain methods remain synchronous.
+`CancellationToken` is the required last parameter at all I/O boundaries. No compatibility defaults are retained. Pure domain methods remain synchronous.
 
 ### F4.2 Error classification
 

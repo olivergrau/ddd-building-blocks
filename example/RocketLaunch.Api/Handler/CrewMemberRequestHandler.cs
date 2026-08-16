@@ -17,38 +17,38 @@ internal static class CrewMemberRequestHandler
         var group = app.MapGroup("crew-members")
                         .WithTags("Crew-Members");
         
-        group.MapPost("/", async ([FromServices] IDomainEntry entry, [FromBody] RegisterCrewMemberRequest request) =>
+        group.MapPost("/", async ([FromServices] IDomainEntry entry, [FromBody] RegisterCrewMemberRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new RegisterCrewMemberCommand(request.CrewMemberId, request.Name, request.Role, request.Certifications);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{crewMemberId:guid}/assign", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId) =>
+        group.MapPost("/{crewMemberId:guid}/assign", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, CancellationToken cancellationToken) =>
         {
             var cmd = new AssignCrewMemberCommand(crewMemberId);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{crewMemberId:guid}/release", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId) =>
+        group.MapPost("/{crewMemberId:guid}/release", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, CancellationToken cancellationToken) =>
         {
             var cmd = new ReleaseCrewMemberCommand(crewMemberId);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{crewMemberId:guid}/certifications", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, [FromBody] SetCrewMemberCertificationsRequest request) =>
+        group.MapPost("/{crewMemberId:guid}/certifications", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, [FromBody] SetCrewMemberCertificationsRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new SetCrewMemberCertificationsCommand(crewMemberId, request.Certifications);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{crewMemberId:guid}/status", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, [FromBody] SetCrewMemberStatusRequest request) =>
+        group.MapPost("/{crewMemberId:guid}/status", async ([FromServices] IDomainEntry entry, [FromRoute] Guid crewMemberId, [FromBody] SetCrewMemberStatusRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new SetCrewMemberStatusCommand(crewMemberId, request.Status);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 

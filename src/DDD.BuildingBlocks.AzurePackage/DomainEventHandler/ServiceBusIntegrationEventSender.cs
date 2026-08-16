@@ -30,9 +30,9 @@ public class ServiceBusIntegrationEventSender(
     private readonly ILogger _log = loggerFactory.CreateLogger<ServiceBusIntegrationEventSender>();
     private readonly string _queueName = configuration.CurrentValue.QueueName;
 
-    public async Task HandleAsync(IDomainEvent @event)
+    public async Task HandleAsync(IDomainEvent @event, System.Threading.CancellationToken cancellationToken)
     {
-        var snapshot = await snapshotCreationService.CreateSnapshotFrom(@event.SerializedAggregateId!, @event.TargetVersion + 1);
+        var snapshot = await snapshotCreationService.CreateSnapshotFrom(@event.SerializedAggregateId!, @event.TargetVersion + 1, cancellationToken);
 
         if (snapshot == null)
         {
@@ -51,7 +51,7 @@ public class ServiceBusIntegrationEventSender(
                 }
             });
 
-        await stringStorageService.SaveAsync(messageContent, messageClaimId.ToString());
+        await stringStorageService.SaveAsync(messageContent, messageClaimId.ToString(), cancellationToken);
 
         var data = Encoding.UTF8.GetBytes(
             JsonSerializer.Serialize(new MessageClaim(messageClaimId, messageContent)));
@@ -77,7 +77,7 @@ public class ServiceBusIntegrationEventSender(
         telemetryClient.TrackTrace(
             $"Sending message: CorrelationId: {@event.CorrelationId}, AggregateType: {snapshot.AggregateTypeIdentifier}, AggregateId: {snapshot.SerializedAggregateId}, AggregateVersion: {snapshot.Version.ToString(CultureInfo.InvariantCulture)}");
 
-        await _sender.SendMessageAsync(message);
+        await _sender.SendMessageAsync(message, cancellationToken);
 
         _log.LogDebug("Message {Subject} was sent to queue: {QueueName}. Correlation: {CorrelationId}, Diagnostics: {Diagnostic-Id}",
             message.Subject,

@@ -76,12 +76,12 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             var (order, _) = PrepareTwoAggregates(
                 GetUniqueString("Order"), GetUniqueString("Item"));
 
-            await _eventSourcingRepository.SaveAsync(order);
+            await _eventSourcingRepository.SaveAsync(order, System.Threading.CancellationToken.None);
             order.CloseOrder();
-            await _eventSourcingRepository.SaveAsync(order);
+            await _eventSourcingRepository.SaveAsync(order, System.Threading.CancellationToken.None);
 
 			// Act + Assert
-			var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(order.Id);
+			var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(order.Id, System.Threading.CancellationToken.None);
 
             reloadedOrder.Should()
                 .NotBeNull();
@@ -105,7 +105,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
             order.SetOptionalCertificate(uniquePrefix, "Fixed");
 
-            Func<Task> functor = async () => await _eventSourcingRepository.SaveAsync(order);
+            Func<Task> functor = async () => await _eventSourcingRepository.SaveAsync(order, System.Threading.CancellationToken.None);
 
             // Act + Assert
             functor.Should().NotThrowAsync("Because it saves the first time with that certificate");
@@ -128,8 +128,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             order1.SetOptionalCertificate(uniquePrefix, "Fixed");
             order2.SetOptionalCertificate(uniquePrefix, "Fixed");
 
-            Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1);
-            Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2);
+            Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1, System.Threading.CancellationToken.None);
+            Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2, System.Threading.CancellationToken.None);
 
             // Act + Assert
             functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
@@ -141,7 +141,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 		public async Task Save_a_single_aggregate_and_that_leads_to_zero_uncommitted_changes()
         {
 			// Act
-            await _eventSourcingRepository.SaveAsync(_target);
+            await _eventSourcingRepository.SaveAsync(_target, System.Threading.CancellationToken.None);
 
 			// Assert
             _target.GetUncommittedChanges().Should().HaveCount(0);
@@ -152,8 +152,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 		public async Task Save_and_load_an_aggregate_correctly()
         {
 			// Act
-            await _eventSourcingRepository.SaveAsync(_target);
-            var target = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(_target.Id);
+            await _eventSourcingRepository.SaveAsync(_target, System.Threading.CancellationToken.None);
+            var target = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(_target.Id, System.Threading.CancellationToken.None);
 
 			// Assert
             target.Should().NotBeNull();
@@ -177,9 +177,9 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
                 _target.ReferenceOrderItem(orderItem);
 
-                await _eventSourcingRepository.SaveAsync(_target);
+                await _eventSourcingRepository.SaveAsync(_target, System.Threading.CancellationToken.None);
 
-                var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(_target.Id);
+                var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(_target.Id, System.Threading.CancellationToken.None);
                 AssertOrder(reloadedOrder!, i);
             }
         }
@@ -201,8 +201,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
             order2.SetOptionalCertificate(prefix, code);
 
-            Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1);
-            Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2);
+            Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1, System.Threading.CancellationToken.None);
+            Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2, System.Threading.CancellationToken.None);
 
             // Act + Assert
             await functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
@@ -231,13 +231,13 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
 			order2.SetOptionalCertificate(prefix, code);
 
-			Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1);
-			Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2);
+			Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1, System.Threading.CancellationToken.None);
+			Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2, System.Threading.CancellationToken.None);
 
 			// Act + Assert
 			await functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
 			await functor2.Should().ThrowAsync<ProviderException>();
-			var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()));
+			var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()), System.Threading.CancellationToken.None);
 			reloadedOrder.Should().BeNull();
 		}
 

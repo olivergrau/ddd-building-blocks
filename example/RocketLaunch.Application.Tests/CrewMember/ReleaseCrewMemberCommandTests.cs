@@ -23,15 +23,15 @@ public class ReleaseCrewMemberCommandTests
             role: CrewRole.MissionSpecialist,
             certifications: []
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var assignHandler = new AssignCrewMemberCommandHandler(repository);
-        await assignHandler.HandleCommandAsync(new AssignCrewMemberCommand(registerCommand.CrewMemberId));
+        await assignHandler.HandleAsync(new AssignCrewMemberCommand(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
 
         var releaseHandler = new ReleaseCrewMemberCommandHandler(repository);
-        await releaseHandler.HandleCommandAsync(new ReleaseCrewMemberCommand(registerCommand.CrewMemberId));
+        await releaseHandler.HandleAsync(new ReleaseCrewMemberCommand(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
 
-        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId));
+        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
         Debug.Assert(crew != null);
         Assert.Equal(CrewMemberStatus.Available, crew.Status);
         Assert.Equal(2, crew.CurrentVersion);

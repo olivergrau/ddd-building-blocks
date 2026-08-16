@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace DDD.BuildingBlocks.Core.Persistence.Storage
 {
@@ -8,10 +9,10 @@ namespace DDD.BuildingBlocks.Core.Persistence.Storage
     {
         int SnapshotFrequency { get; }
         
-        Task<Snapshot?> GetSnapshotAsync(string aggregateId);
+        Task<Snapshot?> GetSnapshotAsync(string aggregateId, CancellationToken cancellationToken);
         
-        Task<Snapshot?> GetSnapshotAsync(string aggregateId, long version);
+        Task<Snapshot?> GetSnapshotAsync(string aggregateId, long version, CancellationToken cancellationToken);
         
-        Task SaveSnapshotAsync(Snapshot snapshot);
+        Task SaveSnapshotAsync(Snapshot snapshot, CancellationToken cancellationToken);
     }
 }

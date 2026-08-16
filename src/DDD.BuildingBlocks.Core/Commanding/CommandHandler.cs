@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 
@@ -11,6 +12,6 @@ namespace DDD.BuildingBlocks.Core.Commanding
 
         protected IEventSourcingRepository AggregateRepository { get; } = eventSourcingRepository ?? throw new ArgumentNullException(nameof(eventSourcingRepository));
 
-        public abstract Task HandleCommandAsync(T command);
+        public abstract Task HandleAsync(T command, CancellationToken cancellationToken);
     }
 }

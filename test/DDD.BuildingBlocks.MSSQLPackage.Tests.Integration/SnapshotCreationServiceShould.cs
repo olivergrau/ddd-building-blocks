@@ -33,11 +33,11 @@ public class SnapshotCreationServiceShould : MSSQLTestBase
 
         var repository = GetRepositoryWithoutSnapshotProvider();
 
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         var sut = GetSnapshotCreationServiceBasedOnANonSnapshotEnabledRepository();
 
-        var snapshot = await sut.CreateSnapshotFrom(orderId.ToString(), 5);
+        var snapshot = await sut.CreateSnapshotFrom(orderId.ToString(), 5, System.Threading.CancellationToken.None);
 
         snapshot!.Version.Should()
             .Be(5);
@@ -63,11 +63,11 @@ public class SnapshotCreationServiceShould : MSSQLTestBase
 
         var repository = GetRepositoryWithActivatedSnapshotProvider(2);
 
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         var sut = GetSnapshotCreationServiceBasedOnASnapshotEnabledRepository(2);
 
-        var snapshot = await sut.CreateSnapshotFrom(orderId.ToString(), 5);
+        var snapshot = await sut.CreateSnapshotFrom(orderId.ToString(), 5, System.Threading.CancellationToken.None);
 
         snapshot!.Version.Should()
             .Be(5);

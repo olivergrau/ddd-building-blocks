@@ -9,30 +9,27 @@ namespace RocketLaunch.Application.Command.Mission.Handler;
 public class RegisterMissionCommandHandler(IEventSourcingRepository repository) 
     : CommandHandler<RegisterMissionCommand>(repository)
 {
-    public override async Task HandleCommandAsync(RegisterMissionCommand command)
+    public override async Task HandleAsync(RegisterMissionCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.Mission mission;
 
         try
         {
             mission =
-                await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(
-                    command, 
-                    new MissionId(command.MissionId),
+                await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command, [new MissionId(command.MissionId),
                     new MissionName(command.MissionName),
                     new TargetOrbit(command.TargetOrbit), 
                     new PayloadDescription(command.PayloadDescription),
                     new LaunchWindow(
                         command.LaunchWindow.Start, 
                         command.LaunchWindow.End
-                    )
-                );
+                    )], cancellationToken);
         }
         catch (Exception e)
         {
             throw new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, e);
         }
 
-        await AggregateRepository.SaveAsync(mission);
+        await AggregateRepository.SaveAsync(mission, cancellationToken);
     }
 }

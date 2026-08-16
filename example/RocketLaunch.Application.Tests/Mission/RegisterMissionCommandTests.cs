@@ -32,11 +32,11 @@ public class RegisterMissionCommandTests
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
             
-        await handler.HandleCommandAsync(command);
+        await handler.HandleAsync(command, System.Threading.CancellationToken.None);
 
         // 4. assert: check that exactly one MissionRegisteredEvent was stored
         var mission = await repository
-            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(command.MissionId));
+            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(command.MissionId), System.Threading.CancellationToken.None);
             
         Assert.NotNull(mission);
         

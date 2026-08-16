@@ -23,7 +23,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
     private readonly IMissionService _missionService = missionService ?? throw new ArgumentNullException(nameof(missionService));
     private readonly ILogger<MissionProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public async Task WhenAsync(MissionCreated @event)
+    public async Task HandleAsync(MissionCreated @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = new Model.Mission
         {
@@ -46,7 +46,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(RocketAssigned @event)
+    public async Task HandleAsync(RocketAssigned @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
@@ -68,7 +68,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(LaunchPadAssigned @event)
+    public async Task HandleAsync(LaunchPadAssigned @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
@@ -93,7 +93,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(CrewAssigned @event)
+    public async Task HandleAsync(CrewAssigned @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
@@ -141,7 +141,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(MissionScheduled @event)
+    public async Task HandleAsync(MissionScheduled @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
@@ -163,7 +163,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(MissionAborted @event)
+    public async Task HandleAsync(MissionAborted @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
@@ -185,7 +185,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(MissionLaunched @event)
+    public async Task HandleAsync(MissionLaunched @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)
@@ -207,7 +207,7 @@ public class MissionProjector(IMissionService missionService, ICrewMemberService
         }
     }
 
-    public async Task WhenAsync(MissionArrivedAtLunarOrbit @event)
+    public async Task HandleAsync(MissionArrivedAtLunarOrbit @event, System.Threading.CancellationToken cancellationToken)
     {
         var mission = await _missionService.GetByIdAsync(@event.MissionId.Value);
         if (mission == null)

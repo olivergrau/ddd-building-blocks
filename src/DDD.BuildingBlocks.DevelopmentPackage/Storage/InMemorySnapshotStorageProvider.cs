@@ -36,8 +36,9 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Storage
             }
         }
 
-        public async Task<Snapshot?> GetSnapshotAsync(string key)
+        public async Task<Snapshot?> GetSnapshotAsync(string key, System.Threading.CancellationToken cancellationToken)
         {
+        cancellationToken.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(key);
 
             if (!_idMapping.ContainsKey(key))
@@ -55,8 +56,9 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Storage
             throw new ProviderException($"Mapping for key {key} exists, but no snapshot data found.");
         }
 
-        public async Task<Snapshot?> GetSnapshotAsync(string key, long version)
+        public async Task<Snapshot?> GetSnapshotAsync(string key, long version, System.Threading.CancellationToken cancellationToken)
         {
+        cancellationToken.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(key);
 
             if (!_idMapping.ContainsKey(key))
@@ -74,8 +76,9 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Storage
             throw new ProviderException($"Mapping for key {key} exists, but no snapshot data found.");
         }
 
-        public async Task SaveSnapshotAsync(Snapshot? snapshot)
+        public async Task SaveSnapshotAsync(Snapshot snapshot, System.Threading.CancellationToken cancellationToken)
         {
+        cancellationToken.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(snapshot);
 
             if (snapshot.SerializedAggregateId == null)

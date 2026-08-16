@@ -6,7 +6,7 @@ using DDD.BuildingBlocks.Core.Persistence.Storage;
 using DDD.BuildingBlocks.DevelopmentPackage.BackgroundService;
 using DDD.BuildingBlocks.DevelopmentPackage.EventPublishing;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
-using DDD.BuildingBlocks.DI.Extensions;
+using DDD.BuildingBlocks.DI.Extensions.Dispatching;
 using DDD.BuildingBlocks.Hosting.Background;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
@@ -49,15 +49,8 @@ services.AddSingleton<EventPublishingTable>(x =>
     return wt;
 });
 
-services.AddSingleton<DomainEventNotifier>(sp =>
-{
-    var notifier = new DomainEventNotifier(rocketOptions.ReadModelAssemblyName);
-    notifier.SetDependencyResolver(new ServiceLocator(sp));
-    return notifier;
-});
-
 services.AddSingleton<IDomainEventHandler>(sp =>
-    new InProcessDomainEventHandler(sp.GetRequiredService<DomainEventNotifier>(), sp.GetService<ILoggerFactory>()));
+    new InProcessDomainEventHandler(sp.GetRequiredService<IDomainEventNotifier>(), sp.GetService<ILoggerFactory>()));
 
 services.AddSingleton<DomainEventProjectionDispatcher>(sp =>
     new DomainEventProjectionDispatcher(
@@ -99,7 +92,9 @@ services.AddSingleton<IEventSourcingRepository>(sp =>
         sp.GetRequiredService<IEventStorageProvider>(),
         sp.GetRequiredService<ISnapshotStorageProvider>()));
 
-services.AddSingleton<ICommandProcessor, DefaultCommandProcessor>();
+services.AddDddBuildingBlocksDispatching(
+    typeof(DomainEntry).Assembly,
+    typeof(MissionProjector).Assembly);
 
 // Read model services and validators
 services.AddSingleton<IMissionService, InMemoryMissionService>();
@@ -107,18 +102,11 @@ services.AddSingleton<IRocketService, InMemoryRocketService>();
 services.AddSingleton<ILaunchPadService, InMemoryLaunchPadService>();
 services.AddSingleton<ICrewMemberService, InMemoryCrewService>();
 services.AddSingleton<IResourceAvailabilityService, InMemoryStationAvailabilityService>();
-
-// Projectors so they can be resolved by the notifier
-services.AddTransient<RocketProjector>();
-services.AddTransient<LaunchPadProjector>();
-services.AddTransient<MissionProjector>();
-services.AddTransient<CrewMemberProjector>();
+services.AddScoped<CrewAssignment>();
+services.AddScoped<CrewUnassignment>();
 
 // Domain entry
-services.AddSingleton<IDomainEntry>(sp => new DomainEntry(
-    sp.GetRequiredService<ICommandProcessor>(),
-    sp.GetRequiredService<IEventSourcingRepository>(),
-    sp.GetRequiredService<IResourceAvailabilityService>()));
+services.AddSingleton<IDomainEntry, DomainEntry>();
 
 var app = builder.Build();
 

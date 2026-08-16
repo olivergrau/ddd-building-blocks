@@ -12,13 +12,13 @@ namespace RocketLaunch.Application.Command.Mission.Handler;
 public class AbortMissionCommandHandler(IEventSourcingRepository repository, CrewUnassignment crewUnassignment)
     : CommandHandler<AbortMissionCommand>(repository)
 {
-    public override async Task HandleCommandAsync(AbortMissionCommand command)
+    public override async Task HandleAsync(AbortMissionCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.Mission mission;
 
         try
         {
-            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command);
+            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command, [], cancellationToken);
         }
         catch (Exception e)
         {
@@ -29,16 +29,16 @@ public class AbortMissionCommandHandler(IEventSourcingRepository repository, Cre
         foreach (var relation in mission.Crew)
         {
             var crewCmd = new ReleaseCrewMemberCommand(Guid.Parse(relation.AggregateId));
-            var member = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(crewCmd);
+            var member = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(crewCmd, [], cancellationToken);
             crewMemberAggregates.Add(member);
         }
 
         crewUnassignment.Unassign(mission, crewMemberAggregates);
 
-        await AggregateRepository.SaveAsync(mission);
+        await AggregateRepository.SaveAsync(mission, cancellationToken);
         foreach (var crewMember in crewMemberAggregates)
         {
-            await AggregateRepository.SaveAsync(crewMember);
+            await AggregateRepository.SaveAsync(crewMember, cancellationToken);
         }
     }
 }

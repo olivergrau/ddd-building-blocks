@@ -68,12 +68,14 @@ public sealed class AggregateInformationServiceShould : IDisposable
     public async Task Deliver_the_original_type_for_a_valid_aggregateId()
     {
         // Act
-        await _eventSourcingRepository.SaveAsync(_order);
+        await _eventSourcingRepository.SaveAsync(_order, System.Threading.CancellationToken.None);
 
         // Assert
         _order.GetUncommittedChanges().Should().HaveCount(0);
 
-        var type = await _aggregateInformationService.GetTypeForAggregateId(_order.Id.ToString());
+        var type = await _aggregateInformationService.GetTypeForAggregateId(
+            _order.Id.ToString(),
+            System.Threading.CancellationToken.None);
 
         type.Should()
             .NotBeNull();

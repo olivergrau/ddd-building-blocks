@@ -20,7 +20,7 @@ public sealed class EventSourcingRepositoryShould
         var aggregate = new Order(Guid.NewGuid().ToString(), "Title", "Comment", OrderState.Open);
         var repository = new EventSourcingRepository(new FailingEventStorageProvider());
 
-        Func<Task> save = () => repository.SaveAsync(aggregate);
+        Func<Task> save = () => repository.SaveAsync(aggregate, System.Threading.CancellationToken.None);
 
         await save.Should().ThrowAsync<InvalidOperationException>();
         aggregate.UncommittedChanges.Should().ContainSingle();
@@ -29,17 +29,17 @@ public sealed class EventSourcingRepositoryShould
 
     private sealed class FailingEventStorageProvider : IEventStorageProvider
     {
-        public Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count)
+        public Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count, System.Threading.CancellationToken cancellationToken)
         {
             return Task.FromResult<IEnumerable<IDomainEvent>?>(null);
         }
 
-        public Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key)
+        public Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key, System.Threading.CancellationToken cancellationToken)
         {
             return Task.FromResult<IDomainEvent?>(null);
         }
 
-        public Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate)
+        public Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
         {
             throw new InvalidOperationException("Simulated storage failure.");
         }

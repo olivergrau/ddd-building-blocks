@@ -23,12 +23,12 @@ public class AssignCrewMemberCommandTests
             role: CrewRole.Pilot,
             certifications: []
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var handler = new AssignCrewMemberCommandHandler(repository);
-        await handler.HandleCommandAsync(new AssignCrewMemberCommand(registerCommand.CrewMemberId));
+        await handler.HandleAsync(new AssignCrewMemberCommand(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
 
-        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId));
+        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
         Debug.Assert(crew != null);
         Assert.Equal(CrewMemberStatus.Assigned, crew.Status);
         Assert.Equal(1, crew.CurrentVersion);

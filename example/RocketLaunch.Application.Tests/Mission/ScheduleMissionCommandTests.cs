@@ -28,20 +28,20 @@ public class ScheduleMissionCommandTests
             payloadDescription: "Rover",
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var rocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
 
         var padHandler = new AssignLaunchPadCommandHandler(repository, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await padHandler.HandleAsync(new AssignLaunchPadCommand(
+            registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
 
         var handler = new ScheduleMissionCommandHandler(repository);
-        await handler.HandleCommandAsync(new ScheduleMissionCommand(registerCommand.MissionId));
+        await handler.HandleAsync(new ScheduleMissionCommand(registerCommand.MissionId), System.Threading.CancellationToken.None);
 
-        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId), System.Threading.CancellationToken.None);
 
         Debug.Assert(mission != null);
         Assert.Equal(MissionStatus.Scheduled, mission.Status);

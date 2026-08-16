@@ -33,23 +33,23 @@ public class FileInMemoryEventStorageProvider : PureInMemoryEventStorageProvider
         RefreshFromFiles();
     }
 
-    public override Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count)
+    public override Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count, System.Threading.CancellationToken cancellationToken)
     {
         RefreshFromFiles();
-        return base.GetEventsAsync(aggregateType, key, start, count);
+        return base.GetEventsAsync(aggregateType, key, start, count, cancellationToken);
     }
 
-    public override Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key)
+    public override Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key, System.Threading.CancellationToken cancellationToken)
     {
         RefreshFromFiles();
-        return base.GetLastEventAsync(aggregateType, key);
+        return base.GetLastEventAsync(aggregateType, key, cancellationToken);
     }
 
-    public override async Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate)
+    public override async Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
     {
         RefreshFromFiles();
 
-        await base.CommitChangesAsync(aggregate);
+        await base.CommitChangesAsync(aggregate, cancellationToken);
 
         SerializerHelper.SaveListToFile(_memoryDumpFile, new[] { EventStream });
         SerializerHelper.SaveListToFile(_memoryDumpFile + "._unique", new[] { UniqueProperties });

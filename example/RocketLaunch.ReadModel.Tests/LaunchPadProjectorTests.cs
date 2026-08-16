@@ -30,9 +30,9 @@ public class LaunchPadProjectorTests
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
 
-        await projector.WhenAsync(
+        await projector.HandleAsync(
             new LaunchPadAssigned(
-                new MissionId(missionId), new LaunchPadId(padId), "Launch Pad M-1", "Cape Carnival", ["Falcon 9"], window));
+                new MissionId(missionId), new LaunchPadId(padId), "Launch Pad M-1", "Cape Carnival", ["Falcon 9"], window), System.Threading.CancellationToken.None);
 
         var pad = (await service.GetByIdAsync(padId))!;
         Assert.Equal(LaunchPadStatus.Occupied, pad.Status);
@@ -68,7 +68,7 @@ public class LaunchPadProjectorTests
             ]
         });
 
-        await projector.WhenAsync(new MissionAborted(new MissionId(missionId)));
+        await projector.HandleAsync(new MissionAborted(new MissionId(missionId)), System.Threading.CancellationToken.None);
 
         var pad = (await service.GetByIdAsync(padId))!;
         Assert.Equal(LaunchPadStatus.Available, pad.Status);
@@ -100,7 +100,7 @@ public class LaunchPadProjectorTests
             ]
         });
 
-        await projector.WhenAsync(new MissionLaunched(new MissionId(missionId)));
+        await projector.HandleAsync(new MissionLaunched(new MissionId(missionId)), System.Threading.CancellationToken.None);
 
         var pad = (await service.GetByIdAsync(padId))
             ?? throw new InvalidOperationException("Launch pad not found");
@@ -116,7 +116,7 @@ public class LaunchPadProjectorTests
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
 
         await Assert.ThrowsAsync<ReadModelServiceException>(() =>
-            projector.WhenAsync(new LaunchPadAssigned(new MissionId(missionId), new LaunchPadId(Guid.NewGuid()), "Pad", "Loc", ["A"], window)));
+            projector.HandleAsync(new LaunchPadAssigned(new MissionId(missionId), new LaunchPadId(Guid.NewGuid()), "Pad", "Loc", ["A"], window), System.Threading.CancellationToken.None));
     }
 
     private class FailingPadService : ILaunchPadService

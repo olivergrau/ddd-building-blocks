@@ -40,11 +40,11 @@ public class EventSourcingRepositoryStressMssqlTests : MSSQLTestBase
             order.ChangeComment(OrderComment + i);
         }
         var repository = GetRepositoryWithActivatedSnapshotProvider(snapshotFrequency);
-        await repository.SaveAsync(order);
-        await repository.SaveAsync(orderItem);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        await repository.SaveAsync(orderItem, System.Threading.CancellationToken.None);
 
         var startTime = ApplicationTime.Current;
-        var orderToCheck = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        var orderToCheck = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
         var endTime = ApplicationTime.Current;
         var elapsedTime = endTime - startTime;
 
@@ -78,16 +78,16 @@ public class EventSourcingRepositoryStressMssqlTests : MSSQLTestBase
             order.ChangeComment(OrderComment + i);
             if (i % saveFrequency == 0)
             {
-                await repository.SaveAsync(order);
-                await repository.SaveAsync(orderItem);
+                await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+                await repository.SaveAsync(orderItem, System.Threading.CancellationToken.None);
             }
         }
 
-        await repository.SaveAsync(order);
-        await repository.SaveAsync(orderItem);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        await repository.SaveAsync(orderItem, System.Threading.CancellationToken.None);
 
         var startTime = DateTime.Now;
-        var _ = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        var _ = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
         var endTime = DateTime.Now;
         var elapsedTime = endTime - startTime;
 
@@ -112,12 +112,12 @@ public class EventSourcingRepositoryStressMssqlTests : MSSQLTestBase
             order.ChangeComment(newComment + i);
             if (i % saveFrequency == 0)
             {
-                await repository.SaveAsync(order);
+                await repository.SaveAsync(order, System.Threading.CancellationToken.None);
             }
         }
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
-        var reloadedOrder = await repository.GetByIdAsync<Order,OrderId>(new OrderId(orderId.ToString()));
+        var reloadedOrder = await repository.GetByIdAsync<Order,OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
 
         // Assert
         reloadedOrder.Should().NotBeNull();
@@ -163,9 +163,9 @@ public class EventSourcingRepositoryStressMssqlTests : MSSQLTestBase
                 var newTitle = $"Title Update: {i}";
                 order.ChangeTitle(newTitle);
                 order.ChangeComment(newComment);
-                await repository.SaveAsync(order);
+                await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
-                var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+                var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
                 reloadedOrder.Should().NotBeNull();
                 reloadedOrder!.Title.Should().Be(newTitle);
                 reloadedOrder.Comment.Should().Be(newComment);

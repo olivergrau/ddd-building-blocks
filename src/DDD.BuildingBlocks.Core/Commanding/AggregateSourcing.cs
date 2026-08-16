@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DDD.BuildingBlocks.Core.Domain;
 using DDD.BuildingBlocks.Core.Exception;
@@ -14,10 +15,12 @@ namespace DDD.BuildingBlocks.Core.Commanding
     {
         private readonly IEventSourcingRepository _eventSourcingRepository = eventSourcingRepository ?? throw new ArgumentNullException(nameof(eventSourcingRepository));
 
-        public virtual async Task<T> Source<T,TKey>(Command command, params object[] p)
+        public virtual async Task<T> Source<T,TKey>(Command command, object[] constructorArguments, CancellationToken cancellationToken)
             where T : AggregateRoot<TKey>, new() where TKey : EntityId<TKey>
         {
             ArgumentNullException.ThrowIfNull(command);
+            ArgumentNullException.ThrowIfNull(constructorArguments);
+            cancellationToken.ThrowIfCancellationRequested();
 
             TKey? key;
 
@@ -31,7 +34,7 @@ namespace DDD.BuildingBlocks.Core.Commanding
             }
 
             var aggregate = await _eventSourcingRepository
-                .GetByIdAsync<T,TKey>(key);
+                .GetByIdAsync<T,TKey>(key, cancellationToken);
 
             if (aggregate != null && command.Mode == AggregateSourcingMode.Create)
             {
@@ -50,7 +53,7 @@ namespace DDD.BuildingBlocks.Core.Commanding
                                           command.Mode == AggregateSourcingMode.Create))
                 {
                     aggregate = Activator.CreateInstance(typeof(T),
-                        new[] { key }.Union(p).ToArray()) as T;
+                        new[] { key }.Union(constructorArguments).ToArray()) as T;
                 }
             }
             catch (System.Exception e)

@@ -24,9 +24,9 @@ public class RegisterCrewMemberCommandTests
             certifications: ["Flight", "EVA"]
         );
 
-        await handler.HandleCommandAsync(command);
+        await handler.HandleAsync(command, System.Threading.CancellationToken.None);
 
-        var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(command.CrewMemberId));
+        var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(command.CrewMemberId), System.Threading.CancellationToken.None);
 
         Assert.NotNull(crewMember);
         Assert.Equal(0, crewMember.CurrentVersion);

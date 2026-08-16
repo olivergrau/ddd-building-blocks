@@ -36,11 +36,11 @@ public class EventStorageProviderForMssqlShould : MSSQLTestBase
             order.ChangeComment($"Comment {i+1}");
         }
 
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         // Assert
         var eventList = await storageProvider
-            .GetEventsAsync(typeof(Order), order.Id.ToString(), 0, 5);
+            .GetEventsAsync(typeof(Order), order.Id.ToString(), 0, 5, System.Threading.CancellationToken.None);
 
         var domainEvents = eventList!.ToList();
         domainEvents.Should().NotBeNull();
@@ -60,11 +60,11 @@ public class EventStorageProviderForMssqlShould : MSSQLTestBase
 
         // Act
         order.SetOptionalCertificate(CertLabel, CertCode);
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         // Assert
         var eventList = await storageProvider
-            .GetEventsAsync(typeof(Order), order.Id.ToString(), 0, int.MaxValue);
+            .GetEventsAsync(typeof(Order), order.Id.ToString(), 0, int.MaxValue, System.Threading.CancellationToken.None);
 
         var domainEvents = eventList!.ToList();
         domainEvents.Should().NotBeNull();
@@ -83,10 +83,10 @@ public class EventStorageProviderForMssqlShould : MSSQLTestBase
         var repository = new EventSourcingRepository(storageProvider);
 
         // Act
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         // Assert
-        var eventList = await storageProvider.GetEventsAsync(typeof(Order), order.Id.ToString(), 0, Int32.MaxValue);
+        var eventList = await storageProvider.GetEventsAsync(typeof(Order), order.Id.ToString(), 0, Int32.MaxValue, System.Threading.CancellationToken.None);
         var domainEvents = eventList!.ToList();
         domainEvents.Should().NotBeNull();
         domainEvents.First().TargetVersion.Should().Be(-1);
@@ -103,10 +103,10 @@ public class EventStorageProviderForMssqlShould : MSSQLTestBase
 
         // Act
         order.SetOptionalCertificate(CertLabel, CertCode);
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         // Assert
-        var eventList = await storageProvider.GetEventsAsync(typeof(Order), order.Id.ToString(), 0, int.MaxValue);
+        var eventList = await storageProvider.GetEventsAsync(typeof(Order), order.Id.ToString(), 0, int.MaxValue, System.Threading.CancellationToken.None);
         var domainEvents = eventList!.ToList();
         domainEvents.Should().NotBeNull();
         domainEvents.Should().HaveCount(2);
@@ -122,13 +122,13 @@ public class EventStorageProviderForMssqlShould : MSSQLTestBase
         var storageProvider = new EventStorageProvider(new EventStorageProviderSettings { ConnectionString = ConnectionString! }.AsOptionsMonitor());
         var repository = new EventSourcingRepository(storageProvider);
         order.SetOptionalCertificate(CertLabel, CertCode);
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
         await PrepareEventWithInvalidType();
 
         // Act
         try
         {
-            var _ = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+            var _ = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
             true.Should().BeFalse();
         }
         catch (ProviderException e)

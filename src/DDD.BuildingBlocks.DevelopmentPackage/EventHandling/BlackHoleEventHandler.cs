@@ -20,13 +20,13 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.EventHandling
         {
             var nullLoggerFactory = new NullLoggerFactory();
 
-            _log = loggerFactory != null ? loggerFactory.CreateLogger(nameof(DefaultCommandProcessor))
-                : nullLoggerFactory.CreateLogger(nameof(DomainEventNotifier));
+            _log = loggerFactory != null ? loggerFactory.CreateLogger(nameof(BlackHoleEventHandler))
+                : nullLoggerFactory.CreateLogger(nameof(BlackHoleEventHandler));
 
             nullLoggerFactory.Dispose();
         }
 
-        public Task HandleAsync(IDomainEvent @event)
+        public Task HandleAsync(IDomainEvent @event, System.Threading.CancellationToken cancellationToken)
         {
             if (@event == null)
             {

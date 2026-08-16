@@ -29,5 +29,6 @@ This folder separates governing documents from evidence produced during implemen
 - [F1 – Outcome Report and Gate G1](reports/14-DDD.BuildingBlocks-F1-Outcome-Report.md)
 - [F2 – Tactical Domain Primitives and Gate G2](reports/15-DDD.BuildingBlocks-F2-Tactical-Domain-Primitives-Report.md)
 - [F3 – Event Contracts and Evolution and Gate G3](reports/16-DDD.BuildingBlocks-F3-Event-Contracts-and-Evolution-Report.md)
+- [F4 – Async, Cancellation, Error, and DI and Gate G4](reports/17-DDD.BuildingBlocks-F4-Async-Cancellation-Error-and-DI-Report.md)
 
 New phase reports belong under `reports/`. Numbered analysis, decision, and planning documents remain in this directory so their intended reading order stays visible.

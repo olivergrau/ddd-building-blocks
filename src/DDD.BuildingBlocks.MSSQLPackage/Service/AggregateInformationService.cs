@@ -10,11 +10,11 @@ using Microsoft.Extensions.Options;
 public class AggregateInformationService(IOptionsMonitor<AggregateInformationServiceSettings> settings, ILogger<AggregateInformationService> logger)
     : IAggregateInformationService
 {
-    public async Task<Type?> GetTypeForAggregateId(string aggregateId)
+    public async Task<Type?> GetTypeForAggregateId(string aggregateId, System.Threading.CancellationToken cancellationToken)
     {
         await using var connection = new SqlConnection(settings.CurrentValue.ConnectionString);
         await using var command = connection.CreateCommand();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         command.CommandText =
             "SELECT A.TYPE FROM dbo.MAPPINGS M INNER JOIN dbo.AGGREGATES A " +

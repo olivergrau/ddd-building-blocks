@@ -31,17 +31,17 @@ public class AbortMissionCommandTests
             payloadDescription: "Rover",
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var rocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await rocketHandler.HandleCommandAsync(
+        await rocketHandler.HandleAsync(
             new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid(),
-                "Saturn V", 34.5, 140000, 3));
+                "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
 
         var padHandler = new AssignLaunchPadCommandHandler(repository, validator);
-        await padHandler.HandleCommandAsync(
+        await padHandler.HandleAsync(
             new AssignLaunchPadCommand(
-                registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+                registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
 
         var crewAssignment = new CrewAssignment(validator);
         var assignCrewHandler = new AssignCrewCommandHandler(repository, crewAssignment);
@@ -49,25 +49,25 @@ public class AbortMissionCommandTests
         var registerCrewHandler = new RegisterCrewMemberCommandHandler(repository);
         foreach (var id in crewIds)
         {
-            await registerCrewHandler.HandleCommandAsync(new RegisterCrewMemberCommand(id, $"Member-{id}", CrewRole.Commander, []));
+            await registerCrewHandler.HandleAsync(new RegisterCrewMemberCommand(id, $"Member-{id}", CrewRole.Commander, []), System.Threading.CancellationToken.None);
         }
-        await assignCrewHandler.HandleCommandAsync(new AssignCrewCommand(registerCommand.MissionId, crewIds));
+        await assignCrewHandler.HandleAsync(new AssignCrewCommand(registerCommand.MissionId, crewIds), System.Threading.CancellationToken.None);
 
         var scheduleHandler = new ScheduleMissionCommandHandler(repository);
-        await scheduleHandler.HandleCommandAsync(new ScheduleMissionCommand(registerCommand.MissionId));
+        await scheduleHandler.HandleAsync(new ScheduleMissionCommand(registerCommand.MissionId), System.Threading.CancellationToken.None);
 
         var unassignment = new CrewUnassignment();
         var handler = new AbortMissionCommandHandler(repository, unassignment);
-        await handler.HandleCommandAsync(new AbortMissionCommand(registerCommand.MissionId));
+        await handler.HandleAsync(new AbortMissionCommand(registerCommand.MissionId), System.Threading.CancellationToken.None);
 
-        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId), System.Threading.CancellationToken.None);
         Debug.Assert(mission != null);
         Assert.Equal(MissionStatus.Aborted, mission.Status);
         Assert.Equal(5, mission.CurrentVersion);
 
         foreach (var id in crewIds)
         {
-            var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(id));
+            var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(id), System.Threading.CancellationToken.None);
             Debug.Assert(crewMember != null);
             Assert.Equal(CrewMemberStatus.Available, crewMember.Status);
         }

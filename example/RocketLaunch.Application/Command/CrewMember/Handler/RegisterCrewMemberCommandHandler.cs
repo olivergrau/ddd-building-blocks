@@ -9,25 +9,22 @@ namespace RocketLaunch.Application.Command.CrewMember.Handler;
 public class RegisterCrewMemberCommandHandler(IEventSourcingRepository repository)
     : CommandHandler<RegisterCrewMemberCommand>(repository)
 {
-    public override async Task HandleCommandAsync(RegisterCrewMemberCommand command)
+    public override async Task HandleAsync(RegisterCrewMemberCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.CrewMember crewMember;
 
         try
         {
-            crewMember = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(
-                command,
-                new CrewMemberId(command.CrewMemberId),
+            crewMember = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(command, [new CrewMemberId(command.CrewMemberId),
                 command.Name,
                 command.Role,
-                command.Certifications
-            );
+                command.Certifications], cancellationToken);
         }
         catch (Exception e)
         {
             throw new ApplicationProcessingException(HandlerErrors.ApplicationProcessingError, e);
         }
 
-        await AggregateRepository.SaveAsync(crewMember);
+        await AggregateRepository.SaveAsync(crewMember, cancellationToken);
     }
 }

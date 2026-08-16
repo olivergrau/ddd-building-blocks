@@ -33,8 +33,9 @@ public class PureInMemoryEventStorageProvider : IEventStorageProvider
     }
 
     public virtual async Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start,
-        long count)
+        long count, System.Threading.CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         try
         {
             if (!IdMapping.Any(q => q.AggregateType == aggregateType && q.Key == key))
@@ -60,8 +61,9 @@ public class PureInMemoryEventStorageProvider : IEventStorageProvider
         }
     }
 
-    public virtual async Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key)
+    public virtual async Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key, System.Threading.CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (!IdMapping.Any(q => q.AggregateType == aggregateType && q.Key == key))
         {
             return null;
@@ -73,8 +75,9 @@ public class PureInMemoryEventStorageProvider : IEventStorageProvider
         return EventStream.ContainsKey(aggregateId) ? EventStream[aggregateId].Last() : null;
     }
 
-    public virtual async Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate)
+    public virtual async Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var events = aggregate.GetUncommittedChanges();
 
         var enumerable = events as IDomainEvent[] ?? events.ToArray();

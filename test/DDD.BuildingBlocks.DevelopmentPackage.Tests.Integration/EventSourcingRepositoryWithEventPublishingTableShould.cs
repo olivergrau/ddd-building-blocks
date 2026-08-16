@@ -8,6 +8,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Threading.Tasks;
+    using System.Threading;
     using FluentAssertions;
     using Core.Event;
     using Core.Persistence.Repository;
@@ -16,6 +17,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
     using Storage;
     using DDD.BuildingBlocks.Tests.Abstracts.Event;
     using DDD.BuildingBlocks.Tests.Abstracts.Model;
+    using DDD.BuildingBlocks.DI.Extensions.Dispatching;
+    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public sealed class EventSourcingRepositoryWithEventPublishingTableShould : IDisposable
@@ -30,13 +33,13 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             public static int WhenAsyncOrderCreatedCalls { get; private set; }
             public static int WhenAsyncOrderItemCreatedCalls { get; private set; }
 
-            public Task WhenAsync(OrderCreatedEvent @event)
+            public Task HandleAsync(OrderCreatedEvent @event, CancellationToken cancellationToken)
             {
                 WhenAsyncOrderCreatedCalls++;
                 return Task.CompletedTask;
             }
 
-            public Task WhenAsync(OrderItemCreatedEvent @event)
+            public Task HandleAsync(OrderItemCreatedEvent @event, CancellationToken cancellationToken)
             {
                 WhenAsyncOrderItemCreatedCalls++;
                 return Task.CompletedTask;
@@ -52,7 +55,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
             public static int WhenAsyncCalls { get; private set; }
 
-            public Task WhenAsync(OrderItemCreatedEvent @event)
+            public Task HandleAsync(OrderItemCreatedEvent @event, CancellationToken cancellationToken)
             {
                 WhenAsyncCalls++;
                 return Task.CompletedTask;
@@ -60,6 +63,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
         }
 
         private readonly Order _order;
+        private readonly ServiceProvider _serviceProvider;
         private readonly OrderItem _orderItem;
 
         private readonly EventSourcingRepository _eventSourcingRepository;
@@ -108,7 +112,10 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             _eventSourcingRepository = new EventSourcingRepository(new PureInMemoryEventStorageProvider(_eventPublishingTable),
                 new InMemorySnapshotStorageProvider(5, inMemorySnapshotStorePath));
 
-            var domainEventNotifier = new DomainEventNotifier("DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration");
+            var services = new ServiceCollection();
+            services.AddDddBuildingBlocksDispatching(typeof(TestSubscriberAlpha).Assembly);
+            _serviceProvider = services.BuildServiceProvider();
+            var domainEventNotifier = _serviceProvider.GetRequiredService<IDomainEventNotifier>();
 
             _eventWorker1 = new DomainEventProjectionDispatcher(
                 new InProcessDomainEventHandler(domainEventNotifier), _eventPublishingTable, "worker1");
@@ -122,6 +129,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
         public void Dispose()
         {
+            _serviceProvider.Dispose();
             var strTempDataFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data_" + _identifier);
             var inMemoryEventStorePath = $@"{strTempDataFolderPath}/events.stream.dump";
             var inMemorySnapshotStorePath = $@"{strTempDataFolderPath}/events.snapshot.dump";
@@ -136,8 +144,8 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 		public async Task Work_properly_together_to_publish_saved_events()
         {
 			// Act
-            await _eventSourcingRepository.SaveAsync(_order);
-            await _eventSourcingRepository.SaveAsync(_orderItem);
+            await _eventSourcingRepository.SaveAsync(_order, System.Threading.CancellationToken.None);
+            await _eventSourcingRepository.SaveAsync(_orderItem, System.Threading.CancellationToken.None);
 
             _eventPublishingTable.WorkerQueues["worker1"]
                 .Count.Should()

@@ -2,7 +2,7 @@
 
 ## DDD.BuildingBlocks modernization plan
 
-**Status:** ACTIVE — M4/F3 implemented; awaiting Gate G3 review
+**Status:** ACTIVE — M5/M9/F4 implemented; awaiting Gate G4 review
 **Version:** 1.4
 **Date:** 2026-08-16  
 **Base:** Framework analysis on commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
@@ -144,7 +144,7 @@ Payload
 
 **Acceptance:**
 
-- `CancellationToken` in repository, provider, snapshot, dispatcher and handler;
+- required `CancellationToken` as the last parameter in repository, provider, snapshot, dispatcher and handler contracts;
 - Cancellation is not classified as a domain error;
 - no cancellation in pure domain apply methods;
 - Tests for abort before and during I/O.
@@ -215,7 +215,7 @@ projection_checkpoints
 
 **Acceptance:**
 
-- no service locator in the normal runtime path;
+- no service locator, dependency resolver, or legacy command processor remains;
 - Command and projection handlers explicitly registered;
 - duplicate handler registration is detected at startup;
 - scoped dependencies work;

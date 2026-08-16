@@ -27,23 +27,23 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
 
     public int SnapshotFrequency => _settings.CurrentValue.SnapshotFrequency;
 
-    public async Task<Snapshot?> GetSnapshotAsync(string aggregateId)
+    public async Task<Snapshot?> GetSnapshotAsync(string aggregateId, System.Threading.CancellationToken cancellationToken)
     {
         await using (var connection = new SqlConnection(_settings.CurrentValue.ConnectionString))
         await using (var command = connection.CreateCommand())
         {
             try
             {
-                await connection.OpenAsync();
+                await connection.OpenAsync(cancellationToken);
 
                 command.CommandText =
                     "SELECT TOP 1 S.* FROM dbo.MAPPINGS M INNER JOIN dbo.SNAPSHOTS S ON M.AGGREGATEID = S.AGGREGATEID WHERE M.[KEY] = @key ORDER BY version DESC";
 
                 command.Parameters.Add(aggregateId.ToSqlParameter("@key"));
 
-                var reader = await command.ExecuteReaderAsync();
+                var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-                while (await reader.ReadAsync())
+                while (await reader.ReadAsync(cancellationToken))
                 {
                     ReconstituteSnapshot(reader, out var snapshot);
 
@@ -52,19 +52,19 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
 
                 return null;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 throw new ProviderException("Failure reading snapshots from storage.", ex);
             }
         }
     }
 
-    public async Task SaveSnapshotAsync(Snapshot snapshot)
+    public async Task SaveSnapshotAsync(Snapshot snapshot, System.Threading.CancellationToken cancellationToken)
     {
         await using (var connection = new SqlConnection(_settings.CurrentValue.ConnectionString))
         await using (var sqlCommand1 = connection.CreateCommand())
         {
-            await connection.OpenAsync();
+            await connection.OpenAsync(cancellationToken);
 
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
             sqlCommand1.Transaction = transaction;
@@ -74,9 +74,9 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
                 sqlCommand1.CommandText = "SELECT * FROM dbo.MAPPINGS WHERE [KEY] = @key";
                 sqlCommand1.Parameters.Add(new SqlParameter("@key", snapshot.SerializedAggregateId));
 
-                var reader = await sqlCommand1.ExecuteReaderAsync();
+                var reader = await sqlCommand1.ExecuteReaderAsync(cancellationToken);
 
-                if (!await reader.ReadAsync())
+                if (!await reader.ReadAsync(cancellationToken))
                 {
                     throw new Exception($"Mapping for key: {snapshot.SerializedAggregateId} not found.");
                 }
@@ -99,7 +99,7 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
                 sqlCommand2.Parameters.Add(snapshot.Version.ToSqlParameter("@version"));
                 sqlCommand2.Parameters.Add(snapshot.GetType().AssemblyQualifiedName!.ToSqlParameter("@type"));
 
-                var rows = await sqlCommand2.ExecuteNonQueryAsync();
+                var rows = await sqlCommand2.ExecuteNonQueryAsync(cancellationToken);
 
                 if (rows <= 0)
                 {
@@ -108,7 +108,7 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
 
                 transaction.Commit();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 transaction.Rollback();
                 throw new ProviderException("Failure saving snapshot", ex);
@@ -116,14 +116,14 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
         }
     }
 
-    public async Task<Snapshot?> GetSnapshotAsync(string aggregateId, long version)
+    public async Task<Snapshot?> GetSnapshotAsync(string aggregateId, long version, System.Threading.CancellationToken cancellationToken)
     {
         await using (var connection = new SqlConnection(_settings.CurrentValue.ConnectionString))
         await using (var command = connection.CreateCommand())
         {
             try
             {
-                await connection.OpenAsync();
+                await connection.OpenAsync(cancellationToken);
 
                 command.CommandText =
                     "SELECT S.* FROM dbo.MAPPINGS M INNER JOIN dbo.SNAPSHOTS S ON M.AGGREGATEID = S.AGGREGATEID WHERE M.[KEY] = @key AND S.version <= @version";
@@ -131,9 +131,9 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
                 command.Parameters.Add(aggregateId.ToSqlParameter("@key"));
                 command.Parameters.Add(version.ToSqlParameter("@version"));
 
-                var reader = await command.ExecuteReaderAsync();
+                var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-                while (await reader.ReadAsync())
+                while (await reader.ReadAsync(cancellationToken))
                 {
                     ReconstituteSnapshot(reader, out var snapshot);
 
@@ -142,7 +142,7 @@ public class SnapshotStorageProvider : ISnapshotStorageProvider
 
                 return null;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 throw new ProviderException("Failure reading snapshots from storage.", ex);
             }

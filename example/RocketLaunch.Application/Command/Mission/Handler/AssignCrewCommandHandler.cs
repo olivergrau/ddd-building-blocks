@@ -12,12 +12,12 @@ public class AssignCrewCommandHandler(IEventSourcingRepository repository, CrewA
     : CommandHandler<AssignCrewCommand>(repository)
 {
     private readonly CrewAssignment _crewAssignment = crewAssignment;
-    public override async Task HandleCommandAsync(AssignCrewCommand command)
+    public override async Task HandleAsync(AssignCrewCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.Mission mission;
         try
         {
-            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command);
+            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command, [], cancellationToken);
         }
         catch (Exception e)
         {
@@ -28,16 +28,16 @@ public class AssignCrewCommandHandler(IEventSourcingRepository repository, CrewA
         foreach (var id in command.CrewMemberIds)
         {
             var crewCmd = new AssignCrewMemberCommand(id);
-            var member = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(crewCmd);
+            var member = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(crewCmd, [], cancellationToken);
             crewMemberAggregates.Add(member);
         }
 
         await _crewAssignment.AssignAsync(mission, crewMemberAggregates);
 
-        await AggregateRepository.SaveAsync(mission);
+        await AggregateRepository.SaveAsync(mission, cancellationToken);
         foreach (var crewMember in crewMemberAggregates)
         {
-            await AggregateRepository.SaveAsync(crewMember);
+            await AggregateRepository.SaveAsync(crewMember, cancellationToken);
         }
     }
 }

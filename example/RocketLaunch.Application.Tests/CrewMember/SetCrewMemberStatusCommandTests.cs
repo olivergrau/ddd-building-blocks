@@ -23,12 +23,12 @@ public class SetCrewMemberStatusCommandTests
             role: CrewRole.Pilot,
             certifications: []
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var handler = new SetCrewMemberStatusCommandHandler(repository);
-        await handler.HandleCommandAsync(new SetCrewMemberStatusCommand(registerCommand.CrewMemberId, CrewMemberStatus.Unavailable));
+        await handler.HandleAsync(new SetCrewMemberStatusCommand(registerCommand.CrewMemberId, CrewMemberStatus.Unavailable), System.Threading.CancellationToken.None);
 
-        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId));
+        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
         Debug.Assert(crew != null);
         Assert.Equal(CrewMemberStatus.Unavailable, crew.Status);
         Assert.Equal(1, crew.CurrentVersion);

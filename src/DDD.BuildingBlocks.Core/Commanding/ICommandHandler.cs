@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace DDD.BuildingBlocks.Core.Commanding
 {
@@ -12,7 +13,8 @@ namespace DDD.BuildingBlocks.Core.Commanding
         ///     Handles the command.
         /// </summary>
         /// <param name="command"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task HandleCommandAsync(T command);
+        Task HandleAsync(T command, CancellationToken cancellationToken);
     }
 }

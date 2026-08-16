@@ -28,35 +28,35 @@ public class MarkMissionArrivedCommandTests
             payloadDescription: "Rover",
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var rocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(registerCommand.MissionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
 
         var padHandler = new AssignLaunchPadCommandHandler(repository, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await padHandler.HandleAsync(new AssignLaunchPadCommand(
+            registerCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
 
         var scheduleHandler = new ScheduleMissionCommandHandler(repository);
-        await scheduleHandler.HandleCommandAsync(new ScheduleMissionCommand(registerCommand.MissionId));
+        await scheduleHandler.HandleAsync(new ScheduleMissionCommand(registerCommand.MissionId), System.Threading.CancellationToken.None);
 
         var launchHandler = new LaunchMissionCommandHandler(repository);
-        await launchHandler.HandleCommandAsync(new LaunchMissionCommand(registerCommand.MissionId));
+        await launchHandler.HandleAsync(new LaunchMissionCommand(registerCommand.MissionId), System.Threading.CancellationToken.None);
 
         var arrivalTime = DateTime.UtcNow;
         var crew = new[] { new CrewManifestItemDto("Neil", "Commander") };
         var payload = new[] { new PayloadManifestItemDto("Lander", 1000) };
         var handler = new MarkMissionArrivedCommandHandler(repository);
-        await handler.HandleCommandAsync(new MarkMissionArrivedCommand(
+        await handler.HandleAsync(new MarkMissionArrivedCommand(
             registerCommand.MissionId,
             arrivalTime,
             "Saturn V",
             crew,
             payload
-        ));
+        ), System.Threading.CancellationToken.None);
 
-        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerCommand.MissionId), System.Threading.CancellationToken.None);
         Debug.Assert(mission != null);
         Assert.Equal(MissionStatus.Arrived, mission.Status);
         Assert.Equal(5, mission.CurrentVersion);

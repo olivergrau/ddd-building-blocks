@@ -11,7 +11,8 @@
 - F0 is complete and its gate was approved.
 - F1 is implemented, verified, and approved at Gate G1.
 - F2 is implemented, verified, and approved at Gate G2.
-- F3 is implemented and verified; Gate G3 is awaiting explicit approval.
+- F3 is implemented, verified, and approved at Gate G3.
+- F4 is implemented and verified; Gate G4 is awaiting explicit approval.
 - Agreed F2 direction: keep the existing `AggregateRoot<TKey>` name because the framework supports only event-sourced domain aggregates.
 - Do not introduce `ConventionalAggregateRoot<TKey>` or `PlainAggregateRoot<TKey>`; DDD.BuildingBlocks remains focused on event-sourced domain aggregates.
 - Do not introduce a marker-only `IAggregateRoot<TKey>` without a concrete consumer.
@@ -32,12 +33,16 @@
 - Documented the coordinated post-G2 migration boundary from `int` to `long` stream versions across event, snapshot, provider, and storage contracts.
 - Added the immutable event envelope, explicit stable-key registry, `IEventCodec`, default `SystemTextJsonEventCodec`, sequential JSON upcasting, historical fixtures, and classified registry/codec errors.
 - Migrated stream-related versions to `long` across commands, events, aggregates, snapshots, repository/provider contracts, examples, and tests; the legacy MSSQL schema now uses `BIGINT`.
+- Removed `ServiceLocator`, `IDependencyResolver`, `DefaultCommandProcessor`, and their compatibility APIs completely.
+- Added validated startup registration plus scope-safe command and domain-event dispatch; each dispatch creates an independent DI scope.
+- Added mandatory `CancellationToken` parameters to asynchronous framework I/O and dispatch contracts, propagated cancellation through providers, and kept cancellation exceptions unwrapped.
+- Expanded the shared error taxonomy with the F4 domain, stream, codec, provider, and cancellation categories.
 
 ## Verification status
 
 - Restore succeeds.
 - Build succeeds with zero warnings and zero errors.
-- Core: 69 passed.
+- Core: 64 passed.
 - DevelopmentPackage integration: 22 passed.
 - MSSQL integration: 33 passed, 2 skipped; SQL Server runs through Testcontainers.
 - RocketLaunch Domain: 21 passed; LunarOps Domain: 53 passed.
@@ -48,7 +53,9 @@
 - Latest F2 full run: every non-API suite passed; API remained at 5/7 with the same accepted projection race.
 - F2 API compatibility against the approved F1 assembly passes with no breaking changes.
 - Latest F3 full run: every non-API suite passed; API passed 6/7 with the same accepted projection race.
+- Latest F4 run: build passed with zero warnings; Core passed 64/64, DevelopmentPackage 22/22, MSSQL 33 passed and 2 skipped, and API passed 6/7 with the same accepted projection race.
 - F3 intentionally breaks the public version contract from `int` to `long`; a future release containing F3 requires an appropriate SemVer major version.
+- F4 intentionally removes the legacy locator/processor APIs and changes async handler and persistence signatures; it therefore remains part of the same coordinated breaking release.
 
 ## Working references
 
@@ -58,6 +65,7 @@
 - F1/G1 report: `specs/reports/14-DDD.BuildingBlocks-F1-Outcome-Report.md`.
 - F2/G2 report: `specs/reports/15-DDD.BuildingBlocks-F2-Tactical-Domain-Primitives-Report.md`.
 - F3/G3 report: `specs/reports/16-DDD.BuildingBlocks-F3-Event-Contracts-and-Evolution-Report.md`.
+- F4/G4 report: `specs/reports/17-DDD.BuildingBlocks-F4-Async-Cancellation-Error-and-DI-Report.md`.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.
 

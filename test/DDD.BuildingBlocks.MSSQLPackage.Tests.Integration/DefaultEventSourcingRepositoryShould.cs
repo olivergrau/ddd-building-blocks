@@ -54,10 +54,10 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         // now deactivate the aggregate
         order1.CloseOrder();
 
-        await repository.SaveAsync(order1);
-        await repository.SaveAsync(order2);
+        await repository.SaveAsync(order1, System.Threading.CancellationToken.None);
+        await repository.SaveAsync(order2, System.Threading.CancellationToken.None);
 
-        var order1Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId1.ToString()));
+        var order1Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId1.ToString()), System.Threading.CancellationToken.None);
 
         order1Repository.Should()
             .NotBeNull();
@@ -65,7 +65,7 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         order1Repository!.CorrelationIds.Should()
             .Contain(correlationId);
 
-        var order2Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()));
+        var order2Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()), System.Threading.CancellationToken.None);
 
         order2Repository.Should()
             .NotBeNull();
@@ -80,9 +80,9 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
 
         order2Repository.CloseOrder();
 
-        await repository.SaveAsync(order2Repository);
+        await repository.SaveAsync(order2Repository, System.Threading.CancellationToken.None);
 
-        order2Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()));
+        order2Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()), System.Threading.CancellationToken.None);
 
         order2Repository!.CorrelationIds.Should()
             .Contain(innerCorrelationId);
@@ -115,10 +115,10 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         // now deactivate the aggregate
         order1.CloseOrder();
 
-        await repository.SaveAsync(order1);
-        await repository.SaveAsync(order2);
+        await repository.SaveAsync(order1, System.Threading.CancellationToken.None);
+        await repository.SaveAsync(order2, System.Threading.CancellationToken.None);
 
-        var order1Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId1.ToString()));
+        var order1Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId1.ToString()), System.Threading.CancellationToken.None);
 
         order1Repository.Should()
             .NotBeNull();
@@ -126,7 +126,7 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         order1Repository!.CorrelationIds.Should()
             .HaveCount(0);
 
-        var order2Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()));
+        var order2Repository = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()), System.Threading.CancellationToken.None);
 
         order2Repository.Should()
             .NotBeNull();
@@ -154,8 +154,8 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
 
         var repository = GetRepositoryWithoutSnapshotProvider();
 
-        Func<Task> functor1 = async () => await repository.SaveAsync(order1);
-        Func<Task> functor2 = async () => await repository.SaveAsync(order2);
+        Func<Task> functor1 = async () => await repository.SaveAsync(order1, System.Threading.CancellationToken.None);
+        Func<Task> functor2 = async () => await repository.SaveAsync(order2, System.Threading.CancellationToken.None);
 
         // Act + Assert
         await functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
@@ -177,8 +177,8 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
 
         // Act + Assert
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order);
-        Func<Task> functor = async () => await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        Func<Task> functor = async () => await repository.SaveAsync(order, System.Threading.CancellationToken.None);
         await functor.Should().NotThrowAsync("Unique Properties are allowed to be null");
     }
 
@@ -197,8 +197,8 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
 
         // Act + Assert
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order1);
-        Func<Task> functor = async () => await repository.SaveAsync(order2);
+        await repository.SaveAsync(order1, System.Threading.CancellationToken.None);
+        Func<Task> functor = async () => await repository.SaveAsync(order2, System.Threading.CancellationToken.None);
         await functor.Should().ThrowAsync<ProviderException>();
     }
 
@@ -213,8 +213,8 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
 
         // Act + Assert
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order1);
-        Func<Task> functor = async () => await repository.SaveAsync(order2);
+        await repository.SaveAsync(order1, System.Threading.CancellationToken.None);
+        Func<Task> functor = async () => await repository.SaveAsync(order2, System.Threading.CancellationToken.None);
         await functor.Should().ThrowAsync<AggregateCreationException>();
     }
 
@@ -229,8 +229,8 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         // Act
         order.ChangeComment(newComment);
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order);
-        var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
 
         // Assert
         reloadedOrder.Should().NotBeNull();
@@ -253,9 +253,9 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         }
 
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order);
-        //var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
-        var reloadedOrder = await repository.GetByIdAsync(orderId.ToString(), typeof(Order), 5) as Order;
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        //var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
+        var reloadedOrder = await repository.GetByIdAsync(orderId.ToString(), typeof(Order), 5, System.Threading.CancellationToken.None) as Order;
 
         // Assert
         reloadedOrder.Should().NotBeNull();
@@ -278,8 +278,8 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         order.ChangeComment("TriMagnesium-dinitrid");
         order.SetOptionalCertificate("Erle", "08/15");
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order);
-        var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderNumber.ToString()));
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+        var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderNumber.ToString()), System.Threading.CancellationToken.None);
 
         // Assert
         reloadedOrder.Should().NotBeNull();
@@ -303,7 +303,7 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         // Act
         PerformMultipleChangeCommentOnAggregate(order, "BromSulfit", numChanges);
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
         // Assert
         order.GetUncommittedChanges().Should().HaveCount(0);
@@ -324,12 +324,12 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
         order.ChangeComment("New Comment");
 
         var repository = GetRepositoryWithoutSnapshotProvider();
-        await repository.SaveAsync(orderItem);
-        await repository.SaveAsync(order);
+        await repository.SaveAsync(orderItem, System.Threading.CancellationToken.None);
+        await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
-        var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
         var reloadedOrderItem = await repository.GetByIdAsync<OrderItem, OrderItemId>(
-            new OrderItemId(1, orderId.ToString()));
+            new OrderItemId(1, orderId.ToString()), System.Threading.CancellationToken.None);
 
         // Assert
         reloadedOrder.Should().NotBeNull();
@@ -355,7 +355,7 @@ public class DefaultEventSourcingRepositoryShould : MSSQLTestBase
 
         // Act
         var repository = GetRepositoryWithoutSnapshotProvider();
-        var order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+        var order = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
 
         // Assert
         order.Should().BeNull();

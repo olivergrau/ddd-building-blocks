@@ -29,7 +29,7 @@ public class CommandHandlerRuleTests
             payloadDescription: "Rover",
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
-        await registerHandler.HandleCommandAsync(command);
+        await registerHandler.HandleAsync(command, System.Threading.CancellationToken.None);
         return (command.MissionId, repository, validator);
     }
 
@@ -43,7 +43,7 @@ public class CommandHandlerRuleTests
         var command = new AssignRocketCommand(missionId, Guid.NewGuid(),
             "Saturn V", 34.5, 140000, 3);
 
-        await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class CommandHandlerRuleTests
         var command = new AssignLaunchPadCommand(
             missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]);
 
-        await Assert.ThrowsAsync<AggregateValidationException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<AggregateValidationException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -63,15 +63,15 @@ public class CommandHandlerRuleTests
         var (missionId, repo, validator) = await SetupMissionAsync();
 
         var rocketHandler = new AssignRocketCommandHandler(repo, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
 
         validator.LaunchPadIsAvailable = false;
         var handler = new AssignLaunchPadCommandHandler(repo, validator);
         var command = new AssignLaunchPadCommand(
             missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]);
 
-        await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -82,14 +82,14 @@ public class CommandHandlerRuleTests
         var handler = new AssignCrewCommandHandler(repo, crewAssignment);
         var crewId = Guid.NewGuid();
         var register = new RegisterCrewMemberCommandHandler(repo);
-        await register.HandleCommandAsync(new RegisterCrewMemberCommand(
+        await register.HandleAsync(new RegisterCrewMemberCommand(
             crewId,
             "Alice",
             CrewRole.Commander,
-            []));
+            []), System.Threading.CancellationToken.None);
         var command = new AssignCrewCommand(missionId, [crewId]);
 
-        await Assert.ThrowsAsync<AggregateValidationException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<AggregateValidationException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -97,25 +97,25 @@ public class CommandHandlerRuleTests
     {
         var (missionId, repo, validator) = await SetupMissionAsync();
         var rocketHandler = new AssignRocketCommandHandler(repo, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
         var padHandler = new AssignLaunchPadCommandHandler(repo, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await padHandler.HandleAsync(new AssignLaunchPadCommand(
+            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
 
         validator.CrewIsAvailable = false;
         var crewAssignment = new CrewAssignment(validator);
         var handler = new AssignCrewCommandHandler(repo, crewAssignment);
         var crewId = Guid.NewGuid();
         var register = new RegisterCrewMemberCommandHandler(repo);
-        await register.HandleCommandAsync(new RegisterCrewMemberCommand(
+        await register.HandleAsync(new RegisterCrewMemberCommand(
             crewId,
             "Bob",
             CrewRole.FlightEngineer,
-            []));
+            []), System.Threading.CancellationToken.None);
         var command = new AssignCrewCommand(missionId, [crewId]);
 
-        await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<RuleValidationException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class CommandHandlerRuleTests
         var handler = new ScheduleMissionCommandHandler(repo);
         var command = new ScheduleMissionCommand(missionId);
 
-        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -133,16 +133,16 @@ public class CommandHandlerRuleTests
     {
         var (missionId, repo, validator) = await SetupMissionAsync();
         var rocketHandler = new AssignRocketCommandHandler(repo, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
         var padHandler = new AssignLaunchPadCommandHandler(repo, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await padHandler.HandleAsync(new AssignLaunchPadCommand(
+            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
 
         var handler = new LaunchMissionCommandHandler(repo);
         var command = new LaunchMissionCommand(missionId);
 
-        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -150,21 +150,21 @@ public class CommandHandlerRuleTests
     {
         var (missionId, repo, validator) = await SetupMissionAsync();
         var rocketHandler = new AssignRocketCommandHandler(repo, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
         var padHandler = new AssignLaunchPadCommandHandler(repo, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await padHandler.HandleAsync(new AssignLaunchPadCommand(
+            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
         var scheduleHandler = new ScheduleMissionCommandHandler(repo);
-        await scheduleHandler.HandleCommandAsync(new ScheduleMissionCommand(missionId));
+        await scheduleHandler.HandleAsync(new ScheduleMissionCommand(missionId), System.Threading.CancellationToken.None);
         var launchHandler = new LaunchMissionCommandHandler(repo);
-        await launchHandler.HandleCommandAsync(new LaunchMissionCommand(missionId));
+        await launchHandler.HandleAsync(new LaunchMissionCommand(missionId), System.Threading.CancellationToken.None);
 
         var unassignment = new CrewUnassignment();
         var handler = new AbortMissionCommandHandler(repo, unassignment);
         var command = new AbortMissionCommand(missionId);
 
-        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -172,13 +172,13 @@ public class CommandHandlerRuleTests
     {
         var (missionId, repo, validator) = await SetupMissionAsync();
         var rocketHandler = new AssignRocketCommandHandler(repo, validator);
-        await rocketHandler.HandleCommandAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
-            "Saturn V", 34.5, 140000, 3));
+        await rocketHandler.HandleAsync(new AssignRocketCommand(missionId, Guid.NewGuid(),
+            "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
         var padHandler = new AssignLaunchPadCommandHandler(repo, validator);
-        await padHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await padHandler.HandleAsync(new AssignLaunchPadCommand(
+            missionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
         var scheduleHandler = new ScheduleMissionCommandHandler(repo);
-        await scheduleHandler.HandleCommandAsync(new ScheduleMissionCommand(missionId));
+        await scheduleHandler.HandleAsync(new ScheduleMissionCommand(missionId), System.Threading.CancellationToken.None);
 
         var handler = new MarkMissionArrivedCommandHandler(repo);
         var command = new MarkMissionArrivedCommand(
@@ -189,6 +189,6 @@ public class CommandHandlerRuleTests
             []
         );
 
-        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleCommandAsync(command));
+        await Assert.ThrowsAsync<DDD.BuildingBlocks.Core.Exception.AggregateException>(() => handler.HandleAsync(command, System.Threading.CancellationToken.None));
     }
 }

@@ -16,7 +16,7 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
     private readonly IRocketService _rocketService = rocketService ?? throw new ArgumentNullException(nameof(rocketService));
     private readonly ILogger<RocketProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public async Task WhenAsync(RocketAssigned @event)
+    public async Task HandleAsync(RocketAssigned @event, System.Threading.CancellationToken cancellationToken)
     {
         var rocket = await _rocketService.GetByIdAsync(@event.RocketId.Value) ?? new Rocket
         {
@@ -41,7 +41,7 @@ public class RocketProjector(IRocketService rocketService, ILogger<RocketProject
         }
     }
 
-    public async Task WhenAsync(MissionAborted @event)
+    public async Task HandleAsync(MissionAborted @event, System.Threading.CancellationToken cancellationToken)
     {
         // Find the rocket that was assigned to this mission
         var rocket = await _rocketService.FindByAssignedMissionAsync(@event.MissionId.Value);

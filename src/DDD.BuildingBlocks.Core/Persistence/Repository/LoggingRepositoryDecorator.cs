@@ -27,38 +27,42 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
             var nullLoggerFactory = new NullLoggerFactory();
 
             _log = loggerFactory != null ? loggerFactory.CreateLogger(nameof(LoggingRepositoryDecorator))
-                : nullLoggerFactory.CreateLogger(nameof(DomainEventNotifier));
+                : nullLoggerFactory.CreateLogger(nameof(LoggingRepositoryDecorator));
 
             _eventSourcingRepository = eventSourcingRepository;
 
             nullLoggerFactory.Dispose();
         }
 
-        public async Task<object?> GetByIdAsync(string id, Type type, long version = -1)
+        public async Task<object?> GetByIdAsync(string id, Type type, long version, System.Threading.CancellationToken cancellationToken)
         {
             BeforeLoadAggregate(id);
-            var result = await _eventSourcingRepository.GetByIdAsync(id, type, version);
+            var result = await _eventSourcingRepository.GetByIdAsync(id, type, version, cancellationToken);
             AfterLoadingAggregate(id, result);
             return result;
         }
 
-        public virtual async Task<T?> GetByIdAsync<T,TKey>(TKey id) where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
+        public virtual async Task<T?> GetByIdAsync<T,TKey>(TKey id, System.Threading.CancellationToken cancellationToken) where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
         {
             BeforeLoadAggregate(id);
-            var result = await _eventSourcingRepository.GetByIdAsync<T,TKey>(id);
+            var result = await _eventSourcingRepository.GetByIdAsync<T,TKey>(id, cancellationToken);
             AfterLoadingAggregate(id, result);
             return result;
         }
 
-        public virtual async Task SaveAsync(IEventSourcingBasedAggregate aggregate)
+        public virtual async Task SaveAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
         {
             try
             {
                 var events = aggregate.GetUncommittedChanges().ToList();
 
                 BeforeSaveAggregate(aggregate, events);
-                await _eventSourcingRepository.SaveAsync(aggregate);
+                await _eventSourcingRepository.SaveAsync(aggregate, cancellationToken);
                 AfterSavingAggregate(aggregate, events);
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
             }
             catch (System.Exception ex)
             {

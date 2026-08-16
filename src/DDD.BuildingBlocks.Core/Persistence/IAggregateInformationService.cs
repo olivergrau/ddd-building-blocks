@@ -5,5 +5,5 @@ namespace DDD.BuildingBlocks.Core.Persistence;
 
 public interface IAggregateInformationService
 {
-    Task<Type?> GetTypeForAggregateId(string aggregateId);
+    Task<Type?> GetTypeForAggregateId(string aggregateId, System.Threading.CancellationToken cancellationToken);
 }

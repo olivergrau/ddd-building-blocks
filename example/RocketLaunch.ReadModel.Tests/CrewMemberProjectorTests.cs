@@ -20,7 +20,7 @@ public class CrewMemberProjectorTests
         var projector = new CrewMemberProjector(service, NullLogger<CrewMemberProjector>.Instance);
 
         var memberId = Guid.NewGuid();
-        await projector.WhenAsync(new CrewMemberRegistered(new CrewMemberId(memberId), "Alice", SharedKernel.Enums.CrewRole.Commander, ["Flight"]));
+        await projector.HandleAsync(new CrewMemberRegistered(new CrewMemberId(memberId), "Alice", SharedKernel.Enums.CrewRole.Commander, ["Flight"]), System.Threading.CancellationToken.None);
 
         var member = (await service.GetByIdAsync(memberId))!;
         Assert.Equal("Alice", member.Name);
@@ -37,7 +37,7 @@ public class CrewMemberProjectorTests
         var memberId = Guid.NewGuid();
         await service.CreateOrUpdateAsync(new CrewMember { CrewMemberId = memberId, Name = "Bob", Role = "Pilot", Status = CrewMemberStatus.Available });
 
-        await projector.WhenAsync(new CrewMemberAssigned(new CrewMemberId(memberId)));
+        await projector.HandleAsync(new CrewMemberAssigned(new CrewMemberId(memberId)), System.Threading.CancellationToken.None);
 
         var member = (await service.GetByIdAsync(memberId))!;
         Assert.Equal(CrewMemberStatus.Assigned, member.Status);
@@ -49,12 +49,12 @@ public class CrewMemberProjectorTests
         var projector = new CrewMemberProjector(new FailingCrewService(), NullLogger<CrewMemberProjector>.Instance);
 
         await Assert.ThrowsAsync<ReadModelServiceException>(() =>
-            projector.WhenAsync(
+            projector.HandleAsync(
                 new CrewMemberRegistered(
                     new CrewMemberId(Guid.NewGuid()),
                     "X",
                     SharedKernel.Enums.CrewRole.Commander,
-                    ["A"])));
+                    ["A"]), System.Threading.CancellationToken.None));
     }
 
     private class FailingCrewService : ICrewMemberService

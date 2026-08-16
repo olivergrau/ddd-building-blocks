@@ -23,13 +23,13 @@ public class SetCrewMemberCertificationsCommandTests
             role: CrewRole.FlightEngineer,
             certifications: ["A"]
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var handler = new SetCrewMemberCertificationsCommandHandler(repository);
         var newCerts = new[] { "B", "C" };
-        await handler.HandleCommandAsync(new SetCrewMemberCertificationsCommand(registerCommand.CrewMemberId, newCerts));
+        await handler.HandleAsync(new SetCrewMemberCertificationsCommand(registerCommand.CrewMemberId, newCerts), System.Threading.CancellationToken.None);
 
-        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId));
+        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
         Debug.Assert(crew != null);
         Assert.Equal(newCerts, crew.Certifications);
         Assert.Equal(1, crew.CurrentVersion);

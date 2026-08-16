@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using DDD.BuildingBlocks.Core.Event;
 
@@ -7,10 +8,10 @@ namespace DDD.BuildingBlocks.Core.Persistence.Storage
 {
     public interface IEventStorageProvider
     {
-        Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count);
+        Task<IEnumerable<IDomainEvent>?> GetEventsAsync(Type aggregateType, string key, long start, long count, CancellationToken cancellationToken);
 
-        Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key);
+        Task<IDomainEvent?> GetLastEventAsync(Type aggregateType, string key, CancellationToken cancellationToken);
 
-        Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate);
+        Task CommitChangesAsync(IEventSourcingBasedAggregate aggregate, CancellationToken cancellationToken);
     }
 }

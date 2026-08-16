@@ -11,13 +11,13 @@ namespace RocketLaunch.Application.Command.Mission.Handler;
 public class AssignLaunchPadCommandHandler(IEventSourcingRepository repository, IResourceAvailabilityService validator)
     : CommandHandler<AssignLaunchPadCommand>(repository)
 {
-    public override async Task HandleCommandAsync(AssignLaunchPadCommand command)
+    public override async Task HandleAsync(AssignLaunchPadCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.Mission mission;
 
         try
         {            
-            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command);
+            mission = await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command, [], cancellationToken);
         }
         catch (Exception e)
         {
@@ -28,6 +28,6 @@ public class AssignLaunchPadCommandHandler(IEventSourcingRepository repository, 
             new LaunchPad(
                 new LaunchPadId(command.LaunchPadId), command.Name, command.Location, command.SupportedRockets), validator);
 
-        await AggregateRepository.SaveAsync(mission);
+        await AggregateRepository.SaveAsync(mission, cancellationToken);
     }
 }

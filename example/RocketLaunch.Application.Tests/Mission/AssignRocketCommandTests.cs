@@ -36,11 +36,11 @@ public class AssignRocketCommandTests
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
             
-        await registerMissionCommandHandler.HandleCommandAsync(registerMissionCommand);
+        await registerMissionCommandHandler.HandleAsync(registerMissionCommand, System.Threading.CancellationToken.None);
 
         // 4. assert: check that exactly one MissionRegisteredEvent was stored
         var mission = await repository
-            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId), System.Threading.CancellationToken.None);
             
         Assert.NotNull(mission);
         
@@ -48,10 +48,10 @@ public class AssignRocketCommandTests
         var assignRocketCommend = new AssignRocketCommand(registerMissionCommand.MissionId, Guid.NewGuid(),
             "Saturn V", 34.5, 140000, 3);
             
-        await assignRocketCommandHandler.HandleCommandAsync(assignRocketCommend);
+        await assignRocketCommandHandler.HandleAsync(assignRocketCommend, System.Threading.CancellationToken.None);
         
         mission = await repository
-            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+            .GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId), System.Threading.CancellationToken.None);
         
         // 5. assert: check that the rocket was assigned
         Debug.Assert(mission != null, nameof(mission) + " != null");
