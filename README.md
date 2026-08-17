@@ -16,7 +16,7 @@ This repository contains a collection of .NET components that implement tactical
 - **DDD.BuildingBlocks.Demo** – minimal project referencing all packages.
 - **test** – unit and integration tests covering the building blocks.
 
-For detailed documentation of the library itself refer to [`src/DDD.BuildingBlocks.Core/README.md`](src/DDD.BuildingBlocks.Core/README.md).
+The user documentation starts at [`docs/index.md`](docs/index.md) and includes getting started material, concepts, tutorials, operational guides, and reference pages. The older Core package overview remains at [`src/DDD.BuildingBlocks.Core/README.md`](src/DDD.BuildingBlocks.Core/README.md).
 
 Version 2.0 is a breaking release. Existing consumers should read the complete [1.x to 2.0 change inventory](CHANGES.md) and the ordered [2.0 migration guide](MIGRATION-2.0.md). Packages are distributed as assets of the [GitHub releases](https://github.com/olivergrau/ddd-building-blocks/releases); they are not published to a public NuGet registry.
 

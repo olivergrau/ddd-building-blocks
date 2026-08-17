@@ -110,7 +110,7 @@
 - F9/G9 report: `specs/reports/22-DDD.BuildingBlocks-F9-Versioned-Snapshots-Report.md`.
 - F10/G10 report: `specs/reports/23-DDD.BuildingBlocks-F10-Packaging-and-Stable-Release-Report.md`.
 - Stable release documents: `CHANGES.md`, `MIGRATION-2.0.md`, and `RELEASE_NOTES-2.0.0.md`.
-- After modernization, create a comprehensive user documentation package with a quickstart, concepts, and tutorials/guides based on the executable examples.
+- Added the hierarchical English `docs/` user-documentation package with getting started, concepts, tutorials, operational guides, and reference pages based on the executable examples. A later task will add MkDocs configuration; no `mkdocs.yml` exists yet.
 - `.vscode/`, `specs/`, and `to_read/` are local-only ignored workspace directories and are intentionally not tracked in the remote repository.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.
