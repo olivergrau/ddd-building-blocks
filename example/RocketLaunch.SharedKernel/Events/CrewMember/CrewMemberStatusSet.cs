@@ -15,7 +15,7 @@ public sealed class CrewMemberStatusSet : DomainEvent
     public CrewMemberId CrewMemberId { get; }
     public CrewMemberStatus Status { get; }
 
-    public CrewMemberStatusSet(CrewMemberId crewMemberId, CrewMemberStatus status, int targetVersion = -1)
+    public CrewMemberStatusSet(CrewMemberId crewMemberId, CrewMemberStatus status, long targetVersion = -1)
         : base(crewMemberId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         CrewMemberId = crewMemberId;

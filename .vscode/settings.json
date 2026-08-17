@@ -1,0 +1,13 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "dotnet.defaultSolution": "auto",
+  "testExplorer.useNativeTesting": true,
+  "chatgpt.openOnStartup": false,
+  "chatgpt.commentCodeLensEnabled": true
+}

@@ -28,9 +28,9 @@ public class RocketProjectorTests
         });
 
         var missionId = Guid.NewGuid();
-        await projector.WhenAsync(
+        await projector.HandleAsync(
             new RocketAssigned(
-                new MissionId(missionId), new RocketId(rocketId), "Falcon 9", 34.5, 140000, 3));
+                new MissionId(missionId), new RocketId(rocketId), "Falcon 9", 34.5, 140000, 3), System.Threading.CancellationToken.None);
 
         var rocket = (await service.GetByIdAsync(rocketId))!;
         Assert.Equal(RocketStatus.Assigned, rocket.Status);
@@ -53,7 +53,7 @@ public class RocketProjectorTests
             AssignedMissionId = missionId
         });
 
-        await projector.WhenAsync(new MissionAborted(new MissionId(missionId)));
+        await projector.HandleAsync(new MissionAborted(new MissionId(missionId)), System.Threading.CancellationToken.None);
 
         var rocket = (await service.GetByIdAsync(rocketId))!;
         Assert.Equal(RocketStatus.Available, rocket.Status);
@@ -65,7 +65,7 @@ public class RocketProjectorTests
     {
         var projector = new RocketProjector(new FailingRocketService(), NullLogger<RocketProjector>.Instance);
         await Assert.ThrowsAsync<ReadModelServiceException>(() =>
-            projector.WhenAsync(new RocketAssigned(new MissionId(Guid.NewGuid()), new RocketId(Guid.NewGuid()), "R", 1, 1, 1)));
+            projector.HandleAsync(new RocketAssigned(new MissionId(Guid.NewGuid()), new RocketId(Guid.NewGuid()), "R", 1, 1, 1), System.Threading.CancellationToken.None));
     }
 
     private class FailingRocketService : IRocketService

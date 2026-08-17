@@ -1,12 +1,14 @@
 using System.Text.Json.Serialization;
 using DDD.BuildingBlocks.Core.Commanding;
 using DDD.BuildingBlocks.Core.Event;
+using DDD.BuildingBlocks.Core.Event.Serialization;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
+using DDD.BuildingBlocks.Core.Persistence.SnapshotSupport;
 using DDD.BuildingBlocks.Core.Persistence.Storage;
 using DDD.BuildingBlocks.DevelopmentPackage.BackgroundService;
 using DDD.BuildingBlocks.DevelopmentPackage.EventPublishing;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
-using DDD.BuildingBlocks.DI.Extensions;
+using DDD.BuildingBlocks.DI.Extensions.Dispatching;
 using DDD.BuildingBlocks.Hosting.Background;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
@@ -19,6 +21,8 @@ using RocketLaunch.ReadModel.Core.Projector.CrewMember;
 using RocketLaunch.ReadModel.Core.Projector.Mission;
 using RocketLaunch.ReadModel.Core.Service;
 using RocketLaunch.ReadModel.InMemory.Service;
+using RocketLaunch.SharedKernel.Events;
+using RocketLaunch.SharedKernel.Snapshots;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,15 +53,8 @@ services.AddSingleton<EventPublishingTable>(x =>
     return wt;
 });
 
-services.AddSingleton<DomainEventNotifier>(sp =>
-{
-    var notifier = new DomainEventNotifier(rocketOptions.ReadModelAssemblyName);
-    notifier.SetDependencyResolver(new ServiceLocator(sp));
-    return notifier;
-});
-
 services.AddSingleton<IDomainEventHandler>(sp =>
-    new InProcessDomainEventHandler(sp.GetRequiredService<DomainEventNotifier>(), sp.GetService<ILoggerFactory>()));
+    new InProcessDomainEventHandler(sp.GetRequiredService<IDomainEventNotifier>(), sp.GetService<ILoggerFactory>()));
 
 services.AddSingleton<DomainEventProjectionDispatcher>(sp =>
     new DomainEventProjectionDispatcher(
@@ -76,30 +73,27 @@ services.AddHostedService(sp =>
         sp.GetService<IOptions<TimedHostedServiceOptions>>()));
 
 // Event sourcing storage
-services.AddSingleton<IEventStorageProvider>(sp =>
-    new PureInMemoryEventStorageProvider(sp.GetRequiredService<EventPublishingTable>()));
+services.AddSingleton<IEventCodec>(_ => RocketLaunchEventCodec.Create());
+services.AddSingleton<InMemoryEventStoreProvider>();
+services.AddSingleton<IEventStoreProvider>(sp => new PublishingEventStoreProviderDecorator(
+    sp.GetRequiredService<InMemoryEventStoreProvider>(),
+    sp.GetRequiredService<IEventCodec>(),
+    sp.GetRequiredService<EventPublishingTable>()));
 
-var snapshotPath = Path.Combine(Path.GetTempPath(), rocketOptions.SnapshotPath);
-
-if (!Path.IsPathRooted(snapshotPath))
-{
-    snapshotPath = Path.Combine(AppContext.BaseDirectory, snapshotPath);
-}
-
-if (!Directory.Exists(snapshotPath))
-{
-    Directory.CreateDirectory(snapshotPath);
-}
-
-services.AddSingleton<ISnapshotStorageProvider>(sp =>
-    new InMemorySnapshotStorageProvider(rocketOptions.SnapshotThreshold, snapshotPath));
+services.AddSingleton<ISnapshotStoreProvider>(_ =>
+    new InMemorySnapshotStoreProvider(rocketOptions.SnapshotThreshold));
+services.AddSingleton<ISnapshotCodec>(_ => RocketLaunchSnapshotCodec.Create());
 
 services.AddSingleton<IEventSourcingRepository>(sp =>
     new EventSourcingRepository(
-        sp.GetRequiredService<IEventStorageProvider>(),
-        sp.GetRequiredService<ISnapshotStorageProvider>()));
+        sp.GetRequiredService<IEventStoreProvider>(),
+        sp.GetRequiredService<IEventCodec>(),
+        sp.GetRequiredService<ISnapshotStoreProvider>(),
+        sp.GetRequiredService<ISnapshotCodec>()));
 
-services.AddSingleton<ICommandProcessor, DefaultCommandProcessor>();
+services.AddDddBuildingBlocksDispatching(
+    typeof(DomainEntry).Assembly,
+    typeof(MissionProjector).Assembly);
 
 // Read model services and validators
 services.AddSingleton<IMissionService, InMemoryMissionService>();
@@ -107,18 +101,11 @@ services.AddSingleton<IRocketService, InMemoryRocketService>();
 services.AddSingleton<ILaunchPadService, InMemoryLaunchPadService>();
 services.AddSingleton<ICrewMemberService, InMemoryCrewService>();
 services.AddSingleton<IResourceAvailabilityService, InMemoryStationAvailabilityService>();
-
-// Projectors so they can be resolved by the notifier
-services.AddTransient<RocketProjector>();
-services.AddTransient<LaunchPadProjector>();
-services.AddTransient<MissionProjector>();
-services.AddTransient<CrewMemberProjector>();
+services.AddScoped<CrewAssignment>();
+services.AddScoped<CrewUnassignment>();
 
 // Domain entry
-services.AddSingleton<IDomainEntry>(sp => new DomainEntry(
-    sp.GetRequiredService<ICommandProcessor>(),
-    sp.GetRequiredService<IEventSourcingRepository>(),
-    sp.GetRequiredService<IResourceAvailabilityService>()));
+services.AddSingleton<IDomainEntry, DomainEntry>();
 
 var app = builder.Build();
 

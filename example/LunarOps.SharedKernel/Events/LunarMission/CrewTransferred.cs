@@ -17,7 +17,7 @@ namespace LunarOps.SharedKernel.Events.LunarMission
         public CrewTransferred(
             ExternalMissionId missionId,
             IEnumerable<LunarCrewMemberId> crew,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;

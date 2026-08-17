@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command.CrewMember;
@@ -13,8 +14,8 @@ public class RegisterCrewMemberCommandTests
     [Fact]
     public async Task Handle_RegisterCrewMemberCommand()
     {
-        var store = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(store);
+        var store = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(store, RocketLaunchEventCodec.Create());
         var handler = new RegisterCrewMemberCommandHandler(repository);
 
         var command = new RegisterCrewMemberCommand(
@@ -24,9 +25,9 @@ public class RegisterCrewMemberCommandTests
             certifications: ["Flight", "EVA"]
         );
 
-        await handler.HandleCommandAsync(command);
+        await handler.HandleAsync(command, System.Threading.CancellationToken.None);
 
-        var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(command.CrewMemberId));
+        var crewMember = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(command.CrewMemberId), System.Threading.CancellationToken.None);
 
         Assert.NotNull(crewMember);
         Assert.Equal(0, crewMember.CurrentVersion);

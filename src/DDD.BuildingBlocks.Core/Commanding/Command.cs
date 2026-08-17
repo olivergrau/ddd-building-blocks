@@ -9,9 +9,9 @@ namespace DDD.BuildingBlocks.Core.Commanding
         public string? CorrelationId { get; }
         public string SerializedAggregateId { get; }
 
-        public int TargetVersion { get; }
+        public long TargetVersion { get; }
 
-        protected Command(string serializedAggregateId, int targetVersion)
+        protected Command(string serializedAggregateId, long targetVersion)
         {
             if (string.IsNullOrWhiteSpace(serializedAggregateId))
             {

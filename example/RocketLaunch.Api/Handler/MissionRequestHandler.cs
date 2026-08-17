@@ -16,59 +16,59 @@ internal static class MissionRequestHandler
         var group = app.MapGroup("missions")
             .WithTags("Missions");
         
-        group.MapPost("/", async ([FromServices] IDomainEntry entry, [FromBody] RegisterMissionRequest request) =>
+        group.MapPost("/", async ([FromServices] IDomainEntry entry, [FromBody] RegisterMissionRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new RegisterMissionCommand(request.MissionId, request.MissionName, request.TargetOrbit, request.PayloadDescription, new LaunchWindowDto(request.LaunchWindowStart, request.LaunchWindowEnd));
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/assign-rocket", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] AssignRocketRequest request) =>
+        group.MapPost("/{missionId:guid}/assign-rocket", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] AssignRocketRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new AssignRocketCommand(missionId, request.RocketId, request.RocketName, request.ThrustCapacity, request.PayloadCapacityKg, request.CrewCapacity);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/assign-pad", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] AssignLaunchPadRequest request) =>
+        group.MapPost("/{missionId:guid}/assign-pad", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] AssignLaunchPadRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new AssignLaunchPadCommand(missionId, request.LaunchPadId, request.LaunchPadName, request.LaunchPadLocation, request.SupportedRockets);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/assign-crew", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] AssignCrewRequest request) =>
+        group.MapPost("/{missionId:guid}/assign-crew", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] AssignCrewRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new AssignCrewCommand(missionId, request.CrewMemberIds);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/schedule", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId) =>
+        group.MapPost("/{missionId:guid}/schedule", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, CancellationToken cancellationToken) =>
         {
             var cmd = new ScheduleMissionCommand(missionId);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/launch", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId) =>
+        group.MapPost("/{missionId:guid}/launch", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, CancellationToken cancellationToken) =>
         {
             var cmd = new LaunchMissionCommand(missionId);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/abort", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId) =>
+        group.MapPost("/{missionId:guid}/abort", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, CancellationToken cancellationToken) =>
         {
             var cmd = new AbortMissionCommand(missionId);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 
-        group.MapPost("/{missionId:guid}/arrive", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] MarkMissionArrivedRequest request) =>
+        group.MapPost("/{missionId:guid}/arrive", async ([FromServices] IDomainEntry entry, [FromRoute] Guid missionId, [FromBody] MarkMissionArrivedRequest request, CancellationToken cancellationToken) =>
         {
             var cmd = new MarkMissionArrivedCommand(missionId, request.ArrivalTime, request.VehicleType, request.CrewManifest, request.PayloadManifest);
-            var result = await entry.ExecuteAsync(cmd);
+            var result = await entry.ExecuteAsync(cmd, cancellationToken);
             return result.ToApiResult();
         });
 

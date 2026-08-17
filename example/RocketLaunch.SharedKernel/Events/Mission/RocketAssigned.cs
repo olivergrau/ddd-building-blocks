@@ -27,7 +27,7 @@ namespace RocketLaunch.SharedKernel.Events.Mission
             double thrustCapacity,
             int payloadCapacityKg,
             int crewCapacity,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId = missionId;

@@ -21,9 +21,9 @@ namespace RocketLaunch.SharedKernel.Events.Mission
             MissionId missionId,
             DateTime arrivalTime,
             string vehicleType,
-            IEnumerable<(string Name, string Role)> crewManifest,
-            IEnumerable<(string Item, double Mass)> payloadManifest,
-            int targetVersion = -1
+            IReadOnlyCollection<(string Name, string Role)> crewManifest,
+            IReadOnlyCollection<(string Item, double Mass)> payloadManifest,
+            long targetVersion = -1
         ) : base(missionId.Value.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId       = missionId;

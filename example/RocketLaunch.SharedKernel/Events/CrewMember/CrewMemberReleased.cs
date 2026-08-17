@@ -13,7 +13,7 @@ public sealed class CrewMemberReleased : DomainEvent
 
     public CrewMemberId CrewMemberId { get; }
 
-    public CrewMemberReleased(CrewMemberId crewMemberId, int targetVersion = -1)
+    public CrewMemberReleased(CrewMemberId crewMemberId, long targetVersion = -1)
         : base(crewMemberId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         CrewMemberId = crewMemberId;

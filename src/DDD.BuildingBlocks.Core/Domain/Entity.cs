@@ -22,7 +22,7 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         public bool Equals(Entity<TKey>? other)
         {
-            return other != null && Id.Equals(other.Id);
+            return other != null && GetType() == other.GetType() && Id.Equals(other.Id);
         }
     }
 }

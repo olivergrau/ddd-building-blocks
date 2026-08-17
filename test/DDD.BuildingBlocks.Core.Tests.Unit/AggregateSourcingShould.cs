@@ -7,6 +7,7 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using FluentAssertions;
     using Commanding;
@@ -27,7 +28,7 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
             _sourcing = new AggregateSourcing(_repository);
         }
 
-        public class TestAggregateCommand(string serializedAggregateId, int targetVersion) : Command(serializedAggregateId, targetVersion);
+        public class TestAggregateCommand(string serializedAggregateId, long targetVersion) : Command(serializedAggregateId, targetVersion);
 
         public class RepositoryMock : IEventSourcingRepository
         {
@@ -35,18 +36,18 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
             public readonly List<TestAggregate> Aggregates = [];
 #pragma warning restore CA1051
 
-            public Task<object?> GetByIdAsync(string id, Type type, int version = -1)
+            public Task<object?> GetByIdAsync(string id, Type type, long version, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
                 //return Task.FromResult(Aggregates.SingleOrDefault(q => Equals(q.Id, id)));
             }
 
-            public Task<T?> GetByIdAsync<T, TKey>(TKey id) where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
+            public Task<T?> GetByIdAsync<T, TKey>(TKey id, CancellationToken cancellationToken) where T : AggregateRoot<TKey> where TKey : EntityId<TKey>
             {
                 return Task.FromResult(Aggregates.SingleOrDefault(q => Equals(q.Id, id)) as T);
             }
 
-            public Task SaveAsync(IEventSourcingBasedAggregate aggregate)
+            public Task SaveAsync(IEventSourcingBasedAggregate aggregate, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
@@ -127,7 +128,10 @@ namespace DDD.BuildingBlocks.Core.Tests.Unit
 
             TestAggregate? aggregate = null;
 
-            Func<Task> functor = async () => { aggregate = await _sourcing.Source<TestAggregate, TestAggregateId>(command); };
+            Func<Task> functor = async () =>
+            {
+                aggregate = await _sourcing.Source<TestAggregate, TestAggregateId>(command, [], CancellationToken.None);
+            };
 
             // act && assert
             functor.Should().NotThrowAsync();

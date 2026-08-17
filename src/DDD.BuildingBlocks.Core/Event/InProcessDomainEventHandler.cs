@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -28,9 +29,9 @@ namespace DDD.BuildingBlocks.Core.Event
             nullLoggerFactory.Dispose();
         }
 
-        public async Task HandleAsync(IDomainEvent @event)
+        public async Task HandleAsync(IDomainEvent @event, CancellationToken cancellationToken)
         {
-            await _domainEventNotifier.NotifyAsync(@event);
+            await _domainEventNotifier.NotifyAsync(@event, cancellationToken);
 
             _log.LogInformation(
                 $"DomainEvent #{@event.TargetVersion + 1} handled: {@event.GetType().Name} @ {ApplicationTime.Current.ToLongTimeString()}");

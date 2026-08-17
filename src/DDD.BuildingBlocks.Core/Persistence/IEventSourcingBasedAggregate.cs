@@ -8,14 +8,14 @@ public interface IEventSourcingBasedAggregate
 {
     string SerializedId { get; }
     
-    int CurrentVersion { get; }
+    long CurrentVersion { get; }
     
-    int LastCommittedVersion { get; }
+    long LastCommittedVersion { get; }
     
     StreamState GetStreamState();
     
     bool HasUncommittedChanges();
-    
+
     IEnumerable<IDomainEvent> GetUncommittedChanges();
     
     void MarkChangesAsCommitted();

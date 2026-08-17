@@ -21,7 +21,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
         private readonly ILogger<CrewMemberProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 
-        public async Task WhenAsync(CrewMemberAssigned @event)
+        public async Task HandleAsync(CrewMemberAssigned @event, System.Threading.CancellationToken cancellationToken)
         {
             var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
@@ -43,7 +43,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
         }
 
-        public async Task WhenAsync(CrewMemberCertificationSet @event)
+        public async Task HandleAsync(CrewMemberCertificationSet @event, System.Threading.CancellationToken cancellationToken)
         {
             var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
@@ -65,7 +65,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
         }
 
-        public async Task WhenAsync(CrewMemberRegistered @event)
+        public async Task HandleAsync(CrewMemberRegistered @event, System.Threading.CancellationToken cancellationToken)
         {
             var member = new Model.CrewMember
             {
@@ -86,7 +86,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
         }
 
-        public async Task WhenAsync(CrewMemberReleased @event)
+        public async Task HandleAsync(CrewMemberReleased @event, System.Threading.CancellationToken cancellationToken)
         {
             var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)
@@ -108,7 +108,7 @@ namespace RocketLaunch.ReadModel.Core.Projector.CrewMember
             }
         }
 
-        public async Task WhenAsync(CrewMemberStatusSet @event)
+        public async Task HandleAsync(CrewMemberStatusSet @event, System.Threading.CancellationToken cancellationToken)
         {
             var member = await _crewService.GetByIdAsync(@event.CrewMemberId.Value);
             if (member == null)

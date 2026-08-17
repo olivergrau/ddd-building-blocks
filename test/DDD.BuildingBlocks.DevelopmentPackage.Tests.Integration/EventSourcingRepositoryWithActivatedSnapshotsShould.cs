@@ -66,13 +66,13 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 				order.ChangeComment(newComment + i);
 				if (i % saveFrequency == 0)
                 {
-                    await repository.SaveAsync(order);
+                    await repository.SaveAsync(order, System.Threading.CancellationToken.None);
                 }
             }
 
-			await repository.SaveAsync(order);
+			await repository.SaveAsync(order, System.Threading.CancellationToken.None);
 
-			var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+			var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
 
 			// Assert
 			reloadedOrder.Should().NotBeNull();
@@ -114,22 +114,22 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 				orderItem.ChangeName(newName + i);
 				if (i % saveFrequencyOrder == 0)
                 {
-                    await repository.SaveAsync(order);
+                    await repository.SaveAsync(order, System.Threading.CancellationToken.None);
                 }
 
                 if (i % saveFrequencyVariant == 0)
                 {
-                    await repository.SaveAsync(orderItem);
+                    await repository.SaveAsync(orderItem, System.Threading.CancellationToken.None);
                 }
             }
 
-			await repository.SaveAsync(order);
-			await repository.SaveAsync(orderItem);
+			await repository.SaveAsync(order, System.Threading.CancellationToken.None);
+			await repository.SaveAsync(orderItem, System.Threading.CancellationToken.None);
 
 
-			var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()));
+			var reloadedOrder = await repository.GetByIdAsync<Order, OrderId>(new OrderId(orderId.ToString()), System.Threading.CancellationToken.None);
 			var reloadedOrderItem = await repository.GetByIdAsync<OrderItem, OrderItemId>(
-                new OrderItemId(1, orderId.ToString()));
+                new OrderItemId(1, orderId.ToString()), System.Threading.CancellationToken.None);
 
 			// Assert
 			reloadedOrder.Should().NotBeNull();
@@ -178,8 +178,10 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 		private EventSourcingRepository GetRepositoryWithInMemorySnapshotProvider(int snapshotFrequency)
 		{
 			return new EventSourcingRepository(
-				new PureInMemoryEventStorageProvider(),
-				new InMemorySnapshotStorageProvider(snapshotFrequency, _snapshotFile));
+				new InMemoryEventStoreProvider(),
+				DDD.BuildingBlocks.Tests.Abstracts.Event.TestEventCodec.Create(),
+				new InMemorySnapshotStoreProvider(snapshotFrequency),
+				DDD.BuildingBlocks.Tests.Abstracts.Snapshot.TestSnapshotCodec.Create());
 		}
 	}
 }

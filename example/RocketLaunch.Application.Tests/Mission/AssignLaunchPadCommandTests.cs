@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -17,8 +18,8 @@ public class AssignLaunchPadCommandTests
     {
         var validator = new StubResourceAvailabilityService();
 
-        var eventStore = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(eventStore);
+        var eventStore = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(eventStore, RocketLaunchEventCodec.Create());
 
         var registerMissionHandler = new RegisterMissionCommandHandler(repository);
         var registerMissionCommand = new RegisterMissionCommand(
@@ -29,20 +30,20 @@ public class AssignLaunchPadCommandTests
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
 
-        await registerMissionHandler.HandleCommandAsync(registerMissionCommand);
+        await registerMissionHandler.HandleAsync(registerMissionCommand, System.Threading.CancellationToken.None);
 
         var assignRocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await assignRocketHandler.HandleCommandAsync(
+        await assignRocketHandler.HandleAsync(
             new AssignRocketCommand(registerMissionCommand.MissionId, Guid.NewGuid(),
-                "Saturn V", 34.5, 140000, 3));
+                "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
         
         var assignPadHandler = new AssignLaunchPadCommandHandler(repository, validator);
         var padId = Guid.NewGuid();
         var assignPadCommand = new AssignLaunchPadCommand(
             registerMissionCommand.MissionId, padId, "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]);
-        await assignPadHandler.HandleCommandAsync(assignPadCommand);
+        await assignPadHandler.HandleAsync(assignPadCommand, System.Threading.CancellationToken.None);
 
-        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId), System.Threading.CancellationToken.None);
 
         Debug.Assert(mission != null, nameof(mission) + " != null");
         Assert.NotNull(mission.AssignedPad);

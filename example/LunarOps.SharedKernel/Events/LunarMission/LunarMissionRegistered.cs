@@ -25,7 +25,7 @@ namespace LunarOps.SharedKernel.Events.LunarMission
             IEnumerable<(string Name,string Role)> crewManifest,
             IEnumerable<(string Item,double Mass)> payloadManifest,
             StationId assignedStationId,
-            int targetVersion = -1
+            long targetVersion = -1
         ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
         {
             MissionId       = missionId;

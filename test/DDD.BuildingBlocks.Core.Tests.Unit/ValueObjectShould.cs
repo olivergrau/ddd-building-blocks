@@ -31,6 +31,14 @@
         }
     }
 
+    public sealed class NullableValueObject(string? value) : ValueObject<NullableValueObject>
+    {
+        protected override IEnumerable<object?> GetAttributesToIncludeInEqualityCheck()
+        {
+            return [value];
+        }
+    }
+
 	public class ValueObjectShould
 	{
         [Fact(DisplayName = "Return true when compared with another nested value object but with the same values")]
@@ -179,5 +187,16 @@
 			// Assert
 			result.Should().BeTrue();
 		}
+
+        [Fact(DisplayName = "Support null equality attributes")]
+        [Trait("Category", "Unittest")]
+        public void Support_null_equality_attributes()
+        {
+            var first = new NullableValueObject(null);
+            var second = new NullableValueObject(null);
+
+            first.Should().Be(second);
+            first.GetHashCode().Should().Be(second.GetHashCode());
+        }
 	}
 }

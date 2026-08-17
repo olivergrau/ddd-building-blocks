@@ -16,7 +16,7 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
     private readonly ILaunchPadService _padService = padService ?? throw new ArgumentNullException(nameof(padService));
     private readonly ILogger<LaunchPadProjector> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public async Task WhenAsync(LaunchPadAssigned @event)
+    public async Task HandleAsync(LaunchPadAssigned @event, System.Threading.CancellationToken cancellationToken)
     {
         var pad = await _padService.GetByIdAsync(@event.PadId.Value) ?? new LaunchPad
         {
@@ -58,7 +58,7 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
         }
     }
 
-    public async Task WhenAsync(MissionAborted @event)
+    public async Task HandleAsync(MissionAborted @event, System.Threading.CancellationToken cancellationToken)
     {
         var pad = await _padService.FindByAssignedMissionAsync(@event.MissionId.Value);
 
@@ -86,7 +86,7 @@ public class LaunchPadProjector(ILaunchPadService padService, ILogger<LaunchPadP
         }
     }
         
-    public async Task WhenAsync(MissionLaunched @event)
+    public async Task HandleAsync(MissionLaunched @event, System.Threading.CancellationToken cancellationToken)
     {
         var pad = await _padService.FindByAssignedMissionAsync(@event.MissionId.Value);
 

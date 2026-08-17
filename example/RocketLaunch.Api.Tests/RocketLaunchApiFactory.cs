@@ -15,7 +15,6 @@ public class RocketLaunchApiFactory : WebApplicationFactory<Program>
         {
             services.PostConfigure<RocketLaunchApiOptions>(opts =>
             {
-                opts.SnapshotPath = Path.GetTempFileName();
                 opts.GlobalTriggerTimeoutInMilliseconds = 10;
             });
             

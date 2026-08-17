@@ -11,14 +11,14 @@ namespace RocketLaunch.Application.Command.Mission.Handler;
 public class AssignRocketCommandHandler(IEventSourcingRepository repository, IResourceAvailabilityService validator) 
     : CommandHandler<AssignRocketCommand>(repository)
 {
-    public override async Task HandleCommandAsync(AssignRocketCommand command)
+    public override async Task HandleAsync(AssignRocketCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.Mission mission;
 
         try
         {
             mission =
-                await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command);
+                await AggregateSourcing.Source<Domain.Model.Mission, MissionId>(command, [], cancellationToken);
         }
         catch (Exception e)
         {
@@ -30,6 +30,6 @@ public class AssignRocketCommandHandler(IEventSourcingRepository repository, IRe
         
         await mission.AssignRocketAsync(rocket, validator);
         
-        await AggregateRepository.SaveAsync(mission);
+        await AggregateRepository.SaveAsync(mission, cancellationToken);
     }
 }

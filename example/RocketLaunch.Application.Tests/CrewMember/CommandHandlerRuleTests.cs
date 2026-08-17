@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command.CrewMember;
@@ -12,16 +13,16 @@ public class CrewMemberCommandHandlerRuleTests
     [Fact]
     public async Task AssignCrewMember_WhenUnavailable_Throws()
     {
-        var store = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(store);
+        var store = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(store, RocketLaunchEventCodec.Create());
         var registerHandler = new RegisterCrewMemberCommandHandler(repository);
         var command = new RegisterCrewMemberCommand(Guid.NewGuid(), "Zed", CrewRole.FlightEngineer, []);
-        await registerHandler.HandleCommandAsync(command);
+        await registerHandler.HandleAsync(command, System.Threading.CancellationToken.None);
 
         var statusHandler = new SetCrewMemberStatusCommandHandler(repository);
-        await statusHandler.HandleCommandAsync(new SetCrewMemberStatusCommand(command.CrewMemberId, CrewMemberStatus.Unavailable));
+        await statusHandler.HandleAsync(new SetCrewMemberStatusCommand(command.CrewMemberId, CrewMemberStatus.Unavailable), System.Threading.CancellationToken.None);
 
         var handler = new AssignCrewMemberCommandHandler(repository);
-        await Assert.ThrowsAsync<Exception>(() => handler.HandleCommandAsync(new AssignCrewMemberCommand(command.CrewMemberId)));
+        await Assert.ThrowsAsync<Exception>(() => handler.HandleAsync(new AssignCrewMemberCommand(command.CrewMemberId), System.Threading.CancellationToken.None));
     }
 }

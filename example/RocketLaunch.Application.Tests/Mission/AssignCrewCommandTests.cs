@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -21,8 +22,8 @@ public class AssignCrewCommandTests
     {
         var validator = new StubResourceAvailabilityService();
 
-        var eventStore = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(eventStore);
+        var eventStore = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(eventStore, RocketLaunchEventCodec.Create());
 
         var registerMissionHandler = new RegisterMissionCommandHandler(repository);
         var registerMissionCommand = new RegisterMissionCommand(
@@ -32,16 +33,16 @@ public class AssignCrewCommandTests
             payloadDescription: "Rover, 250kg",
             launchWindow: new LaunchWindowDto(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(6))
         );
-        await registerMissionHandler.HandleCommandAsync(registerMissionCommand);
+        await registerMissionHandler.HandleAsync(registerMissionCommand, System.Threading.CancellationToken.None);
 
         var assignRocketHandler = new AssignRocketCommandHandler(repository, validator);
-        await assignRocketHandler.HandleCommandAsync(
+        await assignRocketHandler.HandleAsync(
             new AssignRocketCommand(registerMissionCommand.MissionId, Guid.NewGuid(),
-                "Saturn V", 34.5, 140000, 3));
+                "Saturn V", 34.5, 140000, 3), System.Threading.CancellationToken.None);
 
         var assignPadHandler = new AssignLaunchPadCommandHandler(repository, validator);
-        await assignPadHandler.HandleCommandAsync(new AssignLaunchPadCommand(
-            registerMissionCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]));
+        await assignPadHandler.HandleAsync(new AssignLaunchPadCommand(
+            registerMissionCommand.MissionId, Guid.NewGuid(), "LaunchPad-1", "Cape Canaveral", ["Ariane, Falcon 9"]), System.Threading.CancellationToken.None);
 
         var crewAssignment = new CrewAssignment(validator);
         var assignCrewHandler = new AssignCrewCommandHandler(repository, crewAssignment);
@@ -50,18 +51,18 @@ public class AssignCrewCommandTests
         var registerCrewHandler = new RegisterCrewMemberCommandHandler(repository);
         foreach (var id in crewIds)
         {
-            await registerCrewHandler.HandleCommandAsync(new RegisterCrewMemberCommand(
+            await registerCrewHandler.HandleAsync(new RegisterCrewMemberCommand(
                 crewMemberId: id,
                 name: $"Member-{id}",
                 role: CrewRole.Commander,
-                certifications: []));
+                certifications: []), System.Threading.CancellationToken.None);
         }
-        await assignCrewHandler.HandleCommandAsync(new AssignCrewCommand(
+        await assignCrewHandler.HandleAsync(new AssignCrewCommand(
             missionId: registerMissionCommand.MissionId,
             crewMemberIds: crewIds
-        ));
+        ), System.Threading.CancellationToken.None);
 
-        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId));
+        var mission = await repository.GetByIdAsync<Domain.Model.Mission, MissionId>(new MissionId(registerMissionCommand.MissionId), System.Threading.CancellationToken.None);
 
         Debug.Assert(mission != null, nameof(mission) + " != null");
         Assert.Equal(crewIds.Length, mission.Crew.Count);
@@ -73,7 +74,7 @@ public class AssignCrewCommandTests
 
         foreach (var id in crewIds)
         {
-            var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(id));
+            var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(id), System.Threading.CancellationToken.None);
             Debug.Assert(crew != null);
             Assert.Equal(CrewMemberStatus.Assigned, crew.Status);
         }

@@ -8,8 +8,8 @@ namespace LunarOps.Domain.Model.Entities
 {
     public class LunarCrewMember : Entity<LunarCrewMemberId>
     {
-        public string                 Name            { get; private set; }
-        public string                 Role            { get; private set; }
+        public string                 Name            { get; private set; } = null!;
+        public string                 Role            { get; private set; } = null!;
         public CrewAssignmentStatus   AssignmentStatus{ get; private set; }
 
         public LunarCrewMember(

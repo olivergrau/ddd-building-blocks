@@ -4,5 +4,5 @@ using System.Threading.Tasks;
 
 public interface ISnapshotCreationService
 {
-    Task<Snapshot?> CreateSnapshotFrom(string aggregateId, int version = -1);
+    Task<Snapshot?> CreateSnapshotFrom(string aggregateId, long version, System.Threading.CancellationToken cancellationToken);
 }

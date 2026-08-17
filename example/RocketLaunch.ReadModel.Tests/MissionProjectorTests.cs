@@ -7,7 +7,6 @@ using RocketLaunch.ReadModel.Core.Exceptions;
 using RocketLaunch.SharedKernel.Events.Mission;
 using RocketLaunch.SharedKernel.Enums;
 using RocketLaunch.SharedKernel.ValueObjects;
-using RocketLaunch.ReadModel.Core.Exceptions;
 using Xunit;
 using CrewMemberStatus = RocketLaunch.ReadModel.Core.Model.CrewMemberStatus;
 
@@ -24,7 +23,7 @@ public class MissionProjectorTests
 
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
-        await projector.WhenAsync(new MissionCreated(new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window));
+        await projector.HandleAsync(new MissionCreated(new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window), System.Threading.CancellationToken.None);
 
         var mission = (await service.GetByIdAsync(missionId))!;
         Assert.Equal("Test", mission.Name);
@@ -40,9 +39,9 @@ public class MissionProjectorTests
         var projector = new MissionProjector(service, crewService, NullLogger<MissionProjector>.Instance);
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
-        await projector.WhenAsync(
+        await projector.HandleAsync(
             new MissionCreated(
-                new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window));
+                new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window), System.Threading.CancellationToken.None);
 
         var crewIds = new[] { new CrewMemberId(Guid.NewGuid()), new CrewMemberId(Guid.NewGuid()) };
         
@@ -64,7 +63,7 @@ public class MissionProjectorTests
             Status = CrewMemberStatus.Assigned
         });
         
-        await projector.WhenAsync(new CrewAssigned(new MissionId(missionId), crewIds));
+        await projector.HandleAsync(new CrewAssigned(new MissionId(missionId), crewIds), System.Threading.CancellationToken.None);
 
         var mission = (await service.GetByIdAsync(missionId))!;
         Assert.Equal(2, mission.CrewMemberIds.Count);
@@ -80,14 +79,14 @@ public class MissionProjectorTests
         var projector = new MissionProjector(service, crewService, NullLogger<MissionProjector>.Instance);
 
         await Assert.ThrowsAsync<ReadModelException>(() =>
-            projector.WhenAsync(
+            projector.HandleAsync(
                 new RocketAssigned(
                     new MissionId(Guid.NewGuid()),
                     new RocketId(Guid.NewGuid()),
                     "Rocket",
                     1.0,
                     1,
-                    1)));
+                    1), System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -99,13 +98,13 @@ public class MissionProjectorTests
 
         var missionId = Guid.NewGuid();
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
-        await projector.WhenAsync(new MissionCreated(new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window));
+        await projector.HandleAsync(new MissionCreated(new MissionId(missionId), new MissionName("Test"), new TargetOrbit("LEO"), new PayloadDescription("Sat"), window), System.Threading.CancellationToken.None);
 
         await Assert.ThrowsAsync<ReadModelException>(() =>
-            projector.WhenAsync(
+            projector.HandleAsync(
                 new CrewAssigned(
                     new MissionId(missionId),
-                    new[] { new CrewMemberId(Guid.NewGuid()) })));
+                    new[] { new CrewMemberId(Guid.NewGuid()) }), System.Threading.CancellationToken.None));
     }
 
     [Fact]
@@ -117,7 +116,7 @@ public class MissionProjectorTests
         var window = new LaunchWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(1));
 
         await Assert.ThrowsAsync<ReadModelServiceException>(() =>
-            projector.WhenAsync(new MissionCreated(new MissionId(Guid.NewGuid()), new MissionName("T"), new TargetOrbit("L"), new PayloadDescription("P"), window)));
+            projector.HandleAsync(new MissionCreated(new MissionId(Guid.NewGuid()), new MissionName("T"), new TargetOrbit("L"), new PayloadDescription("P"), window), System.Threading.CancellationToken.None));
     }
 
     private class FailingMissionService : IMissionService

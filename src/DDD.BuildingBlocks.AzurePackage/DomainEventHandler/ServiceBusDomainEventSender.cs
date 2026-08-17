@@ -23,7 +23,7 @@ public class ServiceBusDomainEventSender(
     private readonly ServiceBusSender _sender = client.CreateSender(configuration.CurrentValue.QueueName);
     private readonly ILogger _log = loggerFactory.CreateLogger<ServiceBusDomainEventSender>();
 
-    public async Task HandleAsync(IDomainEvent @event)
+    public async Task HandleAsync(IDomainEvent @event, System.Threading.CancellationToken cancellationToken)
     {
         var data = Encoding.UTF8.GetBytes(
             JsonSerializer.Serialize(@event, @event.GetType(), new JsonSerializerOptions
@@ -55,7 +55,7 @@ public class ServiceBusDomainEventSender(
         telemetryClient.TrackTrace(
             $"Sending message: CorrelationId: {@event.CorrelationId}, AggregateId: {@event.SerializedAggregateId}");
 
-        await _sender.SendMessageAsync(message);
+        await _sender.SendMessageAsync(message, cancellationToken);
 
         _log.LogDebug(
                 "Message {Subject} was sent. Correlation: {CorrelationId}, Diagnostics: {Diagnostic-Id}",

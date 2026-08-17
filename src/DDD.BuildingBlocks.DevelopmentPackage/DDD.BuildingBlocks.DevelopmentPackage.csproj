@@ -2,12 +2,11 @@
 
   <PropertyGroup>
     <Description>Package with implementations for IEventBus, ICommandDispatcher with in-process implementations. Not to be used in a production environment.</Description>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>

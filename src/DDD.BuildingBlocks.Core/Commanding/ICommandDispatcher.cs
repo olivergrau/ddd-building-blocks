@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace DDD.BuildingBlocks.Core.Commanding
 {
     public interface ICommandDispatcher
     {
-        Task<CommandPublishResult> PublishAsync(Command command);
+        Task<CommandExecutionResult> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken)
+            where TCommand : class, ICommand;
     }
 }

@@ -24,7 +24,7 @@ private readonly IOptionsMonitor<StringStorageSettings> _settingsMonitor;
         }
     }
 
-    public async Task SaveAsync(string content, string key)
+    public async Task SaveAsync(string content, string key, System.Threading.CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -36,22 +36,22 @@ private readonly IOptionsMonitor<StringStorageSettings> _settingsMonitor;
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(key));
         }
 
-        await SaveContentInternalAsync(content, _settingsMonitor.CurrentValue.ContainerName ?? throw new Exception("No container name provided"), key);
+        await SaveContentInternalAsync(content, _settingsMonitor.CurrentValue.ContainerName ?? throw new Exception("No container name provided"), key, cancellationToken);
     }
 
-    public async Task<string?> GetAsync(string key)
+    public async Task<string?> GetAsync(string key, System.Threading.CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(key));
         }
 
-        var content = await GetFromStorageInternalAsync(key, _settingsMonitor.CurrentValue.ContainerName ?? throw new Exception("No container name provided"));
+        var content = await GetFromStorageInternalAsync(key, _settingsMonitor.CurrentValue.ContainerName ?? throw new Exception("No container name provided"), cancellationToken);
 
         return content;
     }
 
-    public async Task DeleteAsync(string key)
+    public async Task DeleteAsync(string key, System.Threading.CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -62,10 +62,10 @@ private readonly IOptionsMonitor<StringStorageSettings> _settingsMonitor;
             _settingsMonitor.CurrentValue.ConnectionString, _settingsMonitor.CurrentValue.ContainerName ?? throw new Exception("No container name provided"));
 
         await containerClient.DeleteBlobAsync(
-            key, DeleteSnapshotsOption.IncludeSnapshots);
+            key, DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
     }
 
-    private async Task<string?> GetFromStorageInternalAsync(string key, string containerName)
+    private async Task<string?> GetFromStorageInternalAsync(string key, string containerName, System.Threading.CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -87,15 +87,15 @@ private readonly IOptionsMonitor<StringStorageSettings> _settingsMonitor;
 
         var blobClient = containerClient.GetBlobClient(key);
 
-        if (!await blobClient.ExistsAsync())
+        if (!await blobClient.ExistsAsync(cancellationToken))
         {
             return null;
         }
 
-        var content = await blobClient.DownloadAsync();
+        var content = await blobClient.DownloadAsync(cancellationToken);
 
         using var reader = new StreamReader(content.Value.Content);
-        var blobContent = await reader.ReadToEndAsync();
+        var blobContent = await reader.ReadToEndAsync(cancellationToken);
 
         if (string.IsNullOrWhiteSpace(blobContent))
         {
@@ -105,7 +105,7 @@ private readonly IOptionsMonitor<StringStorageSettings> _settingsMonitor;
         return blobContent;
     }
 
-    private async Task SaveContentInternalAsync(string content, string containerName, string key)
+    private async Task SaveContentInternalAsync(string content, string containerName, string key, System.Threading.CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -128,13 +128,13 @@ private readonly IOptionsMonitor<StringStorageSettings> _settingsMonitor;
 
         var ms = new MemoryStream();
         await using var writer = new StreamWriter(ms);
-        await writer.WriteAsync(content);
-        await writer.FlushAsync();
+        await writer.WriteAsync(content.AsMemory(), cancellationToken);
+        await writer.FlushAsync(cancellationToken);
         ms.Position = 0;
 
-        await blobClient.UploadAsync(ms, true); // <- very important to set overwrite to true
+        await blobClient.UploadAsync(ms, true, cancellationToken); // <- very important to set overwrite to true
         await blobClient.SetHttpHeadersAsync(
-            new BlobHttpHeaders { ContentType = "application/file" });
+            new BlobHttpHeaders { ContentType = "application/file" }, cancellationToken: cancellationToken);
     }
 
     private BlobContainerClient GetBlobContainerClient(string containerName)

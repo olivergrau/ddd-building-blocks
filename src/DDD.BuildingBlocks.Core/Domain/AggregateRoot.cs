@@ -24,15 +24,27 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         protected bool Deactivated { get; set; }
 
-        private readonly List<IDomainEvent> _uncommittedChanges;
-        private Dictionary<Type, string> _eventHandlerCache = new();
+        private const long NoStreamVersion = (long)StreamState.NoStream;
+        private readonly List<IDomainEvent> _uncommittedChanges = [];
+        private readonly IReadOnlyDictionary<Type, string> _eventHandlerCache;
 
         protected IEnumerable<string> CorrelationIds => _correlationIds.AsReadOnly();
         private readonly List<string> _correlationIds = [];
 
-        public int CurrentVersion { get; protected set; }
+        public long CurrentVersion { get; protected set; }
 
-        public int LastCommittedVersion { get; protected set; }
+        public long LastCommittedVersion { get; protected set; }
+
+        public IReadOnlyList<IDomainEvent> UncommittedChanges
+        {
+            get
+            {
+                lock (_uncommittedChanges)
+                {
+                    return Array.AsReadOnly(_uncommittedChanges.ToArray());
+                }
+            }
+        }
 
         public StreamState GetStreamState()
         {
@@ -41,15 +53,14 @@ namespace DDD.BuildingBlocks.Core.Domain
                 return StreamState.StreamClosed;
             }
 
-            return CurrentVersion == -1 ? StreamState.NoStream : StreamState.HasStream;
+            return CurrentVersion == NoStreamVersion ? StreamState.NoStream : StreamState.HasStream;
         }
 
         protected AggregateRoot(TKey id) : base(id)
         {
-            CurrentVersion = (int)StreamState.NoStream;
-            LastCommittedVersion = (int)StreamState.NoStream;
-            _uncommittedChanges = [];
-            PrepareInternalEventHandlers();
+            CurrentVersion = NoStreamVersion;
+            LastCommittedVersion = NoStreamVersion;
+            _eventHandlerCache = ReflectionHelper.FindEventHandlerMethodsInAggregate(GetType());
         }
 
         public bool HasUncommittedChanges()
@@ -62,10 +73,7 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         public IEnumerable<IDomainEvent> GetUncommittedChanges()
         {
-            lock (_uncommittedChanges)
-            {
-                return _uncommittedChanges.ToList();
-            }
+            return UncommittedChanges;
         }
 
         public void MarkChangesAsCommitted()
@@ -79,11 +87,18 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         public void ReplayEvents(IEnumerable<IDomainEvent> history)
         {
+            ArgumentNullException.ThrowIfNull(history);
+
+            if (HasUncommittedChanges())
+            {
+                throw new InvalidOperationException("Historical events cannot be replayed while the aggregate has uncommitted changes.");
+            }
+
             foreach (var e in history)
             {
-                //We call ApplyEvent with isNew parameter set to false as we are replaying a historical event
-                ApplyEvent(e, false);
+                ApplyHistoricalEvent(e);
             }
+
             LastCommittedVersion = CurrentVersion;
         }
 
@@ -91,9 +106,16 @@ namespace DDD.BuildingBlocks.Core.Domain
         /// This is used to handle new events
         /// </summary>
         /// <param name="event"></param>
-        protected void ApplyEvent(IDomainEvent @event)
+        protected void RaiseEvent(IDomainEvent @event)
         {
-            ApplyEvent(@event, true);
+            ApplyEvent(@event, isNew: true);
+        }
+
+        protected void ApplyEvent(IDomainEvent @event) => RaiseEvent(@event);
+
+        private void ApplyHistoricalEvent(IDomainEvent @event)
+        {
+            ApplyEvent(@event, isNew: false);
         }
 
         /// <summary>
@@ -103,6 +125,8 @@ namespace DDD.BuildingBlocks.Core.Domain
         /// <param name="isNew">Is this a new DomainEvent</param>
         private void ApplyEvent(IDomainEvent @event, bool isNew)
         {
+            ArgumentNullException.ThrowIfNull(@event);
+
             if (Deactivated)
             {
                 throw new AggregateException(@event.SerializedAggregateId, "Aggregate has been marked as deactivated.");
@@ -146,28 +170,25 @@ namespace DDD.BuildingBlocks.Core.Domain
 
         private void Apply(IDomainEvent @event)
         {
+            if (!_eventHandlerCache.TryGetValue(@event.GetType(), out var handlerMethod))
+            {
+                throw new AggregateEventOnApplyMethodMissingException(
+                    $"No event handler specified for {@event.GetType()} on {GetType()}");
+            }
+
             if (GetStreamState() == StreamState.NoStream)
             {
                 //This is only needed for the very first event as every other event CAN ONLY apply to a matching ID
-                Id = GetIdFromStringRepresentation(@event.SerializedAggregateId) as TKey
+                var serializedAggregateId = @event.SerializedAggregateId
+                    ?? throw new AggregateCreationException("Cannot determine ID value from string representation. Aggregate could not be created.");
+
+                Id = GetIdFromStringRepresentation(serializedAggregateId) as TKey
                      ?? throw new AggregateCreationException("Cannot determine ID value from string representation. Aggregate could not be created.");
             }
 
-            if (_eventHandlerCache.ContainsKey(@event.GetType()))
-            {
-                @event.InvokeOnAggregate(this, _eventHandlerCache[@event.GetType()]);
-            }
-            else
-            {
-                throw new AggregateEventOnApplyMethodMissingException($"No event handler specified for {@event.GetType()} on {GetType()}");
-            }
+            @event.InvokeOnAggregate(this, handlerMethod);
 
             CurrentVersion++;
-        }
-
-        private void PrepareInternalEventHandlers()
-        {
-            _eventHandlerCache = ReflectionHelper.FindEventHandlerMethodsInAggregate(GetType());
         }
     }
 }

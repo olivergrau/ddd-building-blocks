@@ -16,8 +16,8 @@ public sealed class CrewMemberCertificationSet : DomainEvent
 
     public CrewMemberCertificationSet(
         CrewMemberId crewMemberId,
-        IEnumerable<string> certifications,
-        int targetVersion = -1)
+        IReadOnlyCollection<string> certifications,
+        long targetVersion = -1)
         : base(crewMemberId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         CrewMemberId = crewMemberId;

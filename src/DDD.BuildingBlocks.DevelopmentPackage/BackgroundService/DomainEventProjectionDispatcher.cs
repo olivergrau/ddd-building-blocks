@@ -60,7 +60,7 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.BackgroundService
         {
             while (_eventPublishingTable.Dequeue(_boundToWorkerId) is { } domainEvent)
             {
-                await _eventHandler.HandleAsync(domainEvent);
+                await _eventHandler.HandleAsync(domainEvent, cancellationToken ?? System.Threading.CancellationToken.None);
             }
         }
     }

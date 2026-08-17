@@ -15,12 +15,12 @@ namespace LunarOps.Domain.Model
     public class MoonStation : AggregateRoot<StationId>
     {
         // Core Info
-        public string Name { get; private set; }
-        public string Location { get; private set; }
+        public string Name { get; private set; } = null!;
+        public string Location { get; private set; } = null!;
         public StationStatus OperationalStatus { get; private set; }
 
         // Supported Config
-        private readonly HashSet<VehicleType> _supportedVehicleTypes;
+        private readonly HashSet<VehicleType> _supportedVehicleTypes = null!;
         public IReadOnlyCollection<VehicleType> SupportedVehicleTypes => _supportedVehicleTypes;
 
         // Capacity
@@ -72,7 +72,7 @@ namespace LunarOps.Domain.Model
             if (availablePort == null)
                 throw new AggregateValidationException(Id, nameof(DockingPorts), null, "No available docking ports.");
 
-            ApplyEvent(new DockingPortReserved(Id, availablePort.Id, missionId, vehicleType, CurrentVersion));
+            RaiseEvent(new DockingPortReserved(Id, availablePort.Id, missionId, vehicleType, CurrentVersion));
 
             return availablePort.Id;
         }
@@ -83,7 +83,7 @@ namespace LunarOps.Domain.Model
             if (port == null)
                 throw new AggregateValidationException(Id, nameof(DockingPorts), portId, "Docking port not found.");
 
-            ApplyEvent(new DockingPortReleased(Id, portId, CurrentVersion));
+            RaiseEvent(new DockingPortReleased(Id, portId, CurrentVersion));
         }
 
         public void AssignCrewMember(LunarCrewMember member)
@@ -91,7 +91,7 @@ namespace LunarOps.Domain.Model
             if (_crewQuarters.Count >= MaxCrewCapacity)
                 throw new AggregateValidationException(Id, nameof(CrewQuarters), member.Name, "Station crew capacity exceeded.");
 
-            ApplyEvent(new CrewMemberAssignedToStation(Id, member.Id, member.Name, member.Role, CurrentVersion));
+            RaiseEvent(new CrewMemberAssignedToStation(Id, member.Id, member.Name, member.Role, CurrentVersion));
         }
 
         public void StorePayload(LunarPayload payload)
@@ -100,7 +100,7 @@ namespace LunarOps.Domain.Model
             if (currentMass + payload.Mass > MaxPayloadCapacity)
                 throw new AggregateValidationException(Id, nameof(StoredPayloads), payload.Mass, "Payload capacity exceeded.");
 
-            ApplyEvent(new PayloadStoredAtStation(Id, payload.Description, payload.Mass, payload.DestinationArea, CurrentVersion));
+            RaiseEvent(new PayloadStoredAtStation(Id, payload.Description, payload.Mass, payload.DestinationArea, CurrentVersion));
         }
         
         public void RemoveCrewMember(LunarCrewMemberId crewMemberId)
@@ -109,7 +109,7 @@ namespace LunarOps.Domain.Model
             if (member == null)
                 throw new AggregateValidationException(Id, nameof(CrewQuarters), crewMemberId, "Crew member not found.");
 
-            ApplyEvent(new CrewMemberRemovedFromStation(Id, crewMemberId, CurrentVersion));
+            RaiseEvent(new CrewMemberRemovedFromStation(Id, crewMemberId, CurrentVersion));
         }
 
         public void RemovePayload(LunarPayload payload)
@@ -122,7 +122,7 @@ namespace LunarOps.Domain.Model
                 throw new AggregateValidationException(Id, nameof(StoredPayloads), payload.Description, "Matching payload not found.");
             }
 
-            ApplyEvent(new PayloadRemovedFromStation(Id, payload.Description, payload.Mass, payload.DestinationArea, CurrentVersion));
+            RaiseEvent(new PayloadRemovedFromStation(Id, payload.Description, payload.Mass, payload.DestinationArea, CurrentVersion));
         }
         
         // Event Handlers

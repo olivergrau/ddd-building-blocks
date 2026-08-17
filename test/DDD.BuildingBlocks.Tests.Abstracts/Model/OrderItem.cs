@@ -62,7 +62,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(description));
             }
 
-            ApplyEvent(new OrderItemCreatedEvent(Id.ToString(), CurrentVersion, name, description, ApplicationTime.Current));
+            RaiseEvent(new OrderItemCreatedEvent(Id.ToString(), CurrentVersion, name, description, ApplicationTime.Current));
 		}
 
 		#endregion
@@ -71,29 +71,29 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 
 		public void SetBuyingPrice(decimal buyingPrice)
 		{
-			ApplyEvent(new OrderItemBuyingPriceChangedEvent(Id.ToString(), CurrentVersion, buyingPrice));
+			RaiseEvent(new OrderItemBuyingPriceChangedEvent(Id.ToString(), CurrentVersion, buyingPrice));
 		}
 
 		public void Cancel()
 		{
-			ApplyEvent(new OrderItemCancelledEvent(Id.ToString(), CurrentVersion));
+			RaiseEvent(new OrderItemCancelledEvent(Id.ToString(), CurrentVersion));
 		}
 
 		public void SetActive()
 		{
-			ApplyEvent(new OrderItemStateChangedEvent(Id.ToString(), CurrentVersion, (int) OrderItemState.Active));
+			RaiseEvent(new OrderItemStateChangedEvent(Id.ToString(), CurrentVersion, (int) OrderItemState.Active));
 		}
 
 		public void SetAsSold()
 		{
-			ApplyEvent(new OrderItemStateChangedEvent(Id.ToString(), CurrentVersion, (int) OrderItemState.Sold));
+			RaiseEvent(new OrderItemStateChangedEvent(Id.ToString(), CurrentVersion, (int) OrderItemState.Sold));
 		}
 
 		public void ChangeName(string newName)
 		{
 			if (Name != newName)
 			{
-				ApplyEvent(new OrderItemNameChangedEvent(Id.ToString(), CurrentVersion, newName));
+				RaiseEvent(new OrderItemNameChangedEvent(Id.ToString(), CurrentVersion, newName));
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 		{
 			if (Description != newDescription)
 			{
-				ApplyEvent(new OrderItemDescriptionChangedEvent(Id.ToString(), CurrentVersion, newDescription));
+				RaiseEvent(new OrderItemDescriptionChangedEvent(Id.ToString(), CurrentVersion, newDescription));
 			}
 		}
 

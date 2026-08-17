@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -14,8 +15,8 @@ public class AssignCrewMemberCommandTests
     [Fact]
     public async Task Handle_AssignCrewMemberCommand()
     {
-        var store = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(store);
+        var store = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(store, RocketLaunchEventCodec.Create());
         var registerHandler = new RegisterCrewMemberCommandHandler(repository);
         var registerCommand = new RegisterCrewMemberCommand(
             crewMemberId: Guid.NewGuid(),
@@ -23,12 +24,12 @@ public class AssignCrewMemberCommandTests
             role: CrewRole.Pilot,
             certifications: []
         );
-        await registerHandler.HandleCommandAsync(registerCommand);
+        await registerHandler.HandleAsync(registerCommand, System.Threading.CancellationToken.None);
 
         var handler = new AssignCrewMemberCommandHandler(repository);
-        await handler.HandleCommandAsync(new AssignCrewMemberCommand(registerCommand.CrewMemberId));
+        await handler.HandleAsync(new AssignCrewMemberCommand(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
 
-        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId));
+        var crew = await repository.GetByIdAsync<Domain.Model.CrewMember, CrewMemberId>(new CrewMemberId(registerCommand.CrewMemberId), System.Threading.CancellationToken.None);
         Debug.Assert(crew != null);
         Assert.Equal(CrewMemberStatus.Assigned, crew.Status);
         Assert.Equal(1, crew.CurrentVersion);

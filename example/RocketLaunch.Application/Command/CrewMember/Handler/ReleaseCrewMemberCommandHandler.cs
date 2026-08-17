@@ -9,13 +9,13 @@ namespace RocketLaunch.Application.Command.CrewMember.Handler;
 public class ReleaseCrewMemberCommandHandler(IEventSourcingRepository repository)
     : CommandHandler<ReleaseCrewMemberCommand>(repository)
 {
-    public override async Task HandleCommandAsync(ReleaseCrewMemberCommand command)
+    public override async Task HandleAsync(ReleaseCrewMemberCommand command, System.Threading.CancellationToken cancellationToken)
     {
         Domain.Model.CrewMember crewMember;
 
         try
         {
-            crewMember = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(command);
+            crewMember = await AggregateSourcing.Source<Domain.Model.CrewMember, CrewMemberId>(command, [], cancellationToken);
         }
         catch (Exception e)
         {
@@ -24,6 +24,6 @@ public class ReleaseCrewMemberCommandHandler(IEventSourcingRepository repository
 
         crewMember.Release();
 
-        await AggregateRepository.SaveAsync(crewMember);
+        await AggregateRepository.SaveAsync(crewMember, cancellationToken);
     }
 }

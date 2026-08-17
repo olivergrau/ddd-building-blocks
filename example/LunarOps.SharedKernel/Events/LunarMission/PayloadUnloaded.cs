@@ -15,7 +15,7 @@ public sealed class PayloadUnloaded : DomainEvent
     public PayloadUnloaded(
         ExternalMissionId missionId,
         IEnumerable<LunarPayload> payload,
-        int targetVersion = -1
+        long targetVersion = -1
     ) : base(missionId.ToString(), targetVersion, CurrentClassVersion)
     {
         MissionId = missionId;

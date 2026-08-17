@@ -15,7 +15,7 @@ public sealed class DockingPortReleased : DomainEvent
     public DockingPortReleased(
         StationId stationId,
         DockingPortId portId,
-        int targetVersion = -1
+        long targetVersion = -1
     ) : base(stationId.Value.ToString(), targetVersion, CurrentClassVersion)
     {
         StationId = stationId;
