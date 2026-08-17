@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 ﻿using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -21,8 +22,8 @@ public class AssignRocketCommandTests
         var validator = new StubResourceAvailabilityService();
         
         // 1. arrange: in-memory event store + repository
-        var eventStore = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(eventStore /*, no snapshot provider*/);
+        var eventStore = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(eventStore, RocketLaunchEventCodec.Create());
             
         // 2. arrange: your command handler (inject repo + any other deps)
         var registerMissionCommandHandler = new RegisterMissionCommandHandler(repository /*, …*/);

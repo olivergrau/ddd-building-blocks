@@ -23,6 +23,7 @@ namespace RocketLaunch.SharedKernel.ValueObjects
             Value = guidValue;
         }
         
+        [System.Text.Json.Serialization.JsonConstructor]
         public MissionId(Guid value)
         {
             if (value == Guid.Empty)
@@ -41,4 +42,3 @@ namespace RocketLaunch.SharedKernel.ValueObjects
         }
     }
 }
-

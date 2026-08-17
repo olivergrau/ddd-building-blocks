@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -20,8 +21,8 @@ public class AbortMissionCommandTests
     public async Task Handle_AbortMissionCommand()
     {
         var validator = new StubResourceAvailabilityService();
-        var store = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(store);
+        var store = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(store, RocketLaunchEventCodec.Create());
 
         var registerHandler = new RegisterMissionCommandHandler(repository);
         var registerCommand = new RegisterMissionCommand(

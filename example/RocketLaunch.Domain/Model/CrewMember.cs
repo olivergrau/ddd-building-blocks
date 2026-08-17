@@ -14,7 +14,7 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     public CrewMember(CrewMemberId id, string name, CrewRole role, IEnumerable<string> certifications)
         : base(id)
     {
-        RaiseEvent(new CrewMemberRegistered(id, name, role, certifications));
+        RaiseEvent(new CrewMemberRegistered(id, name, role, certifications.ToArray()));
     }
 
     // For rehydration
@@ -41,7 +41,7 @@ public class CrewMember : AggregateRoot<CrewMemberId>
     public void SetCertifications(IEnumerable<string> certifications)
     {
         RaiseEvent(new CrewMemberCertificationSet(Id,
-            certifications ?? throw new ArgumentNullException(nameof(certifications)),
+            certifications?.ToArray() ?? throw new ArgumentNullException(nameof(certifications)),
             CurrentVersion));
     }
 

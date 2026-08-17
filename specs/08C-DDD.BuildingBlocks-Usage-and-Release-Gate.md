@@ -33,7 +33,7 @@ F0 reproduce the baseline
 -> F6 select the production provider
 -> F7 implement the production provider
 -> F8 demonstrate projection and recovery
--> optional F9 snapshot hardening
+-> F9 deliver and harden snapshot providers; consumer activation remains optional
 -> F10 release and explicit approval
 -> only then begin the Playground foundation
 ```
@@ -101,7 +101,7 @@ F0 reproduce the baseline
 
 ## 5. Production Provider Decision
 
-The technology is not anticipated in the specification phase. At least the following are checked at gate F6:
+The technology was not anticipated in the specification phase. Gate F6 selected PostgreSQL with Npgsql and explicit SQL after checking:
 
 - required event store semantics;
 - atomic expected version check;
@@ -112,7 +112,7 @@ The technology is not anticipated in the specification phase. At least the follo
 - Maintenance and upgrade effort;
 - additional infrastructure requirements.
 
-PostgreSQL is the preferred starting hypothesis because it is already selected for read models and other relational operational data. An external event store is preferable only if it provides a demonstrable functional or operational benefit that justifies the additional complexity.
+PostgreSQL is the accepted production event store because it is already selected for read models and other relational operational data and satisfies the normative provider contracts. An external event store was rejected because it provided no demonstrable functional or operational benefit that justified the additional complexity. EF Core is excluded from the event-store hot path.
 
 ## 6. Release artifact
 
@@ -170,7 +170,7 @@ READY FOR PLAYGROUND
 
 - Analysis, modernization plan and release gate form a complete process.
 - Framework modernization comes before playground code.
-- The production-provider technology remains open until F6.
-- PostgreSQL is a preference, but not an unfounded pre-determination of the event store.
+- The production-provider technology was closed at F6 with PostgreSQL as the accepted choice.
+- PostgreSQL was selected through an explicit ADR rather than treated as an unfounded pre-determination.
 - Real integration and contract tests are mandatory.
 - there is exactly one released tactical basis.

@@ -53,8 +53,11 @@
 
             _order.ReferenceOrderItem(_orderItem);
 
-            _eventSourcingRepository = new EventSourcingRepository(new PureInMemoryEventStorageProvider(),
-                new InMemorySnapshotStorageProvider(5, inMemorySnapshotStorePath));
+            _eventSourcingRepository = new EventSourcingRepository(
+                new InMemoryEventStoreProvider(),
+                DDD.BuildingBlocks.Tests.Abstracts.Event.TestEventCodec.Create(),
+                new InMemorySnapshotStoreProvider(5),
+                DDD.BuildingBlocks.Tests.Abstracts.Snapshot.TestSnapshotCodec.Create());
         }
 
         public void Dispose()

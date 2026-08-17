@@ -20,6 +20,7 @@ namespace RocketLaunch.SharedKernel.ValueObjects
             Value = guidValue;
         }
 
+        [System.Text.Json.Serialization.JsonConstructor]
         public CrewMemberId(Guid value)
         {
             if (value == Guid.Empty)

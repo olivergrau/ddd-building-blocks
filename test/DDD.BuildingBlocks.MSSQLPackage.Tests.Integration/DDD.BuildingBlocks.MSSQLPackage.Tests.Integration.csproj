@@ -1,36 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="FluentAssertions" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="NSubstitute" />
-        <PackageReference Include="Testcontainers" />
-        <PackageReference Include="Testcontainers.MsSql" />
-        <PackageReference Include="xunit" />
-        <PackageReference Include="xunit.runner.visualstudio">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="coverlet.collector">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="SSH.NET" />
+    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\src\DDD.BuildingBlocks.MSSQLPackage\DDD.BuildingBlocks.MSSQLPackage.csproj" />
-      <ProjectReference Include="..\DDD.BuildingBlocks.Tests.Abstracts\DDD.BuildingBlocks.Tests.Abstracts.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\..\src\DDD.BuildingBlocks.MSSQLPackage\DDL.sql">
-        <Link>DDL.sql</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.MSSQLPackage\DDD.BuildingBlocks.MSSQLPackage.csproj" />
+    <ProjectReference Include="..\DDD.BuildingBlocks.Tests.Abstracts\DDD.BuildingBlocks.Tests.Abstracts.csproj" />
+  </ItemGroup>
 
 </Project>

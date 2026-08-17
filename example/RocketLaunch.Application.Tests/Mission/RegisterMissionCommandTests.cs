@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 ﻿using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 using RocketLaunch.Application.Command.Mission;
@@ -17,8 +18,8 @@ public class RegisterMissionCommandTests
     public async Task Handle_RegisterMissionCommand_PersistsMissionRegisteredEvent()
     {
         // 1. arrange: in-memory event store + repository
-        var eventStore = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(eventStore /*, no snapshot provider*/);
+        var eventStore = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(eventStore, RocketLaunchEventCodec.Create());
             
         // 2. arrange: your command handler (inject repo + any other deps)
         var handler = new RegisterMissionCommandHandler(repository /*, …*/);

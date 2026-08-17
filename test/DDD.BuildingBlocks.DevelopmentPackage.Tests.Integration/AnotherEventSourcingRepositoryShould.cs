@@ -50,8 +50,11 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             _target = new Order(orderId.ToString(), title, comment, orderState);
             _target.SetOptionalCertificate("prefix", "code");
 
-            _eventSourcingRepository = new EventSourcingRepository(new PureInMemoryEventStorageProvider(),
-                new InMemorySnapshotStorageProvider(5, inMemorySnapshotStorePath));
+            _eventSourcingRepository = new EventSourcingRepository(
+                new InMemoryEventStoreProvider(),
+                DDD.BuildingBlocks.Tests.Abstracts.Event.TestEventCodec.Create(),
+                new InMemorySnapshotStoreProvider(5),
+                DDD.BuildingBlocks.Tests.Abstracts.Snapshot.TestSnapshotCodec.Create());
         }
 
         public void Dispose()
@@ -93,9 +96,9 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             reloadedOrder.HasUncommittedChanges().Should().BeFalse();
         }
 
-        [Fact(DisplayName = "Allow saving of aggregates with unique constraints based values multiple times")]
+        [Fact(DisplayName = "Allow saving the same aggregate multiple times")]
         [Trait("Category", "Integrationtest")]
-		public void Allow_saving_of_aggregates_with_unique_constraints_based_values_multiple_times()
+		public void Allow_saving_the_same_aggregate_multiple_times()
         {
             // Arrange
             var (order, _) = PrepareTwoAggregates(
@@ -110,30 +113,6 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
             // Act + Assert
             functor.Should().NotThrowAsync("Because it saves the first time with that certificate");
             functor.Should().NotThrowAsync("Because the the same object saves the same value");
-        }
-
-        [Fact(DisplayName = "Not allow saving two aggregates with the same value of a unique constraint based property")]
-        [Trait("Category", "Integrationtest")]
-		public void Not_allow_saving_two_aggregates_with_the_same_value_of_a_unique_constraint_based_property()
-        {
-            // Arrange
-            var (order1, _) = PrepareTwoAggregates(
-                GetUniqueString("Order1"), GetUniqueString("Item1.1"));
-
-            var (order2, _) = PrepareTwoAggregates(
-                GetUniqueString("Order2"), GetUniqueString("Item2.1"));
-
-            var uniquePrefix = GetUniqueString("UniquePrefix");
-
-            order1.SetOptionalCertificate(uniquePrefix, "Fixed");
-            order2.SetOptionalCertificate(uniquePrefix, "Fixed");
-
-            Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1, System.Threading.CancellationToken.None);
-            Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2, System.Threading.CancellationToken.None);
-
-            // Act + Assert
-            functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
-            functor2.Should().ThrowAsync<ProviderException>("Because the second aggregate wants to save a certificate which already exists.");
         }
 
         [Fact(DisplayName = "Save a single aggregate and that leads to zero uncommitted changes")]
@@ -183,63 +162,6 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
                 AssertOrder(reloadedOrder!, i);
             }
         }
-
-        [Fact(DisplayName = "Allow saving two aggregates with same unique property only if the first one has been deactivated")]
-        [Trait("Category", "Integrationtest")]
-        public async Task Allow_saving_two_aggregates_with_same_unique_property_only_if_the_first_one_has_been_deactivated()
-        {
-            // Arrange
-            var orderId1 = Guid.NewGuid();
-            var order1 = new Order(orderId1.ToString(), "Titel1", "Kommentar1", OrderState.Deactivated);
-
-            var prefix = GetUniqueString("UniquePrefix");
-            var code = "Code";
-            order1.SetOptionalCertificate(prefix, code);
-
-            var orderId2 = Guid.NewGuid();
-            var order2 = new Order(orderId2.ToString(), "Titel2", "Kommentar2", OrderState.Deactivated);
-
-            order2.SetOptionalCertificate(prefix, code);
-
-            Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1, System.Threading.CancellationToken.None);
-            Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2, System.Threading.CancellationToken.None);
-
-            // Act + Assert
-            await functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
-
-            // now deactivate the aggregate
-            order1.CloseOrder();
-
-            await functor1.Should().NotThrowAsync("The aggregate should be deactivated");
-            await functor2.Should().NotThrowAsync<ProviderException>();
-        }
-
-		[Fact(DisplayName = "Not allow saving two aggregates with same unique property")]
-		[Trait("Category", "Integrationtest")]
-		public async Task Not_allow_saving_two_aggregates_with_same_unique_property()
-		{
-			// Arrange
-			var orderId1 = Guid.NewGuid();
-			var order1 = new Order(orderId1.ToString(), "Titel1", "Kommentar1", OrderState.Deactivated);
-
-			var prefix = GetUniqueString("UniquePrefix");
-			var code = "Code";
-			order1.SetOptionalCertificate(prefix, code);
-
-			var orderId2 = Guid.NewGuid();
-			var order2 = new Order(orderId2.ToString(), "Titel2", "Kommentar2", OrderState.Deactivated);
-
-			order2.SetOptionalCertificate(prefix, code);
-
-			Func<Task> functor1 = async () => await _eventSourcingRepository.SaveAsync(order1, System.Threading.CancellationToken.None);
-			Func<Task> functor2 = async () => await _eventSourcingRepository.SaveAsync(order2, System.Threading.CancellationToken.None);
-
-			// Act + Assert
-			await functor1.Should().NotThrowAsync("Because it saves the first time with that certificate");
-			await functor2.Should().ThrowAsync<ProviderException>();
-			var reloadedOrder = await _eventSourcingRepository.GetByIdAsync<Order, OrderId>(new OrderId(orderId2.ToString()), System.Threading.CancellationToken.None);
-			reloadedOrder.Should().BeNull();
-		}
 
 		private void AssertOrder(Order order, int iteration)
 		{

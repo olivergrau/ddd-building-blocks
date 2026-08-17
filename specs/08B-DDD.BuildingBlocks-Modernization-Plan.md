@@ -2,7 +2,7 @@
 
 ## DDD.BuildingBlocks modernization plan
 
-**Status:** ACTIVE — M5/M9/F4 implemented; awaiting Gate G4 review
+**Status:** ACTIVE — F5 in-memory provider and normative contract suite implemented; awaiting Gate G5 review
 **Version:** 1.4
 **Date:** 2026-08-16  
 **Base:** Framework analysis on commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
@@ -153,15 +153,19 @@ Payload
 
 **Goal:** Select an event-store technology based on mandatory capabilities and operational effort, then implement exactly one production adapter.
 
-Options under evaluation:
+The production-provider decision is complete:
 
 ```text
-DDD.BuildingBlocks PostgreSQL Provider
-Adaptation of the existing relational provider logic
-external event store with a DDD.BuildingBlocks adapter
+selected: DDD.BuildingBlocks PostgreSQL Provider with Npgsql and explicit SQL
+rejected: adaptation of the removed relational provider logic
+rejected: external event store with a DDD.BuildingBlocks adapter
 ```
 
-PostgreSQL remains the preferred starting hypothesis as long as an external solution does not offer any demonstrable additional benefit.
+PostgreSQL is the accepted reference production provider. EF Core is not used in its event-store hot path. An external event-store product offered no required benefit that justified its additional operational dependency.
+
+Before selecting that provider, F5 established `IEventStoreProvider` and `EventStoreProviderContract` as the only normative envelope-based semantics. The in-memory reference implementation defines atomic expected-version append, unique Event IDs, stable stream order, provider-assigned global positions, and committed-feed paging. The legacy `IEventStorageProvider` and its Development and MSSQL implementations were removed. Every future provider must pass the suite unchanged.
+
+The PostgreSQL provider was accepted at Gate G7. A clean-room MSSQL parity provider was subsequently implemented against the same contracts with its own migrations and SQL Server operational verification. It does not reuse the removed persistence format.
 
 For a relational implementation, at least the following storage classes are required:
 
@@ -199,7 +203,7 @@ projection_checkpoints
 
 ### M8: Snapshots
 
-**Goal:** Optional, disposable rehydration optimization.
+**Goal:** Deliver snapshot providers for In-Memory, PostgreSQL, and SQL Server as disposable rehydration optimizations. Consumer activation remains optional; provider implementation is mandatory.
 
 **Acceptance:**
 
@@ -233,6 +237,10 @@ projection_checkpoints
 - small Playground-oriented example with at least two event-sourced aggregates with different lifecycles, such as `Session` and `Persona`;
 - Framework version pinned;
 - no open critical finding category.
+
+### Post-modernization documentation package
+
+Once the modernization and release gates are complete, produce a user-facing documentation set with a quickstart, concept articles, and task-oriented tutorials and guides. RocketLaunch and LunarOps provide the executable reference scenarios. The package must cover normal development, both relational providers, snapshots, projections, rebuild and recovery, testing, migrations, and operational concerns without requiring readers to understand the modernization history.
 
 ## 5. Prioritization
 

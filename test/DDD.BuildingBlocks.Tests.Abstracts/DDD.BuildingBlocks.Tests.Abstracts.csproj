@@ -13,8 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
@@ -26,16 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
     <ProjectReference Include="..\..\src\DDD.BuildingBlocks.DevelopmentPackage\DDD.BuildingBlocks.DevelopmentPackage.csproj" />
-    <ProjectReference Include="..\..\src\DDD.BuildingBlocks.MSSQLPackage\DDD.BuildingBlocks.MSSQLPackage.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Configuration">
-      <HintPath>..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.extensions.configuration\2.1.1\lib\netstandard2.0\Microsoft.Extensions.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
-      <HintPath>..\..\..\..\Users\I047\.nuget\packages\microsoft.extensions.configuration.abstractions\2.2.0\lib\netstandard2.0\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

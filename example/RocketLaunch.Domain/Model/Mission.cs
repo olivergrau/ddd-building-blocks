@@ -98,7 +98,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
             throw new RuleValidationException(
                 Id, "Crew not available");
             
-        RaiseEvent(new CrewAssigned(Id, crew, CurrentVersion));
+        RaiseEvent(new CrewAssigned(Id, crew.ToArray(), CurrentVersion));
     }
 
     public void Schedule()
@@ -132,7 +132,7 @@ public class Mission : AggregateRoot<MissionId>, ISnapshotEnabled
         if (Status != MissionStatus.Launched)
             throw new AggregateException(Id, "Only launched missions can arrive");
         RaiseEvent(new MissionArrivedAtLunarOrbit(
-            Id, arrivalTime, vehicleType, crewManifest, payloadManifest, CurrentVersion));
+            Id, arrivalTime, vehicleType, crewManifest.ToArray(), payloadManifest.ToArray(), CurrentVersion));
     }
 
     // Event handlers

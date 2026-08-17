@@ -2,7 +2,7 @@
 
 ## Detailed implementation plan for modernization and playground release
 
-**Status:** ACTIVE — F4 implemented; awaiting Gate G4 review
+**Status:** ACTIVE — F5 implemented; awaiting Gate G5 review
 **Version:** 1.3
 **Date:** 2026-08-16  
 **Initial status:** Commit `26faa4b7226f070a30ae7bb8e1a4cf79b0bba5ad`
@@ -237,7 +237,7 @@ Existing persisted MSSQL data should only be migrated if there is a real asset t
 
 ## 8. Phase F4: Async, Cancellation, Error and DI
 
-**Implementation status:** Complete. Gate G4 is awaiting explicit approval. The legacy service locator, dependency resolver, and command processor were removed without a compatibility layer, as explicitly decided for this breaking release.
+**Implementation status:** Complete and approved at Gate G4. The legacy service locator, dependency resolver, and command processor were removed without a compatibility layer, as explicitly decided for this breaking release.
 
 ### F4.1 I/O Contracts
 
@@ -284,6 +284,8 @@ Cancellation
 
 ## 9. Phase F5: In-memory provider and contract suite
 
+**Implementation status:** Complete and accepted at Gate G5. The envelope-based `IEventStoreProvider` is the only event-store provider contract. The earlier `IEventStorageProvider` and its legacy Development and MSSQL implementations were removed in F5.
+
 ### F5.1 Production-level semantics
 
 - thread safe;
@@ -317,6 +319,8 @@ Separate contracts are created if necessary for snapshots and projection checkpo
 
 ## 10. Phase F6: Production Provider Decision
 
+**Decision status:** Complete and accepted. PostgreSQL with Npgsql and explicit SQL is the selected production event-store technology. EF Core is excluded from the event-store hot path. External event-store products were rejected because they add an operational dependency without a required capability that PostgreSQL cannot provide. See ADR 001.
+
 ### F6.1 Spike A: PostgreSQL adapter
 
 The spike proves:
@@ -341,6 +345,8 @@ PostgreSQL is the default hypothesis. An external store is selected only if it p
 
 ## 11. Phase F7: Production Provider
 
+**Implementation status:** Complete, verified, and accepted at Gate G7. `DDD.BuildingBlocks.PostgreSQLPackage` implements the normative provider contract against PostgreSQL 18 using Npgsql 10 and explicit SQL. The optional clean-room MSSQL parity provider is also implemented and awaiting follow-up review.
+
 ### F7.1 Schema and Migrations
 
 At least logical:
@@ -348,7 +354,7 @@ At least logical:
 ```text
 event_streams
 events
-snapshots optional
+snapshots (consumer activation optional; provider delivery mandatory in F9)
 projection_checkpoints
 ```
 
@@ -361,7 +367,7 @@ Schema, indexes and constraints are derived from the contract requirements, not 
 - Check expected version atomically;
 - Write batch of events;
 - assign global positions;
--commit;
+- commit;
 - only then visible as committed.
 
 ### F7.3 Tests
@@ -374,9 +380,15 @@ Schema, indexes and constraints are derived from the contract requirements, not 
 - Backup/Restore smoke test;
 - long streams and large payloads within sensible limits.
 
+### F7.4 Optional MSSQL parity provider
+
+After PostgreSQL passed Gate G7, the new MSSQL parity provider was implemented. It uses the same `IEventStoreProvider` contract, passes the normative suite unchanged, and has independent migrations and operational verification against SQL Server 2025. It does not revive or adapt the removed CLR-type-bound persistence format. Snapshot support remains a separate provider contract finalized in F9.
+
 **Gate G7:** Enable production persistence.
 
 ## 12. Phase F8: Projections and Recovery
+
+**Implementation status:** Complete and verified. Gate G8 is awaiting explicit approval. Projection checkpoints are implemented for In-Memory, PostgreSQL, and SQL Server with transactional read-model callbacks, idempotent redelivery, visible failure state, retry, reset, and rebuild.
 
 ### F8.1 Feed and Checkpoint
 
@@ -406,7 +418,7 @@ Schema, indexes and constraints are derived from the contract requirements, not 
 
 ## 13. Phase F9: Snapshots
 
-F9 only starts when there is measured need or when the existing framework API needs to be kept consistent without much additional effort.
+Snapshot use remains an optional aggregate-rehydration optimization, but provider availability is mandatory framework scope. F9 must deliver and verify snapshot providers for In-Memory, PostgreSQL, and SQL Server.
 
 - Snapshot references stream version;
 - Snapshot format versioned;
@@ -414,8 +426,13 @@ F9 only starts when there is measured need or when the existing framework API ne
 - full replay remains possible;
 - Snapshot error does not change event commit;
 - Equivalence test replay against snapshot plus residual events.
+- the same normative snapshot-provider contract passes unchanged for all three implementations.
+
+F9 delivers an immutable JSON snapshot envelope with stable snapshot keys and explicit schema versions, a registry-backed codec, and the `ISnapshotStoreProvider` contract. Incompatible or unreadable snapshots are treated as disposable and trigger full replay. In-Memory, PostgreSQL, and SQL Server implement the same provider contract; snapshot persistence happens only after the event append and cannot turn that successful commit into a failure.
 
 ## 14. Phase F10: Packaging and release
+
+F10 produces stable version `2.0.0` as a coordinated SemVer major release. Distribution uses downloadable GitHub Release assets and a local-folder NuGet source; no package is pushed to NuGet.org or another package registry. Packages use the MIT license and are not signed. The tag-triggered release workflow verifies the Release build and provider suites, creates seven NuGet and seven symbol packages, checks package contents and metadata, runs a clean local-feed consumer smoke test, generates SHA-256 checksums, and publishes the assets with release and migration documentation.
 
 ### F10.1 Package quality
 
@@ -432,20 +449,14 @@ F9 only starts when there is measured need or when the existing framework API ne
 
 Recommendation:
 
-```text
-0.x.y-alpha.N    modernization and API exploration
-0.x.y-rc.N       Playground-compatible release candidate
-1.0.0            only after the public API has stabilized
-```
-
-If the framework has already published stable versions, SemVer will instead be continued compatible with the existing history. An artificial return to `0.x` would then be wrong.
+The modernized framework is released as stable `2.0.0`. The major increment communicates the intentional breaking storage, version, cancellation, serialization, and dispatch changes from the 1.x line. Subsequent compatible features use minor versions and compatible fixes use patch versions.
 
 ### F10.3 Feeds
 
-- local folder feed for immediate development;
-- private or GitHub-based feed for reproducible pre-releases;
-- NuGet.org only if consciously published publicly;
-- Playground pins a concrete version and never `*`.
+- local folder feed for immediate development and consumer verification;
+- immutable `v2.0.0` GitHub Release assets for distribution;
+- no NuGet.org or GitHub Packages publication for this release;
+- Playground pins concrete version `2.0.0` and never `*`.
 
 ### F10.4 Release Gate
 
@@ -456,7 +467,17 @@ If the framework has already published stable versions, SemVer will instead be c
 - tagged commit;
 - express release `READY FOR PLAYGROUND`.
 
-## 15. Codex cutting
+## 15. Post-modernization documentation package
+
+After the modernization gates are complete, create a coherent user documentation package rather than extending phase reports into user guidance. It must contain:
+
+- a concise quickstart from package installation to the first persisted and rehydrated aggregate;
+- concept articles for aggregates, event contracts and evolution, repositories, providers, snapshots, projections, recovery, cancellation, errors, and dependency injection;
+- task-oriented tutorials and guides for In-Memory development, PostgreSQL, SQL Server, projection rebuilds, snapshot activation, testing, migrations, and operational recovery;
+- executable or continuously verified examples based on RocketLaunch and LunarOps;
+- a clear navigation index and links from package READMEs without making internal modernization reports prerequisites for framework users.
+
+## 16. Codex cutting
 
 Each sub-stage is formulated as a separate task. An order contains a maximum of one main reason for changes.
 

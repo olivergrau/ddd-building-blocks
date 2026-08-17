@@ -68,7 +68,7 @@ The framework supports:
 - expected version at append;
 - Event sourcing repository;
 - Provider abstraction;
-- optional snapshots;
+- optional snapshot activation with framework-provided storage implementations;
 - In-memory provider for testing.
 
 The basic semantics are compatible with the planned Playground aggregates.
@@ -259,7 +259,7 @@ Should be used:
 - uncommitted events and replay;
 - provider limit;
 - Optimistic concurrency as a principle;
-- optional snapshots;
+- optional snapshot activation with framework-provided storage implementations;
 - Given-When-Then testing style.
 
 Should be specifically replaced or expanded:

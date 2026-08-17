@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -17,8 +18,8 @@ public class ScheduleMissionCommandTests
     public async Task Handle_ScheduleMissionCommand()
     {
         var validator = new StubResourceAvailabilityService();
-        var eventStore = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(eventStore);
+        var eventStore = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(eventStore, RocketLaunchEventCodec.Create());
 
         var registerHandler = new RegisterMissionCommandHandler(repository);
         var registerCommand = new RegisterMissionCommand(

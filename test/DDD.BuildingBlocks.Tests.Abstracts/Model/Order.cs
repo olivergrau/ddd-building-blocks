@@ -43,7 +43,6 @@ namespace DDD.BuildingBlocks.Tests.Abstracts.Model
 			get; private set;
 		}
 
-		[UniqueDomainProperty]
 		public Certificate? OptionalCertificate
 		{
 			get; private set;

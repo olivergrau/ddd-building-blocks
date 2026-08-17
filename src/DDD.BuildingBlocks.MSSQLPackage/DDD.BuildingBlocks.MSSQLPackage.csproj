@@ -1,18 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <Description>Package with implementations for IEventBus, ICommandDispatcher with MSSQL Server based implementations.</Description>
+      <Description>Microsoft SQL Server event-store provider for DDD.BuildingBlocks.</Description>
     <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
-      <ProjectReference Include="..\DDD.BuildingBlocks.Hosting.Background\DDD.BuildingBlocks.Hosting.Background.csproj" />
-      <ProjectReference Include="..\DDD.BuildingBlocks.DI.Extensions\DDD.BuildingBlocks.DI.Extensions.csproj" />
+      <PackageReference Include="Microsoft.Data.SqlClient" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Data.SqlClient" />
+      <ProjectReference Include="..\DDD.BuildingBlocks.Core\DDD.BuildingBlocks.Core.csproj" />
     </ItemGroup>
 
 </Project>

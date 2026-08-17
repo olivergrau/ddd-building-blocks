@@ -21,7 +21,7 @@ public sealed class CrewMemberRegistered : DomainEvent
         CrewMemberId crewMemberId,
         string name,
         CrewRole role,
-        IEnumerable<string> certifications,
+        IReadOnlyCollection<string> certifications,
         long targetVersion = -1)
         : base(crewMemberId.Value.ToString(), targetVersion, CurrentClassVersion)
     {

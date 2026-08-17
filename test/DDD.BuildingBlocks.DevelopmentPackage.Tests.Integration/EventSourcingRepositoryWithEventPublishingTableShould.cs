@@ -109,8 +109,13 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 
             _order.ReferenceOrderItem(_orderItem);
 
-            _eventSourcingRepository = new EventSourcingRepository(new PureInMemoryEventStorageProvider(_eventPublishingTable),
-                new InMemorySnapshotStorageProvider(5, inMemorySnapshotStorePath));
+            var eventCodec = DDD.BuildingBlocks.Tests.Abstracts.Event.TestEventCodec.Create();
+            _eventSourcingRepository = new EventSourcingRepository(
+                new PublishingEventStoreProviderDecorator(
+                    new InMemoryEventStoreProvider(), eventCodec, _eventPublishingTable),
+                eventCodec,
+                new InMemorySnapshotStoreProvider(5),
+                DDD.BuildingBlocks.Tests.Abstracts.Snapshot.TestSnapshotCodec.Create());
 
             var services = new ServiceCollection();
             services.AddDddBuildingBlocksDispatching(typeof(TestSubscriberAlpha).Assembly);

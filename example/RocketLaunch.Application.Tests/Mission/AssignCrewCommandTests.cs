@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using System.Diagnostics;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -21,8 +22,8 @@ public class AssignCrewCommandTests
     {
         var validator = new StubResourceAvailabilityService();
 
-        var eventStore = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(eventStore);
+        var eventStore = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(eventStore, RocketLaunchEventCodec.Create());
 
         var registerMissionHandler = new RegisterMissionCommandHandler(repository);
         var registerMissionCommand = new RegisterMissionCommand(

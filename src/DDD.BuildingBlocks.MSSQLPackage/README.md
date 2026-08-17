@@ -1,28 +1,20 @@
-﻿# MSSQL Server based implementations for DDD.BuildingBlocks.Core
+# DDD.BuildingBlocks SQL Server Provider
 
-This package is divided into two sections:
-1. Provider implementations
-2. Service implementations
+This package implements `IEventStoreProvider` for Microsoft SQL Server with Microsoft.Data.SqlClient and explicit parameterized SQL. It is a clean-room parity implementation of the current envelope-based contracts; it does not reuse the removed CLR-type-bound persistence format. EF Core is intentionally not used in the event-store append or read path.
 
-## Providers
-1. EventStorageProvider
-2. SnapshotStorageProvider
+Apply the schema migration during deployment or startup and then construct the provider with the same connection string and options:
 
-### Remarks
-EventStorageProvider implements the interface 'IEventStorageProvider' of the BuildingBlocks Core package and the
-matching SnapshotStorageProvider based on the interface 'ISnapshotStorageProvider'.
+```csharp
+var options = new SqlServerEventStoreOptions();
 
-*Notes*:
+await new SqlServerEventStoreMigrator(connectionString, options)
+    .MigrateAsync(cancellationToken);
 
-- Make sure that you always use both implementations (EventStorage/SnapshotStorage) from one package only. <br/>
-So either use only the EventStorageProvider implementation without snapshots or with the supplied SnapshotImplementation from the same package.
+IEventStoreProvider provider = new SqlServerEventStoreProvider(connectionString, options);
+```
 
-## Services
-1. AggregateInformationService
-2. EventProcessingServiceBackgroundWorker
+The default schema is `ddd_building_blocks`. A custom schema must be a regular SQL Server identifier.
 
-### Remarks
+The provider uses `UPDLOCK` and `HOLDLOCK` for atomic stream concurrency and a table-valued parameter for set-based event-batch insertion. Global positions are allocated through a transactional singleton row so committed-feed checkpoints cannot skip a later-committing transaction with a lower position.
 
-*Notes*:
-
-- The same applies here as for the providers, only use both implementations together from one package.
+Snapshot storage and projection checkpoints remain separate persistence contracts and are not hidden inside the event-store append transaction. Snapshot activation is optional, but this package must provide its snapshot implementation in F9.

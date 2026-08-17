@@ -2,7 +2,7 @@
 
 ## Status
 
-F4 is implemented and verified. Gate G4 is awaiting explicit approval.
+F4 is implemented and verified. Gate G4 was explicitly approved.
 
 ## Implemented decisions
 

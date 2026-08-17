@@ -178,8 +178,10 @@ namespace DDD.BuildingBlocks.DevelopmentPackage.Tests.Integration
 		private EventSourcingRepository GetRepositoryWithInMemorySnapshotProvider(int snapshotFrequency)
 		{
 			return new EventSourcingRepository(
-				new PureInMemoryEventStorageProvider(),
-				new InMemorySnapshotStorageProvider(snapshotFrequency, _snapshotFile));
+				new InMemoryEventStoreProvider(),
+				DDD.BuildingBlocks.Tests.Abstracts.Event.TestEventCodec.Create(),
+				new InMemorySnapshotStoreProvider(snapshotFrequency),
+				DDD.BuildingBlocks.Tests.Abstracts.Snapshot.TestSnapshotCodec.Create());
 		}
 	}
 }

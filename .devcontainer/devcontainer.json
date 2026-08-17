@@ -8,13 +8,15 @@
   "mounts": [
     "source=ddd-building-blocks-nuget,target=/home/vscode/.nuget/packages,type=volume",
     "source=ddd-building-blocks-codex,target=/home/vscode/.codex,type=volume",
+    "source=ddd-building-blocks-gh,target=/home/vscode/.config/gh,type=volume",
     "source=${localEnv:HOME}/.local/share/nuget/persona-feed,target=/workspaces/local-nuget-feed,type=bind"
   ],
   "containerEnv": {
     "NUGET_PACKAGES": "/home/vscode/.nuget/packages"
   },
   "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "customizations": {
     "vscode": {
@@ -29,5 +31,5 @@
       ]
     }
   },
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.nuget/packages /home/vscode/.codex && bash .devcontainer/restore-codex-sessions.sh && dotnet --info && dotnet restore DDD.BuildingBlocks.sln"
+  "postCreateCommand": "sudo mkdir -p /home/vscode/.config/gh && sudo chown -R vscode:vscode /home/vscode/.nuget/packages /home/vscode/.codex /home/vscode/.config/gh && bash .devcontainer/restore-codex-sessions.sh && dotnet --info && dotnet restore DDD.BuildingBlocks.sln"
 }

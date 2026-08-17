@@ -1,3 +1,4 @@
+using RocketLaunch.SharedKernel.Events;
 using DDD.BuildingBlocks.Core.Exception;
 using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
@@ -19,8 +20,8 @@ public class CommandHandlerRuleTests
         SetupMissionAsync()
     {
         var validator = new StubResourceAvailabilityService();
-        var store = new PureInMemoryEventStorageProvider();
-        var repository = new EventSourcingRepository(store);
+        var store = new InMemoryEventStoreProvider();
+        var repository = new EventSourcingRepository(store, RocketLaunchEventCodec.Create());
         var registerHandler = new RegisterMissionCommandHandler(repository);
         var command = new RegisterMissionCommand(
             missionId: Guid.NewGuid(),
