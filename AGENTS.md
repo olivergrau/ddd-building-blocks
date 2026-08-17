@@ -19,7 +19,7 @@
 - F7.4 SQL Server parity provider is implemented, verified, and accepted for continuation.
 - F8 is implemented, verified, and approved at Gate G8.
 - F9 is implemented, verified, and approved at Gate G9.
-- F10 is implemented and locally verified for stable release `2.0.0`; GitHub publication uses tag `v2.0.0`.
+- F10 is implemented, verified, and published as stable GitHub Release `v2.0.0` from main commit `4550cba`.
 - Agreed F2 direction: keep the existing `AggregateRoot<TKey>` name because the framework supports only event-sourced domain aggregates.
 - Do not introduce `ConventionalAggregateRoot<TKey>` or `PlainAggregateRoot<TKey>`; DDD.BuildingBlocks remains focused on event-sourced domain aggregates.
 - Do not introduce a marker-only `IAggregateRoot<TKey>` without a concrete consumer.
@@ -89,6 +89,7 @@
 - Latest F8 run: build passed with zero warnings; Core passed 68/68, DevelopmentPackage 35/35, PostgreSQL and SQL Server each passed 24/24, every other non-API suite passed, and API passed 5/7 with the same accepted legacy projection race.
 - Latest F9 run: build passed with zero warnings; Core passed 73/73, DevelopmentPackage 41/41, PostgreSQL and SQL Server each passed 30/30, every other non-API suite passed, and API passed 5/7 with the same accepted legacy projection race.
 - Latest F10 Release run: build passed with zero warnings; Core passed 73/73, DevelopmentPackage 41/41, PostgreSQL and SQL Server each passed 30/30, RocketLaunch Application 23/23, ReadModel 27/27, Domain 21/21, and LunarOps Domain 53/53. Package inspection, vulnerability scan, and clean consumer smoke test passed. The timing-sensitive legacy API example passed 6/7.
+- GitHub Release workflow run `32023841069` passed every gate and published seven `.nupkg`, seven `.snupkg`, the complete archive, checksums, license, changes, and migration guide.
 - F3 intentionally breaks the public version contract from `int` to `long`; a future release containing F3 requires an appropriate SemVer major version.
 - F4 intentionally removes the legacy locator/processor APIs and changes async handler and persistence signatures; it therefore remains part of the same coordinated breaking release.
 
@@ -110,6 +111,7 @@
 - F10/G10 report: `specs/reports/23-DDD.BuildingBlocks-F10-Packaging-and-Stable-Release-Report.md`.
 - Stable release documents: `CHANGES.md`, `MIGRATION-2.0.md`, and `RELEASE_NOTES-2.0.0.md`.
 - After modernization, create a comprehensive user documentation package with a quickstart, concepts, and tutorials/guides based on the executable examples.
+- `.vscode/`, `specs/`, and `to_read/` are local-only ignored workspace directories and are intentionally not tracked in the remote repository.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.
 
