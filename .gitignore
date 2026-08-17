@@ -396,13 +396,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# VS Code files for those working on multiple tools
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+# Repository-local editor and working documentation
+.vscode/
+specs/
+to_read/
 
 # Local History for Visual Studio Code
 .history/
@@ -419,4 +416,3 @@ FodyWeavers.xsd
 
 .idea/
 /DDD.BuildingBlocks.sln.DotSettings
-to_read/
