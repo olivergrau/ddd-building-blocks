@@ -77,11 +77,14 @@ Commands encapsulate requests to mutate an aggregate. Implement a command and ha
 // Command to place a new order
 public sealed class PlaceOrderCommand : Command
 {
-    public PlaceOrderCommand(Guid orderId)
+    public PlaceOrderCommand(Guid commandId, Guid orderId)
         : base(orderId.ToString(), -1)
     {
+        CommandId = commandId;
         Mode = AggregateSourcingMode.Create;
     }
+
+    public Guid CommandId { get; }
 }
 
 // Command handler
@@ -93,7 +96,10 @@ public sealed class PlaceOrderCommandHandler(IEventSourcingRepository repository
         var aggregate = await AggregateSourcing.Source<OrderAggregate, OrderId>(command, [], cancellationToken);
         await AggregateRepository.SaveAsync(
             aggregate!,
-            new EventCommitMetadata(CommandId: command.SerializedAggregateId),
+            new EventCommitMetadata(
+                CorrelationId: command.CorrelationId,
+                CommandId: command.CommandId.ToString("D"),
+                Actor: "order-api"),
             cancellationToken);
     }
 }

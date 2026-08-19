@@ -416,3 +416,6 @@ to_read/
 
 .idea/
 /DDD.BuildingBlocks.sln.DotSettings
+Templates/
+site/
+.venv-docs/

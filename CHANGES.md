@@ -1,5 +1,29 @@
 # Changes in DDD.BuildingBlocks
 
+## 2.1.1
+
+DDD.BuildingBlocks 2.1.1 completes the public user-documentation migration for the 2.1 APIs and introduces a reproducible MkDocs Material documentation site.
+
+### User documentation
+
+- Updated the PostgreSQL, SQL Server, snapshot, and in-memory tutorials to register permanent aggregate type keys through `AggregateTypeRegistry`.
+- Replaced remaining compatibility-constructor examples with `EventSourcingRepository.Create(...)` for new durable applications.
+- Added explicit `EventCommitMetadata` examples with separate command, correlation, and actor identities.
+- Corrected command examples so command IDs are not conflated with aggregate IDs.
+
+### MkDocs Material site
+
+- Added a strict `mkdocs.yml` with hierarchical navigation across getting started, concepts, tutorials, guides, and reference documentation.
+- Added Material light/dark palettes, tabbed and sectioned navigation, search, syntax highlighting, permanent heading links, a framework logo, and documentation-focused responsive styling.
+- Added pinned documentation dependencies and Make targets for isolated installation, strict builds, local serving, and container-friendly polling.
+- Added devcontainer Python tooling and automatic documentation-environment setup.
+- Added a dedicated GitHub Actions documentation build.
+- Release bundles now include a prebuilt static documentation archive alongside packages, checksums, changes, and migration material.
+
+### Compatibility
+
+This patch release changes no framework runtime or provider contract. Applications using 2.1.0 can upgrade package references directly.
+
 ## 2.1.0
 
 DDD.BuildingBlocks 2.1 adds explicit persistence identities for aggregate types and complete repository commit metadata. The release is additive and keeps the 2.0 event-store, provider, projection, and snapshot contracts intact.

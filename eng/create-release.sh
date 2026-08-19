@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-release_version="${1:-2.1.0}"
+release_version="${1:-2.1.1}"
 release_root="$repository_root/artifacts/release/v$release_version"
 package_root="$release_root/packages"
 release_notes="$repository_root/RELEASE_NOTES-$release_version.md"
@@ -24,6 +24,11 @@ dotnet restore "$repository_root/DDD.BuildingBlocks.sln"
 dotnet build "$repository_root/DDD.BuildingBlocks.sln" --no-restore --configuration Release
 dotnet pack "$repository_root/DDD.BuildingBlocks.Packages.slnf" \
   --no-build --configuration Release --output "$package_root"
+
+if [[ ! -x "$repository_root/.venv-docs/bin/mkdocs" ]]; then
+  make -C "$repository_root" docs-install
+fi
+make -C "$repository_root" docs
 
 mapfile -t packages < <(find "$package_root" -maxdepth 1 -type f -name '*.nupkg' ! -name '*.snupkg' | sort)
 mapfile -t symbols < <(find "$package_root" -maxdepth 1 -type f -name '*.snupkg' | sort)
@@ -48,11 +53,15 @@ cp "$repository_root/MIGRATION-2.0.md" "$release_root/MIGRATION-2.0.md"
 cp "$release_notes" "$release_root/RELEASE_NOTES-$release_version.md"
 cp "$repository_root/LICENSE" "$release_root/LICENSE"
 
+tar -czf "$release_root/DDD.BuildingBlocks-docs-v$release_version.tar.gz" \
+  -C "$repository_root" site
+
 (
   cd "$release_root"
   find . -type f ! -name 'SHA256SUMS' -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
   tar -czf "DDD.BuildingBlocks-v$release_version.tar.gz" \
-    packages CHANGES.md MIGRATION-2.0.md "RELEASE_NOTES-$release_version.md" LICENSE SHA256SUMS
+    packages "DDD.BuildingBlocks-docs-v$release_version.tar.gz" \
+    CHANGES.md MIGRATION-2.0.md "RELEASE_NOTES-$release_version.md" LICENSE SHA256SUMS
   sha256sum "DDD.BuildingBlocks-v$release_version.tar.gz" >> SHA256SUMS
 )
 

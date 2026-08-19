@@ -5,7 +5,7 @@ The PostgreSQL adapter uses Npgsql and explicit SQL. It includes event storage, 
 ## Install
 
 ```bash
-dotnet add package DDD.BuildingBlocks.PostgreSQLPackage --version 2.1.0
+dotnet add package DDD.BuildingBlocks.PostgreSQLPackage --version 2.1.1
 ```
 
 ## Create the data source
@@ -48,12 +48,15 @@ IEventStoreProvider eventStore =
     new PostgreSqlEventStoreProvider(dataSource, options);
 
 IEventCodec eventCodec = CreateApplicationEventCodec();
+IAggregateTypeRegistry aggregateTypes = new AggregateTypeRegistry()
+    .Register<Order>("sales.order")
+    .Register<Customer>("sales.customer");
 
 IEventSourcingRepository repository =
-    new EventSourcingRepository(eventStore, eventCodec);
+    EventSourcingRepository.Create(eventStore, eventCodec, aggregateTypes);
 ```
 
-Register `NpgsqlDataSource`, `IEventStoreProvider`, `IEventCodec`, and `IEventSourcingRepository` as application-wide services. The repository itself has no per-request mutable state.
+Register `NpgsqlDataSource`, `IEventStoreProvider`, `IEventCodec`, `IAggregateTypeRegistry`, and `IEventSourcingRepository` as application-wide services. The repository itself has no per-request mutable state. Treat aggregate type keys as permanent storage contracts.
 
 ## Add checkpoint and snapshot stores
 
@@ -78,6 +81,7 @@ At startup or readiness time, verify:
 - the expected migration version exists;
 - application credentials can read/append events and use checkpoints;
 - stable event registrations cover all event types the deployment may encounter.
+- stable aggregate registrations cover every aggregate type the deployment may load or save.
 
 Do not append a test event to a production stream as a health check.
 

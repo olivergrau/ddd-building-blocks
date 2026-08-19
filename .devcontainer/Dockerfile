@@ -11,6 +11,8 @@ RUN rm -f /etc/apt/sources.list.d/yarn.list \
         git \
         curl \
         jq \
+        python3-pip \
+        python3-venv \
         postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /home/vscode/.nuget/NuGet

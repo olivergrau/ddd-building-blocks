@@ -5,7 +5,7 @@ The SQL Server adapter uses Microsoft.Data.SqlClient, explicit locking SQL, and 
 ## Install
 
 ```bash
-dotnet add package DDD.BuildingBlocks.MSSQLPackage --version 2.1.0
+dotnet add package DDD.BuildingBlocks.MSSQLPackage --version 2.1.1
 ```
 
 ## Configure the schema
@@ -35,12 +35,15 @@ IEventStoreProvider eventStore =
     new SqlServerEventStoreProvider(connectionString, options);
 
 IEventCodec eventCodec = CreateApplicationEventCodec();
+IAggregateTypeRegistry aggregateTypes = new AggregateTypeRegistry()
+    .Register<Order>("sales.order")
+    .Register<Customer>("sales.customer");
 
 IEventSourcingRepository repository =
-    new EventSourcingRepository(eventStore, eventCodec);
+    EventSourcingRepository.Create(eventStore, eventCodec, aggregateTypes);
 ```
 
-The provider opens pooled SqlClient connections per operation. Configure pooling, encryption, authentication, and transient connection behavior in the connection string and deployment environment.
+The provider opens pooled SqlClient connections per operation. Configure pooling, encryption, authentication, and transient connection behavior in the connection string and deployment environment. Keep aggregate type keys stable across CLR refactorings.
 
 ## Add checkpoints and snapshots
 

@@ -56,4 +56,4 @@ Before cutover, prove:
 
 ## Package acquisition
 
-Download all required `2.1.0` packages from the stable GitHub Release, verify checksums, and use a local or controlled internal NuGet source. Pin exact versions.
+Download all required `2.1.1` packages from the stable GitHub Release, verify checksums, and use a local or controlled internal NuGet source. Pin exact versions.

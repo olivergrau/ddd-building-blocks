@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DDD.BuildingBlocks logo">
+  <rect width="64" height="64" rx="10" fill="#111827"/>
+  <rect x="9" y="9" width="20" height="20" rx="3" fill="#818cf8"/>
+  <rect x="35" y="9" width="20" height="20" rx="3" fill="#a5b4fc"/>
+  <rect x="9" y="35" width="20" height="20" rx="3" fill="#c7d2fe"/>
+  <path d="M35 35h20v20H35z" fill="#4f46e5"/>
+  <path d="M40 41h5.5c5.5 0 8.5 2.5 8.5 7s-3 7-8.5 7H40zm5.5 10c2.3 0 3.5-1 3.5-3s-1.2-3-3.5-3H45v6z" fill="#fff"/>
+</svg>

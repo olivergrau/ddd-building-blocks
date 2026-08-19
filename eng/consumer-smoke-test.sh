@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-release_version="${1:-2.1.0}"
+release_version="${1:-2.1.1}"
 package_root="${2:-$repository_root/artifacts/release/v$release_version/packages}"
 smoke_root="$(mktemp -d)"
 trap 'rm -rf -- "$smoke_root"' EXIT

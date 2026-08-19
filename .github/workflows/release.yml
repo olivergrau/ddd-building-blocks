@@ -9,7 +9,7 @@ on:
       version:
         description: Stable semantic version without the v prefix
         required: true
-        default: 2.1.0
+        default: 2.1.1
 
 permissions:
   contents: write
@@ -31,6 +31,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+
+      - name: Install Python for documentation
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
 
       - name: Restore and build Release configuration
         run: |
@@ -85,6 +92,7 @@ jobs:
             "artifacts/release/$GITHUB_REF_NAME"/packages/*.nupkg \
             "artifacts/release/$GITHUB_REF_NAME"/packages/*.snupkg \
             "artifacts/release/$GITHUB_REF_NAME/DDD.BuildingBlocks-$GITHUB_REF_NAME.tar.gz" \
+            "artifacts/release/$GITHUB_REF_NAME/DDD.BuildingBlocks-docs-$GITHUB_REF_NAME.tar.gz" \
             "artifacts/release/$GITHUB_REF_NAME/SHA256SUMS" \
             "artifacts/release/$GITHUB_REF_NAME/CHANGES.md" \
             "artifacts/release/$GITHUB_REF_NAME/MIGRATION-2.0.md" \

@@ -56,6 +56,13 @@ ISnapshotCodec snapshotCodec =
 
 The stable key follows the same durability rules as event keys.
 
+Register the aggregate independently from its snapshot contract:
+
+```csharp
+var aggregateTypes = new AggregateTypeRegistry()
+    .Register<Counter>("counter.counter");
+```
+
 ## Select a store
 
 For local development:
@@ -70,9 +77,10 @@ For production, use `PostgreSqlSnapshotStoreProvider` or `SqlServerSnapshotStore
 ## Enable repository snapshot support
 
 ```csharp
-var repository = new EventSourcingRepository(
+var repository = EventSourcingRepository.Create(
     eventStore,
     eventCodec,
+    aggregateTypes,
     snapshotStore,
     snapshotCodec);
 ```

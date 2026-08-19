@@ -1,0 +1,110 @@
+site_name: DDD.BuildingBlocks
+site_description: User documentation for the DDD.BuildingBlocks event-sourcing framework
+site_url: https://olivergrau.github.io/ddd-building-blocks/
+
+docs_dir: docs
+use_directory_urls: true
+
+repo_name: olivergrau/ddd-building-blocks
+repo_url: https://github.com/olivergrau/ddd-building-blocks
+edit_uri: edit/main/docs/
+
+strict: true
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+      toc_depth: "2-3"
+  - footnotes
+  - attr_list
+  - def_list
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.keys
+
+plugins:
+  - search
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+    - content.action.view
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Overview: getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+      - Next Steps: getting-started/next-steps.md
+  - Concepts:
+      - Overview: concepts/index.md
+      - Domain Model: concepts/domain-model.md
+      - Event Sourcing: concepts/event-sourcing.md
+      - Event Contracts and Evolution: concepts/event-contracts.md
+      - Persistence: concepts/persistence.md
+      - Snapshots: concepts/snapshots.md
+      - Projections: concepts/projections.md
+      - Commands and Dispatch: concepts/commands-and-dispatch.md
+      - Errors and Cancellation: concepts/errors-and-cancellation.md
+  - Tutorials:
+      - Overview: tutorials/index.md
+      - In-Memory Application: tutorials/in-memory-application.md
+      - PostgreSQL: tutorials/postgresql.md
+      - SQL Server: tutorials/sql-server.md
+      - Snapshots: tutorials/snapshots.md
+      - Projections: tutorials/projections.md
+  - Guides:
+      - Overview: guides/index.md
+      - Database Migrations: guides/database-migrations.md
+      - Evolving Events: guides/evolving-events.md
+      - Testing: guides/testing.md
+      - Recovery and Rebuild: guides/recovery-and-rebuild.md
+      - Operations: guides/operations.md
+      - Upgrade from 1.x: guides/upgrading-from-1.x.md
+  - Reference:
+      - Overview: reference/index.md
+      - Packages: reference/packages.md
+      - Composition Root: reference/composition-root.md
+      - Examples: reference/examples.md
+      - Terminology: reference/terminology.md
+
+extra_css:
+  - overrides/styles/extra.css
+
+copyright: Copyright &copy; Oliver Grau. Distributed under the MIT License.

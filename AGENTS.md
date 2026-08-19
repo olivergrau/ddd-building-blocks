@@ -116,6 +116,7 @@
 - Added the hierarchical English `docs/` user-documentation package with getting started, concepts, tutorials, operational guides, and reference pages based on the executable examples. A later task will add MkDocs configuration; no `mkdocs.yml` exists yet.
 - Added explicit stable aggregate-type registration and repository commit metadata (`CorrelationId`, `CausationId`, `CommandId`, `Actor`, and `TurnId`) for the Persona Simulation Playground integration; the CLR-name repository constructor remains as a 2.0 compatibility path.
 - Published stable package version `2.1.0` with release notes, change inventory, generalized tag-release automation, release bundle inspection, clean-consumer smoke verification, and vulnerability scan.
+- Prepared patch version `2.1.1` with fully migrated user tutorials, a strict hierarchical MkDocs Material site, pinned isolated documentation tooling, devcontainer integration, documentation CI, and a prebuilt static-site release asset.
 - `.vscode/`, `specs/`, and `to_read/` are local-only ignored workspace directories and are intentionally not tracked in the remote repository.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.

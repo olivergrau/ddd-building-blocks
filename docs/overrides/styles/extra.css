@@ -1,0 +1,24 @@
+/* Wider content area for documentation-heavy framework pages. */
+.md-grid {
+  max-width: 1500px;
+}
+
+/* Keep API and capability tables readable. */
+.md-typeset table:not([class]) {
+  display: table;
+  width: 100%;
+}
+
+.md-typeset table code {
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.md-typeset a {
+  overflow-wrap: anywhere;
+}
+
+/* Give architecture diagrams and long code samples the available width. */
+.md-typeset pre > code {
+  max-height: 36rem;
+}

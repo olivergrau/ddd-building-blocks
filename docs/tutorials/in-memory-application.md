@@ -7,9 +7,9 @@ This tutorial extends the [quickstart aggregate](../getting-started/quickstart.m
 Add:
 
 ```text
-DDD.BuildingBlocks.Core 2.1.0
-DDD.BuildingBlocks.DevelopmentPackage 2.1.0
-DDD.BuildingBlocks.DI.Extensions 2.1.0
+DDD.BuildingBlocks.Core 2.1.1
+DDD.BuildingBlocks.DevelopmentPackage 2.1.1
+DDD.BuildingBlocks.DI.Extensions 2.1.1
 ```
 
 ## Define a command
@@ -21,13 +21,15 @@ using DDD.BuildingBlocks.Core.Commanding;
 
 public sealed class CreateCounterCommand : Command
 {
-    public CreateCounterCommand(Guid counterId)
+    public CreateCounterCommand(Guid commandId, Guid counterId)
         : base(counterId.ToString("D"), targetVersion: -1)
     {
+        CommandId = commandId;
         CounterId = counterId;
         Mode = AggregateSourcingMode.Create;
     }
 
+    public Guid CommandId { get; }
     public Guid CounterId { get; }
 }
 ```
@@ -48,7 +50,13 @@ public sealed class CreateCounterCommandHandler(IEventSourcingRepository reposit
         CancellationToken cancellationToken)
     {
         var counter = new Counter(new CounterId(command.CounterId));
-        await AggregateRepository.SaveAsync(counter, cancellationToken);
+        await AggregateRepository.SaveAsync(
+            counter,
+            new EventCommitMetadata(
+                CorrelationId: command.CorrelationId,
+                CommandId: command.CommandId.ToString("D"),
+                Actor: "counter-api"),
+            cancellationToken);
     }
 }
 ```
@@ -74,10 +82,14 @@ services.AddSingleton<IEventCodec>(_ => new SystemTextJsonEventCodec(
         .Register<CounterIncremented>("counter.incremented")));
 
 services.AddSingleton<IEventStoreProvider, InMemoryEventStoreProvider>();
+services.AddSingleton<IAggregateTypeRegistry>(_ =>
+    new AggregateTypeRegistry()
+        .Register<Counter>("counter.counter"));
 services.AddSingleton<IEventSourcingRepository>(provider =>
-    new EventSourcingRepository(
+    EventSourcingRepository.Create(
         provider.GetRequiredService<IEventStoreProvider>(),
-        provider.GetRequiredService<IEventCodec>()));
+        provider.GetRequiredService<IEventCodec>(),
+        provider.GetRequiredService<IAggregateTypeRegistry>()));
 
 services.AddDddBuildingBlocksDispatching(
     typeof(CreateCounterCommandHandler).Assembly);
@@ -87,7 +99,7 @@ var dispatcher = root.GetRequiredService<ICommandDispatcher>();
 
 var id = Guid.NewGuid();
 await dispatcher.DispatchAsync(
-    new CreateCounterCommand(id),
+    new CreateCounterCommand(Guid.NewGuid(), id),
     CancellationToken.None);
 ```
 
@@ -104,7 +116,10 @@ var counter = await repository.GetByIdAsync<Counter, CounterId>(
     CancellationToken.None);
 
 counter!.Increment(3);
-await repository.SaveAsync(counter, CancellationToken.None);
+await repository.SaveAsync(
+    counter,
+    new EventCommitMetadata(CommandId: Guid.NewGuid().ToString("D"), Actor: "counter-api"),
+    CancellationToken.None);
 ```
 
 For user-facing queries, build a projection rather than exposing aggregate state directly.

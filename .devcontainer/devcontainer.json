@@ -31,5 +31,5 @@
       ]
     }
   },
-  "postCreateCommand": "sudo mkdir -p /home/vscode/.config/gh && sudo chown -R vscode:vscode /home/vscode/.nuget/packages /home/vscode/.codex /home/vscode/.config/gh && bash .devcontainer/restore-codex-sessions.sh && dotnet --info && dotnet restore DDD.BuildingBlocks.sln"
+  "postCreateCommand": "sudo mkdir -p /home/vscode/.config/gh && sudo chown -R vscode:vscode /home/vscode/.nuget/packages /home/vscode/.codex /home/vscode/.config/gh && bash .devcontainer/restore-codex-sessions.sh && dotnet --info && dotnet restore DDD.BuildingBlocks.sln && make docs-install"
 }
