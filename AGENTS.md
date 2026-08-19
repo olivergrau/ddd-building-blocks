@@ -20,6 +20,7 @@
 - F8 is implemented, verified, and approved at Gate G8.
 - F9 is implemented, verified, and approved at Gate G9.
 - F10 is implemented, verified, and published as stable GitHub Release `v2.0.0` from main commit `4550cba`.
+- Stable additive Release `v2.1.0` was published from main commit `175abad` with explicit aggregate type keys and complete repository commit metadata.
 - Agreed F2 direction: keep the existing `AggregateRoot<TKey>` name because the framework supports only event-sourced domain aggregates.
 - Do not introduce `ConventionalAggregateRoot<TKey>` or `PlainAggregateRoot<TKey>`; DDD.BuildingBlocks remains focused on event-sourced domain aggregates.
 - Do not introduce a marker-only `IAggregateRoot<TKey>` without a concrete consumer.
@@ -91,6 +92,7 @@
 - Latest F10 Release run: build passed with zero warnings; Core passed 73/73, DevelopmentPackage 41/41, PostgreSQL and SQL Server each passed 30/30, RocketLaunch Application 23/23, ReadModel 27/27, Domain 21/21, and LunarOps Domain 53/53. Package inspection, vulnerability scan, and clean consumer smoke test passed. The timing-sensitive legacy API example passed 6/7.
 - Latest post-2.0 aggregate-key/commit-metadata run: build passed with zero warnings; Core passed 76/76, DevelopmentPackage 41/41, PostgreSQL and SQL Server each passed 30/30, and all non-API example suites passed. The accepted timing-sensitive API projection race remained at 5/7.
 - GitHub Release workflow run `32023841069` passed every gate and published seven `.nupkg`, seven `.snupkg`, the complete archive, checksums, license, changes, and migration guide.
+- GitHub Release workflow run `32234684957` passed every gate and published the complete `v2.1.0` asset set.
 - F3 intentionally breaks the public version contract from `int` to `long`; a future release containing F3 requires an appropriate SemVer major version.
 - F4 intentionally removes the legacy locator/processor APIs and changes async handler and persistence signatures; it therefore remains part of the same coordinated breaking release.
 
@@ -110,10 +112,10 @@
 - F8/G8 report: `specs/reports/21-DDD.BuildingBlocks-F8-Projections-and-Recovery-Report.md`.
 - F9/G9 report: `specs/reports/22-DDD.BuildingBlocks-F9-Versioned-Snapshots-Report.md`.
 - F10/G10 report: `specs/reports/23-DDD.BuildingBlocks-F10-Packaging-and-Stable-Release-Report.md`.
-- Stable release documents: `CHANGES.md`, `MIGRATION-2.0.md`, and `RELEASE_NOTES-2.0.0.md`.
+- Stable release documents: `CHANGES.md`, `MIGRATION-2.0.md`, `RELEASE_NOTES-2.0.0.md`, and `RELEASE_NOTES-2.1.0.md`.
 - Added the hierarchical English `docs/` user-documentation package with getting started, concepts, tutorials, operational guides, and reference pages based on the executable examples. A later task will add MkDocs configuration; no `mkdocs.yml` exists yet.
 - Added explicit stable aggregate-type registration and repository commit metadata (`CorrelationId`, `CausationId`, `CommandId`, `Actor`, and `TurnId`) for the Persona Simulation Playground integration; the CLR-name repository constructor remains as a 2.0 compatibility path.
-- Prepared stable package version `2.1.0`, release notes, change inventory, generalized tag-release automation, release bundle inspection, clean-consumer smoke verification, and vulnerability scan.
+- Published stable package version `2.1.0` with release notes, change inventory, generalized tag-release automation, release bundle inspection, clean-consumer smoke verification, and vulnerability scan.
 - `.vscode/`, `specs/`, and `to_read/` are local-only ignored workspace directories and are intentionally not tracked in the remote repository.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.
