@@ -24,6 +24,38 @@ Stable keys are permanent contracts. Follow these rules:
 - never reuse a retired key for a different semantic fact;
 - fail startup on duplicate keys or duplicate CLR registrations.
 
+## Stable aggregate keys
+
+Streams also require a stable aggregate type key. Register aggregate CLR types independently from event types:
+
+```csharp
+var aggregateTypes = new AggregateTypeRegistry()
+    .Register<Mission>("lunar-ops.mission")
+    .Register<CrewMember>("lunar-ops.crew-member");
+```
+
+Pass the registry to `EventSourcingRepository.Create`. The key becomes part of stream identity and must remain unchanged when namespaces, assemblies, or CLR type names are refactored. Duplicate keys, duplicate CLR registrations, and attempts to use an unregistered aggregate fail explicitly.
+
+The repository constructor without an aggregate registry remains available for 2.0 compatibility and derives aggregate types from CLR full names. New durable applications should use explicit registration.
+
+## Commit metadata
+
+Keep transport and workflow identifiers outside domain-event payloads. Supply them when the aggregate is saved:
+
+```csharp
+await repository.SaveAsync(
+    mission,
+    new EventCommitMetadata(
+        CorrelationId: request.CorrelationId,
+        CausationId: request.CausationId,
+        CommandId: request.CommandId,
+        Actor: request.Actor,
+        TurnId: request.TurnId),
+    cancellationToken);
+```
+
+The repository copies the same commit metadata to every event produced by that aggregate operation. If `CorrelationId` is omitted, the correlation ID already captured by each domain event is preserved. Commit metadata supports tracing and application-level idempotency; it does not itself provide a command inbox or turn store.
+
 ## Schema versions
 
 Every registration has a positive current schema version. The event class's `ClassVersion` must match it when encoding.

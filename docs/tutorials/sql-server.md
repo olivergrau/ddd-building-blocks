@@ -5,7 +5,7 @@ The SQL Server adapter uses Microsoft.Data.SqlClient, explicit locking SQL, and 
 ## Install
 
 ```bash
-dotnet add package DDD.BuildingBlocks.MSSQLPackage --version 2.0.0
+dotnet add package DDD.BuildingBlocks.MSSQLPackage --version 2.1.0
 ```
 
 ## Configure the schema

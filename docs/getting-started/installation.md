@@ -4,15 +4,15 @@
 
 - .NET SDK `10.0.400` or a compatible .NET 10 SDK
 - a .NET project targeting `net10.0`
-- access to the DDD.BuildingBlocks `v2.0.0` GitHub Release assets
+- access to the DDD.BuildingBlocks `v2.1.0` GitHub Release assets
 
 Database tutorials additionally require Docker for Testcontainers or a reachable PostgreSQL/SQL Server instance.
 
 ## Download the packages
 
-Download the `.nupkg` files from the `v2.0.0` GitHub Release. You may download individual packages or extract the complete release archive.
+Download the `.nupkg` files from the `v2.1.0` GitHub Release. You may download individual packages or extract the complete release archive.
 
-Keep all DDD.BuildingBlocks packages on the same version. Version `2.0.0` is a coordinated major release; mixing it with 1.x packages is unsupported.
+Keep all DDD.BuildingBlocks packages on the same version. Version `2.1.0` is a coordinated stable release; mixing package versions is unsupported.
 
 ## Add a local NuGet source
 
@@ -34,21 +34,21 @@ dotnet nuget list source
 For the in-memory quickstart:
 
 ```bash
-dotnet add package DDD.BuildingBlocks.Core --version 2.0.0
-dotnet add package DDD.BuildingBlocks.DevelopmentPackage --version 2.0.0
+dotnet add package DDD.BuildingBlocks.Core --version 2.1.0
+dotnet add package DDD.BuildingBlocks.DevelopmentPackage --version 2.1.0
 ```
 
 For Microsoft dependency-injection dispatch:
 
 ```bash
-dotnet add package DDD.BuildingBlocks.DI.Extensions --version 2.0.0
+dotnet add package DDD.BuildingBlocks.DI.Extensions --version 2.1.0
 ```
 
 For a production event store, add exactly one or both provider packages as required by your deployment topology:
 
 ```bash
-dotnet add package DDD.BuildingBlocks.PostgreSQLPackage --version 2.0.0
-dotnet add package DDD.BuildingBlocks.MSSQLPackage --version 2.0.0
+dotnet add package DDD.BuildingBlocks.PostgreSQLPackage --version 2.1.0
+dotnet add package DDD.BuildingBlocks.MSSQLPackage --version 2.1.0
 ```
 
 ## Verify restore
@@ -58,7 +58,7 @@ dotnet restore
 dotnet list package
 ```
 
-The application's project file should show explicit `2.0.0` references. Third-party dependencies continue to restore from NuGet.org unless your organization uses another mapped source.
+The application's project file should show explicit `2.1.0` references. Third-party dependencies continue to restore from NuGet.org unless your organization uses another mapped source.
 
 ## Source mapping recommendation
 

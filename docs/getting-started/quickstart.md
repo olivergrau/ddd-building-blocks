@@ -126,14 +126,19 @@ using DDD.BuildingBlocks.Core.Persistence.Repository;
 using DDD.BuildingBlocks.DevelopmentPackage.Storage;
 
 var eventStore = new InMemoryEventStoreProvider();
-var repository = new EventSourcingRepository(eventStore, codec);
+var aggregateTypes = new AggregateTypeRegistry()
+    .Register<Counter>("counter.counter");
+var repository = EventSourcingRepository.Create(eventStore, codec, aggregateTypes);
 var cancellationToken = CancellationToken.None;
 
 var id = new CounterId(Guid.NewGuid());
 var counter = new Counter(id);
 counter.Increment(2);
 
-await repository.SaveAsync(counter, cancellationToken);
+await repository.SaveAsync(
+    counter,
+    new EventCommitMetadata(CommandId: "increment-counter-1", Actor: "quickstart-user"),
+    cancellationToken);
 
 var reloaded = await repository.GetByIdAsync<Counter, CounterId>(
     id,

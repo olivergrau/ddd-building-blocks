@@ -49,8 +49,28 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
                     "Snapshot store and snapshot codec must either both be configured or both be omitted.");
         private readonly IEventStoreProvider _eventStoreProvider = eventStoreProvider ?? throw new ArgumentNullException(nameof(eventStoreProvider));
         private readonly IEventCodec _eventCodec = eventCodec ?? throw new ArgumentNullException(nameof(eventCodec));
+        private readonly IAggregateTypeRegistry _aggregateTypes = new ClrNameAggregateTypeRegistry();
 
         private bool HasSnapshotSupport => _snapshotConfigurationIsValid && snapshotStoreProvider is not null;
+
+        private EventSourcingRepository(
+            IEventStoreProvider eventStoreProvider,
+            IEventCodec eventCodec,
+            IAggregateTypeRegistry aggregateTypes,
+            ISnapshotStoreProvider? snapshotStoreProvider,
+            ISnapshotCodec? snapshotCodec)
+            : this(eventStoreProvider, eventCodec, snapshotStoreProvider, snapshotCodec)
+        {
+            _aggregateTypes = aggregateTypes ?? throw new ArgumentNullException(nameof(aggregateTypes));
+        }
+
+        public static EventSourcingRepository Create(
+            IEventStoreProvider eventStoreProvider,
+            IEventCodec eventCodec,
+            IAggregateTypeRegistry aggregateTypes,
+            ISnapshotStoreProvider? snapshotStoreProvider = null,
+            ISnapshotCodec? snapshotCodec = null) =>
+            new(eventStoreProvider, eventCodec, aggregateTypes, snapshotStoreProvider, snapshotCodec);
 
         public virtual async Task<object?> GetByIdAsync(string id, Type type, long version, System.Threading.CancellationToken cancellationToken)
         {
@@ -145,14 +165,27 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
 
         public virtual async Task SaveAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
         {
+            await SaveAsync(aggregate, new EventCommitMetadata(), cancellationToken).ConfigureAwait(false);
+        }
+
+        public virtual async Task SaveAsync(
+            IEventSourcingBasedAggregate aggregate,
+            EventCommitMetadata metadata,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(aggregate);
+            ArgumentNullException.ThrowIfNull(metadata);
             cancellationToken.ThrowIfCancellationRequested();
             if (aggregate.HasUncommittedChanges())
             {
-                await CommitChanges(aggregate, cancellationToken);
+                await CommitChanges(aggregate, metadata, cancellationToken);
             }
         }
 
-        private async Task CommitChanges(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
+        private async Task CommitChanges(
+            IEventSourcingBasedAggregate aggregate,
+            EventCommitMetadata metadata,
+            System.Threading.CancellationToken cancellationToken)
         {
             var expectedVersion = aggregate.LastCommittedVersion;
 
@@ -175,7 +208,11 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
                     null,
                     new DateTimeOffset(@event.EventCommittedTimestamp, TimeSpan.Zero),
                     null,
-                    @event.CorrelationId))).ToArray();
+                    metadata.CorrelationId ?? @event.CorrelationId,
+                    metadata.CausationId,
+                    metadata.CommandId,
+                    metadata.Actor,
+                    metadata.TurnId))).ToArray();
 
             await _eventStoreProvider.AppendAsync(
                 aggregate.SerializedId,
@@ -232,7 +269,12 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
             return envelopes.Select(_eventCodec.Decode).ToArray();
         }
 
-        private static string GetAggregateType(Type aggregateType) =>
-            aggregateType.FullName ?? throw new InvalidOperationException("Aggregate type has no stable full name.");
+        private string GetAggregateType(Type aggregateType) => _aggregateTypes.GetAggregateType(aggregateType);
+
+        private sealed class ClrNameAggregateTypeRegistry : IAggregateTypeRegistry
+        {
+            public string GetAggregateType(Type clrType) =>
+                clrType.FullName ?? throw new InvalidOperationException("Aggregate type has no stable full name.");
+        }
     }
 }

@@ -5,15 +5,21 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: Stable semantic version without the v prefix
+        required: true
+        default: 2.1.0
 
 permissions:
   contents: write
 
 jobs:
   verify-and-release:
-    if: github.event_name != 'push' || github.ref == 'refs/tags/v2.0.0'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
 
     steps:
       - name: Check out source
@@ -46,31 +52,40 @@ jobs:
         run: dotnet list DDD.BuildingBlocks.sln package --vulnerable --include-transitive
 
       - name: Create and inspect release bundle
-        run: bash eng/create-release.sh 2.0.0
+        env:
+          RELEASE_VERSION: ${{ env.RELEASE_TAG }}
+        run: |
+          version="${RELEASE_VERSION#v}"
+          bash eng/create-release.sh "$version"
 
       - name: Verify clean consumer restore
-        run: bash eng/consumer-smoke-test.sh
+        env:
+          RELEASE_VERSION: ${{ env.RELEASE_TAG }}
+        run: |
+          version="${RELEASE_VERSION#v}"
+          bash eng/consumer-smoke-test.sh "$version"
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DDD.BuildingBlocks-v2.0.0
-          path: artifacts/release/v2.0.0/
+          name: DDD.BuildingBlocks-${{ env.RELEASE_TAG }}
+          path: artifacts/release/${{ env.RELEASE_TAG }}/
           if-no-files-found: error
 
       - name: Publish GitHub Release
-        if: github.event_name == 'push' && github.ref == 'refs/tags/v2.0.0'
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v2.0.0 \
-            --title "DDD.BuildingBlocks 2.0.0" \
-            --notes-file RELEASE_NOTES-2.0.0.md \
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            --title "DDD.BuildingBlocks $version" \
+            --notes-file "RELEASE_NOTES-$version.md" \
             --verify-tag \
-            artifacts/release/v2.0.0/packages/*.nupkg \
-            artifacts/release/v2.0.0/packages/*.snupkg \
-            artifacts/release/v2.0.0/DDD.BuildingBlocks-v2.0.0.tar.gz \
-            artifacts/release/v2.0.0/SHA256SUMS \
-            artifacts/release/v2.0.0/CHANGES.md \
-            artifacts/release/v2.0.0/MIGRATION-2.0.md \
-            artifacts/release/v2.0.0/LICENSE
+            "artifacts/release/$GITHUB_REF_NAME"/packages/*.nupkg \
+            "artifacts/release/$GITHUB_REF_NAME"/packages/*.snupkg \
+            "artifacts/release/$GITHUB_REF_NAME/DDD.BuildingBlocks-$GITHUB_REF_NAME.tar.gz" \
+            "artifacts/release/$GITHUB_REF_NAME/SHA256SUMS" \
+            "artifacts/release/$GITHUB_REF_NAME/CHANGES.md" \
+            "artifacts/release/$GITHUB_REF_NAME/MIGRATION-2.0.md" \
+            "artifacts/release/$GITHUB_REF_NAME/LICENSE"

@@ -49,6 +49,6 @@ PostgreSQL / SQL Server / In-Memory   committed event feed
 
 ## Version and distribution
 
-These pages describe DDD.BuildingBlocks `2.0.0`, targeting .NET 10. Packages are downloadable from the project's GitHub Release and can be installed through a local NuGet source. They are not published to NuGet.org.
+These pages describe DDD.BuildingBlocks `2.1.0`, targeting .NET 10. Packages are downloadable from the project's GitHub Release and can be installed through a local NuGet source. They are not published to NuGet.org.
 
 Existing 1.x consumers must read the [upgrade guide](guides/upgrading-from-1.x.md) before changing package references or databases.

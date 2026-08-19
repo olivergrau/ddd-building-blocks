@@ -1,4 +1,34 @@
-# Changes in DDD.BuildingBlocks 2.0
+# Changes in DDD.BuildingBlocks
+
+## 2.1.0
+
+DDD.BuildingBlocks 2.1 adds explicit persistence identities for aggregate types and complete repository commit metadata. The release is additive and keeps the 2.0 event-store, provider, projection, and snapshot contracts intact.
+
+### Stable aggregate type keys
+
+- Added `IAggregateTypeRegistry` and the thread-safe `AggregateTypeRegistry`.
+- Aggregate CLR types can be registered under permanent logical keys such as `playground.session` and `playground.persona`.
+- Stream reads, appends, and snapshots use the registered key, so namespace, assembly, and CLR type-name refactorings no longer change stream identity.
+- Duplicate logical keys, duplicate CLR registrations, and unregistered aggregate types fail explicitly.
+- Added `EventSourcingRepository.Create(...)` for explicitly registered aggregate types.
+- The existing constructor retains CLR-full-name resolution as a compatibility path for 2.0 consumers.
+
+### Commit metadata
+
+- Added immutable `EventCommitMetadata` with `CorrelationId`, `CausationId`, `CommandId`, `Actor`, and `TurnId`.
+- Added an `IEventSourcingRepository.SaveAsync` overload that writes the commit context to every event envelope produced by one aggregate operation.
+- An omitted correlation ID preserves the correlation ID already captured by each domain event.
+- `LoggingRepositoryDecorator` forwards the complete metadata unchanged.
+- Third-party repository implementations that have not adopted the new overload fail explicitly rather than silently discarding metadata.
+- Commit metadata supports tracing and application-level idempotency but does not replace a command inbox or operational turn store.
+
+### Documentation and verification
+
+- Updated the quickstart, event-contract guidance, and composition-root example.
+- Added tests for stable aggregate persistence and reload, complete metadata propagation, duplicate registration, and missing registration.
+- Verified all framework and non-API example suites. The known timing-sensitive legacy RocketLaunch API projection race remains unchanged.
+
+## 2.0.0
 
 DDD.BuildingBlocks 2.0 is a deliberate breaking modernization of the 1.x codebase. It keeps the framework focused on event-sourced domain aggregates and replaces persistence, serialization, dispatch, projection, and snapshot infrastructure with explicit versioned contracts.
 

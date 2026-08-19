@@ -52,12 +52,36 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
 
         public virtual async Task SaveAsync(IEventSourcingBasedAggregate aggregate, System.Threading.CancellationToken cancellationToken)
         {
+            await SaveInternalAsync(aggregate, null, cancellationToken);
+        }
+
+        public virtual async Task SaveAsync(
+            IEventSourcingBasedAggregate aggregate,
+            EventCommitMetadata metadata,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(metadata);
+            await SaveInternalAsync(aggregate, metadata, cancellationToken);
+        }
+
+        private async Task SaveInternalAsync(
+            IEventSourcingBasedAggregate aggregate,
+            EventCommitMetadata? metadata,
+            System.Threading.CancellationToken cancellationToken)
+        {
             try
             {
                 var events = aggregate.GetUncommittedChanges().ToList();
 
                 BeforeSaveAggregate(aggregate, events);
-                await _eventSourcingRepository.SaveAsync(aggregate, cancellationToken);
+                if (metadata is null)
+                {
+                    await _eventSourcingRepository.SaveAsync(aggregate, cancellationToken);
+                }
+                else
+                {
+                    await _eventSourcingRepository.SaveAsync(aggregate, metadata, cancellationToken);
+                }
                 AfterSavingAggregate(aggregate, events);
             }
             catch (System.OperationCanceledException)

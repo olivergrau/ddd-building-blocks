@@ -91,10 +91,15 @@ public sealed class PlaceOrderCommandHandler(IEventSourcingRepository repository
     public override async Task HandleAsync(PlaceOrderCommand command, CancellationToken cancellationToken)
     {
         var aggregate = await AggregateSourcing.Source<OrderAggregate, OrderId>(command, [], cancellationToken);
-        await AggregateRepository.SaveAsync(aggregate!, cancellationToken);
+        await AggregateRepository.SaveAsync(
+            aggregate!,
+            new EventCommitMetadata(CommandId: command.SerializedAggregateId),
+            cancellationToken);
     }
 }
 ```
+
+Construct the repository with an explicit `AggregateTypeRegistry` for durable applications. Stable keys such as `sales.order` keep stream identity independent from CLR namespaces and type names.
 
 Register and resolve the scoped dispatcher through Microsoft DI:
 

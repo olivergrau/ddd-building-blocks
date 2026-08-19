@@ -63,6 +63,10 @@ await new PostgreSqlEventStoreMigrator(dataSource, options)
 services.AddSingleton(dataSource);
 services.AddSingleton(options);
 services.AddSingleton<IEventCodec>(_ => CreateApplicationEventCodec());
+services.AddSingleton<IAggregateTypeRegistry>(_ =>
+    new AggregateTypeRegistry()
+        .Register<Mission>("lunar-ops.mission")
+        .Register<CrewMember>("lunar-ops.crew-member"));
 services.AddSingleton<IEventStoreProvider>(provider =>
     new PostgreSqlEventStoreProvider(
         provider.GetRequiredService<NpgsqlDataSource>(),
@@ -72,16 +76,17 @@ services.AddSingleton<IProjectionCheckpointStore>(provider =>
         provider.GetRequiredService<NpgsqlDataSource>(),
         provider.GetRequiredService<PostgreSqlEventStoreOptions>()));
 services.AddSingleton<IEventSourcingRepository>(provider =>
-    new EventSourcingRepository(
+    EventSourcingRepository.Create(
         provider.GetRequiredService<IEventStoreProvider>(),
-        provider.GetRequiredService<IEventCodec>()));
+        provider.GetRequiredService<IEventCodec>(),
+        provider.GetRequiredService<IAggregateTypeRegistry>()));
 ```
 
 Production applications should run migration outside normal host startup where operational policy requires separated credentials.
 
 ## Startup validation checklist
 
-- all event/snapshot keys are unique;
+- all aggregate/event/snapshot keys are unique and every persisted CLR type is registered;
 - current class versions match registry schema versions;
 - upcaster chains are contiguous;
 - every command has exactly one handler;

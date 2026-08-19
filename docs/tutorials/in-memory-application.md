@@ -7,9 +7,9 @@ This tutorial extends the [quickstart aggregate](../getting-started/quickstart.m
 Add:
 
 ```text
-DDD.BuildingBlocks.Core 2.0.0
-DDD.BuildingBlocks.DevelopmentPackage 2.0.0
-DDD.BuildingBlocks.DI.Extensions 2.0.0
+DDD.BuildingBlocks.Core 2.1.0
+DDD.BuildingBlocks.DevelopmentPackage 2.1.0
+DDD.BuildingBlocks.DI.Extensions 2.1.0
 ```
 
 ## Define a command

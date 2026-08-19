@@ -10,5 +10,11 @@ namespace DDD.BuildingBlocks.Core.Persistence.Repository
         Task<object?> GetByIdAsync(string id, Type type, long version, CancellationToken cancellationToken);
         Task<T?> GetByIdAsync<T, TKey>(TKey id, CancellationToken cancellationToken) where T : AggregateRoot<TKey> where TKey : EntityId<TKey>;
         Task SaveAsync(IEventSourcingBasedAggregate aggregate, CancellationToken cancellationToken);
+
+        Task SaveAsync(
+            IEventSourcingBasedAggregate aggregate,
+            EventCommitMetadata metadata,
+            CancellationToken cancellationToken) => throw new System.NotSupportedException(
+                "This repository implementation does not support explicit event commit metadata.");
     }
 }

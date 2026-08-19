@@ -5,7 +5,7 @@ The PostgreSQL adapter uses Npgsql and explicit SQL. It includes event storage, 
 ## Install
 
 ```bash
-dotnet add package DDD.BuildingBlocks.PostgreSQLPackage --version 2.0.0
+dotnet add package DDD.BuildingBlocks.PostgreSQLPackage --version 2.1.0
 ```
 
 ## Create the data source
