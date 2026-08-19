@@ -21,6 +21,7 @@
 - F9 is implemented, verified, and approved at Gate G9.
 - F10 is implemented, verified, and published as stable GitHub Release `v2.0.0` from main commit `4550cba`.
 - Stable additive Release `v2.1.0` was published from main commit `175abad` with explicit aggregate type keys and complete repository commit metadata.
+- Stable documentation patch Release `v2.1.1` was published from main commit `2fbad9b` with MkDocs Material sources and a prebuilt static-site archive.
 - Agreed F2 direction: keep the existing `AggregateRoot<TKey>` name because the framework supports only event-sourced domain aggregates.
 - Do not introduce `ConventionalAggregateRoot<TKey>` or `PlainAggregateRoot<TKey>`; DDD.BuildingBlocks remains focused on event-sourced domain aggregates.
 - Do not introduce a marker-only `IAggregateRoot<TKey>` without a concrete consumer.
@@ -93,6 +94,7 @@
 - Latest post-2.0 aggregate-key/commit-metadata run: build passed with zero warnings; Core passed 76/76, DevelopmentPackage 41/41, PostgreSQL and SQL Server each passed 30/30, and all non-API example suites passed. The accepted timing-sensitive API projection race remained at 5/7.
 - GitHub Release workflow run `32023841069` passed every gate and published seven `.nupkg`, seven `.snupkg`, the complete archive, checksums, license, changes, and migration guide.
 - GitHub Release workflow run `32234684957` passed every gate and published the complete `v2.1.0` asset set.
+- GitHub Release workflow run `32236008133` and documentation workflow run `32235996148` passed every gate for `v2.1.1`.
 - F3 intentionally breaks the public version contract from `int` to `long`; a future release containing F3 requires an appropriate SemVer major version.
 - F4 intentionally removes the legacy locator/processor APIs and changes async handler and persistence signatures; it therefore remains part of the same coordinated breaking release.
 
@@ -116,7 +118,7 @@
 - Added the hierarchical English `docs/` user-documentation package with getting started, concepts, tutorials, operational guides, and reference pages based on the executable examples. A later task will add MkDocs configuration; no `mkdocs.yml` exists yet.
 - Added explicit stable aggregate-type registration and repository commit metadata (`CorrelationId`, `CausationId`, `CommandId`, `Actor`, and `TurnId`) for the Persona Simulation Playground integration; the CLR-name repository constructor remains as a 2.0 compatibility path.
 - Published stable package version `2.1.0` with release notes, change inventory, generalized tag-release automation, release bundle inspection, clean-consumer smoke verification, and vulnerability scan.
-- Prepared patch version `2.1.1` with fully migrated user tutorials, a strict hierarchical MkDocs Material site, pinned isolated documentation tooling, devcontainer integration, documentation CI, and a prebuilt static-site release asset.
+- Published patch version `2.1.1` with fully migrated user tutorials, a strict hierarchical MkDocs Material site, pinned isolated documentation tooling, devcontainer integration, documentation CI, and a prebuilt static-site release asset.
 - `.vscode/`, `specs/`, and `to_read/` are local-only ignored workspace directories and are intentionally not tracked in the remote repository.
 - Standard commands: `dotnet restore DDD.BuildingBlocks.sln`, `dotnet build DDD.BuildingBlocks.sln --no-restore`, and `dotnet test DDD.BuildingBlocks.sln --no-build`.
 - Package command: `dotnet pack DDD.BuildingBlocks.Packages.slnf --no-build --configuration Debug --output artifacts/packages`.
